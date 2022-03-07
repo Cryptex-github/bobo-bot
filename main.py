@@ -1,4 +1,4 @@
-from core import bot
+from core import BoboBot
 
 if __name__ == '__main__':
-    bot.run()
+    BoboBot().run()
