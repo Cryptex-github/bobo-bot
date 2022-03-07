@@ -10,6 +10,11 @@ import mystbin
 import discord
 from discord.ext import commands
 
+import jishaku
+
+jishaku.Flags.NO_UNDERSCORE = True
+jishaku.Flags.NO_DM_TRACEBACK = True
+
 from .context import BoboContext
 from config import DbConnectionDetails, token
 
