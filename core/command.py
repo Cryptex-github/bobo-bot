@@ -52,7 +52,7 @@ def hooked_wrapped_callback(command, ctx, coro):
                 async for ret in coro(*args, **kwargs):
                     yield ret
             else:
-                return await coro(*args, **kwargs)
+                yield await coro(*args, **kwargs)
         except commands.CommandError:
             ctx.command_failed = True
             raise
@@ -87,11 +87,8 @@ class BoboBotCommand(commands.Command):
         ctx.invoked_subcommand = None
         ctx.subcommand_passed = None
         injected = hooked_wrapped_callback(self, ctx, self.callback)
-        if inspect.isasyncgenfunction(injected):
-            async for item in injected(*ctx.args, **ctx.kwargs):
-                yield item
-        else:
-            return await injected(*ctx.args, **ctx.kwargs)
+        async for item in injected(*ctx.args, **ctx.kwargs):
+            yield item
 
 
 def command(name=None, cls=BoboBotCommand, **attrs):
