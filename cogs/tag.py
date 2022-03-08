@@ -29,3 +29,5 @@ class Tag(Cog):
             return 'Tag not found.'
         
         return content
+
+setup = Tag.setup

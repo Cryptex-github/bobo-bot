@@ -28,6 +28,4 @@ class Owner(Cog):
 
         return embed
 
-
-
 setup = Owner.setup
