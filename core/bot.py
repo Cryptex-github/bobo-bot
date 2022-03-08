@@ -71,7 +71,7 @@ class BoboBot(commands.Bot):
         kwargs = {}
         des = ctx.send
 
-        if not isinstance(i, tuple):
+        if not isinstance(output, tuple):
             output = (output,)
 
         for i in output:
