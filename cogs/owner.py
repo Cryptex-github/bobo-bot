@@ -5,7 +5,7 @@ from core import Cog, BoboContext, command, Regexs
 
 class Owner(Cog):
     async def cog_check(self, ctx: BoboContext) -> bool:
-        return ctx.author.id == self.bot.owner_id
+        return not ctx.author.id == self.bot.owner_id
     
     @command()
     async def pull(self, ctx: BoboContext):
