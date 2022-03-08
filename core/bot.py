@@ -46,7 +46,7 @@ class BoboBot(commands.Bot):
             self.dispatch('command', ctx)
             try:
                 if await self.can_run(ctx, call_once=True):
-                    c = ctx.command.invoke()
+                    c = ctx.command.invoke(ctx)
                     if inspect.isasyncgenfunction(c):
                         async for m in c:
                             await self.process_output(ctx, m)
