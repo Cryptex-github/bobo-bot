@@ -24,7 +24,7 @@ class Owner(Cog):
                 res += f'\n{cog!r} failed to reload: {e}'
         
         embed = ctx.embed(title='Pulled from Github', description=res)
-        embed.add_field(named='Reloaded Cog(s)', value=', '.join(cogs) if cogs else 'No Cog reloaded')
+        embed.add_field(name='Reloaded Cog(s)', value=', '.join(cogs) if cogs else 'No Cog reloaded')
 
         return embed
 
