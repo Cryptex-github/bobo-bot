@@ -6,6 +6,7 @@ import os
 import aiohttp
 import asyncpg
 from discord.ext.commands.cooldowns import MaxConcurrency
+from core.command import BoboBotCommand
 import mystbin
 import discord
 from discord.ext import commands
@@ -46,8 +47,11 @@ class BoboBot(commands.Bot):
             self.dispatch('command', ctx)
             try:
                 if await self.can_run(ctx, call_once=True):
-                    async for m in ctx.command.invoke(ctx):
-                        await self.process_output(ctx, m)
+                    if isinstance(ctx.command, BoboBotCommand):
+                        async for m in ctx.command.invoke(ctx):
+                            await self.process_output(ctx, m)
+                    else:
+                        await ctx.command.invoke(ctx)
                 else:
                     raise commands.CheckFailure(
                         'The global check once functions failed.'
