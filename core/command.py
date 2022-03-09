@@ -11,7 +11,8 @@ from discord.ext import commands
 
 if TYPE_CHECKING:
     from typing import Any, AsyncGenerator, Callable
-    from core import BoboContext, OUTPUT_TYPE
+    from core.context import BoboContext
+    from core.types import OUTPUT_TYPE
 
 
 __all__ = ('BoboBotCommand', 'command')

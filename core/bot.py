@@ -11,7 +11,8 @@ import mystbin
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 
-from core import BoboBotCommand, DeleteMessageManager
+from core.command import BoboBotCommand
+from core.cache_manager import DeleteMessageManager
 
 if TYPE_CHECKING:
     from core import OUTPUT_TYPE
