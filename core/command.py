@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from core.types import OUTPUT_TYPE
 
 
-__all__ = ('BoboBotCommand', 'command')
+__all__ = ('BoboBotCommand', 'command', 'group')
 
 
 def user_permissions_predicate(ctx: BoboContext) -> bool:
