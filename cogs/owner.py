@@ -15,22 +15,23 @@ class Owner(Cog):
         stdout, stderr = await proc.communicate()
 
         stdout, stderr = stdout.decode(), stderr.decode()
-        res = f'```\n{stdout}\n\n{stderr}```'
+        res = f"```\n{stdout}\n\n{stderr}```"
 
         cogs = Regexs.COG_REGEX.findall(res)
         for cog in cogs:
             try:
-                cog_file = cog.replace('/', '.').replace('.py', '')
+                cog_file = cog.replace("/", ".").replace(".py", "")
                 if cog_file in self.bot.extensions:
                     self.bot.reload_extension(cog_file)
                 else:
                     self.bot.load_extension(cog_file)
             except Exception as e:
-                res += f'\n{cog!r} failed to reload: {e}'
+                res += f"\n{cog!r} failed to reload: {e}"
 
-        embed = ctx.embed(title='Pulled from Github', description=res)
-        embed.add_field(name='Reloaded Cog(s)', value=', '.join(
-            cogs) if cogs else 'No Cog reloaded')
+        embed = ctx.embed(title="Pulled from Github", description=res)
+        embed.add_field(
+            name="Reloaded Cog(s)", value=", ".join(cogs) if cogs else "No Cog reloaded"
+        )
 
         return embed
 
