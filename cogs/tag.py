@@ -1,6 +1,12 @@
-from asyncpg.pool import Pool
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from core import BoboContext, Cog, command
+
+if TYPE_CHECKING:
+    from asyncpg.pool import Pool
+
 
 class TagManager:
     def __init__(self, db: Pool):

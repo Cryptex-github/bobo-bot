@@ -1,13 +1,16 @@
-from typing import List
+from __future__ import annotations
 
-from aioredis import Client
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aioredis import Redis
 
 __all__ = ('DeleteMessageManager',)
 
 class DeleteMessageManager:
     __slots__ = ('redis',)
 
-    def __init__(self, redis: Client) -> None:
+    def __init__(self, redis: Redis) -> None:
         self.redis = redis
     
     async def get_messages(self, message_id: int, one_only: bool) -> List[int]:
