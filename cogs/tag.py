@@ -29,7 +29,7 @@ class Tag(Cog):
         self.tag_manager = TagManager(self.bot.db)
     
     @group(invoke_without_command=True)
-    async def tag(self, ctx: BoboContext, name: str) -> str:
+    async def tag(self, ctx: BoboContext, *, name: str) -> str:
         """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
         if not content:
@@ -40,7 +40,7 @@ class Tag(Cog):
     @tag.command(alias=['create'])
     async def new(self, ctx: BoboContext, name: str, *, content: str) -> str:
         """Creates a new tag."""
-        if name > 200:
+        if len(name) > 200:
             return 'Tag name is too long.'
 
         await self.tag_manager.new_tag(ctx, name, content)

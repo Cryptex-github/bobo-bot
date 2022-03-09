@@ -101,6 +101,14 @@ class BoboBotCommand(commands.Command):
             yield item
 
 
+class Group(commands.Group):
+    def command(self, *args: Any, **kwargs: Any) -> Any:
+        if 'cls' not in kwargs:
+            kwargs['cls'] = BoboBotCommand
+        
+        super().__init__(*args, **kwargs)
+
+
 @discord.utils.copy_doc(commands.command)
 def command(name=None, cls=BoboBotCommand, **attrs) -> BoboBotCommand:
     return commands.command(name=name, cls=cls, **attrs)
@@ -108,6 +116,6 @@ def command(name=None, cls=BoboBotCommand, **attrs) -> BoboBotCommand:
 @discord.utils.copy_doc(commands.group)
 def group(name: str | None = None, cls: Type[commands.Group] | None = None, **attrs: Any) -> Any:
     if not cls:
-        cls = commands.Group
+        cls = Group
     
     return command(name=name, cls=cls, **attrs)
