@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands
 
 if TYPE_CHECKING:
-    from typing import Any, AsyncGenerator, Callable
+    from typing import Any, AsyncGenerator, Callable, Type
     from core.context import BoboContext
     from core.types import OUTPUT_TYPE
 
@@ -104,3 +104,10 @@ class BoboBotCommand(commands.Command):
 @discord.utils.copy_doc(commands.command)
 def command(name=None, cls=BoboBotCommand, **attrs) -> BoboBotCommand:
     return commands.command(name=name, cls=cls, **attrs)
+
+@discord.utils.copy_doc(commands.group)
+def group(name: str | None = None, cls: Type[commands.Group] | None = None, **attrs: Any) -> Any:
+    if not cls:
+        cls = commands.Group
+    
+    return command(name=name, cls=cls, **attrs)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core import BoboContext, Cog, command
+from core import BoboContext, Cog, group
 
 if TYPE_CHECKING:
     from asyncpg.pool import Pool
@@ -28,12 +28,24 @@ class Tag(Cog):
     def init(self):
         self.tag_manager = TagManager(self.bot.db)
     
-    @command()
-    async def tag(self, ctx: BoboContext, name: str):
+    @group(invoke_without_command=True)
+    async def tag(self, ctx: BoboContext, name: str) -> str:
+        """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
         if not content:
             return 'Tag not found.'
         
         return content
+    
+    @tag.command(alias=['create'])
+    async def new(self, ctx: BoboContext, name: str, *, content: str) -> str:
+        """Creates a new tag."""
+        if name > 200:
+            return 'Tag name is too long.'
+
+        await self.tag_manager.new_tag(ctx, name, content)
+
+        return 'Tag created.'
+    
 
 setup = Tag.setup

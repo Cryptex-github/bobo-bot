@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS tags (
 )
 
 CREATE INDEX IF NOT EXISTS idx_name ON tags(name);
+CREATE INDEX IF NOT EXISTS idx_author_id ON tags(author_id);
