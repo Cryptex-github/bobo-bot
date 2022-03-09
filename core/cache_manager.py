@@ -14,10 +14,12 @@ class DeleteMessageManager:
         self.redis = redis
     
     async def get_messages(self, message_id: int, one_only: bool = False) -> List[int]:
-        list(map(int, await self.redis.lrange(f'delete_messages:{message_id}', 0, 0 if one_only else -1)))
+        return list(map(int, await self.redis.lrange(f'delete_messages:{message_id}', 0, 0 if one_only else -1)))
     
     async def add_message(self, message_id: int, message_maybe_delete: int) -> None:
         await self.redis.lpush(f'delete_messages:{message_id}', message_maybe_delete)
+
+        await self.redis.expire(f'delete_messages:{message_id}', 86400)
     
     async def remove_message(self, message_id: int, message_to_delete: int) -> None:
         await self.redis.lrem(f'delete_messages:{message_id}', 0, message_to_delete)
