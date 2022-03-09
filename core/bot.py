@@ -175,6 +175,6 @@ class BoboBot(commands.Bot):
         await super().close()
 
     def run(self):
-        self.load_all_extensions()
         self.loop.run_until_complete(self.setup())
+        self.load_all_extensions()
         super().run(token=token)
