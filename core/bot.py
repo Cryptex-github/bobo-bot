@@ -1,23 +1,27 @@
-from collections import Counter
-import inspect
 import logging
 import os
+from typing import TYPE_CHECKING
 
 import aiohttp
+import aioredis
 import asyncpg
-from discord.ext.commands.cooldowns import MaxConcurrency
-from core.command import BoboBotCommand
-import mystbin
 import discord
-from discord.ext import commands
-
 import jishaku
+import mystbin
+from discord.ext import commands
+from discord.ext.commands.cooldowns import MaxConcurrency
+
+from core import BoboBotCommand, DeleteMessageManager
+
+if TYPE_CHECKING:
+    from core import OUTPUT_TYPE
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 
-from .context import BoboContext
 from config import DbConnectionDetails, token
+
+from .context import BoboContext
 
 __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
@@ -64,7 +68,7 @@ class BoboBot(commands.Bot):
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
     
-    async def process_output(self, ctx, output):
+    async def process_output(self, ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
         if output is None:
             return
 
@@ -106,6 +110,9 @@ class BoboBot(commands.Bot):
     async def initialize_constants(self):
         self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
+
+        self.redis = aioredis.from_url('redis://localhost', decode_responses=True)
+        self.delete_message_manager = DeleteMessageManager(self.redis)
 
     def add_command(self, command):
         super().add_command(command)
