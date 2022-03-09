@@ -8,12 +8,16 @@ from core import Regexs
 
 
 class Owner(Cog):
+
     def cog_check(self, ctx: BoboContext) -> bool:
         return ctx.author.id == self.bot.owner_id
 
     @command()
     async def pull(self, ctx: BoboContext):
-        proc = await create_subprocess_exec("git", "pull", stdout=PIPE, stderr=PIPE)
+        proc = await create_subprocess_exec("git",
+                                            "pull",
+                                            stdout=PIPE,
+                                            stderr=PIPE)
 
         stdout, stderr = await proc.communicate()
 
@@ -32,9 +36,8 @@ class Owner(Cog):
                 res += f"\n{cog!r} failed to reload: {e}"
 
         embed = ctx.embed(title="Pulled from Github", description=res)
-        embed.add_field(
-            name="Reloaded Cog(s)", value=", ".join(cogs) if cogs else "No Cog reloaded"
-        )
+        embed.add_field(name="Reloaded Cog(s)",
+                        value=", ".join(cogs) if cogs else "No Cog reloaded")
 
         return embed
 
