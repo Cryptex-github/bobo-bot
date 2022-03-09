@@ -106,7 +106,7 @@ class Group(commands.Group):
         if 'cls' not in kwargs:
             kwargs['cls'] = BoboBotCommand
         
-        super().__init__(*args, **kwargs)
+        super().command(*args, **kwargs)
 
 
 @discord.utils.copy_doc(commands.command)
