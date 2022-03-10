@@ -81,7 +81,7 @@ class BoboBot(commands.Bot):
             await self.redis.ping()
         
         with Timer() as discord_rest_timer:
-            await self.http.request(discord.http.Route('GET', ''))
+            await self.http.get_user(self.user.id)
         
         res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
 
