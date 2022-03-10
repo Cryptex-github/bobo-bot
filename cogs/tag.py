@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord.utils import escape_mentions
+from asyncpg.exceptions import UniqueViolationError
 from discord.ext import commands
+from discord.utils import escape_mentions
 
 from core import BoboContext, Cog, group
 
@@ -17,7 +18,7 @@ class TagManager:
     
     async def new_tag(self, ctx: BoboContext, name: str, content: str):
         await self.db.execute(
-            'INSERT INTO tags (name, content, author_id, message_id) VALUES ($1, $2, $3)',
+            'INSERT INTO tags (name, content, author_id, message_id) VALUES ($1, $2, $3, $4)',
             name, content, ctx.author.id, ctx.message.id
         )
     
@@ -48,8 +49,11 @@ class Tag(Cog):
 
             return
 
-        await self.tag_manager.new_tag(ctx, name, content)
-        
+        try:
+            await self.tag_manager.new_tag(ctx, name, content)
+        except UniqueViolationError:
+            await ctx.send('Tag already exists.')
+
         await ctx.send('Tag created.')
     
 
