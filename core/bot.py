@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections import namedtuple
 import logging
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 import aiohttp
 import aioredis
@@ -15,6 +16,7 @@ from discord.ext.commands.cooldowns import MaxConcurrency
 
 from core.command import BoboBotCommand
 from core.cache_manager import DeleteMessageManager
+from core.utils import Timer
 
 if TYPE_CHECKING:
     from core import OUTPUT_TYPE
@@ -71,6 +73,21 @@ class BoboBot(commands.Bot):
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
     
+    async def self_test(self) -> NamedTuple[float]:
+        with Timer() as postgres_timer:
+            await self.db.execute('SELECT 1')
+        
+        with Timer() as redis_timer:
+            await self.redis.ping()
+        
+        with Timer() as discord_rest_timer:
+            await self.http.request(discord.http.Route('GET', ''))
+        
+        res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
+
+        return res(postgres_timer * 1000, redis_timer * 1000, discord_rest_timer * 1000, self.latency * 1000)
+        
+
     async def process_output(self, ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
         if output is None:
             return
