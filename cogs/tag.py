@@ -26,6 +26,11 @@ class TagManager:
         return await self.db.fetchval(
             'SELECT content FROM tags WHERE name = $1', name
         )
+    
+    async def remove_tag(self, ctx, name: str) -> bool:
+        return (await self.db.execute(
+            'DELETE FROM tags WHERE name = $1 AND author_id = $2', name, ctx.author.id
+        )) != 'DELETE 0'
 
 
 class Tag(Cog):
@@ -38,6 +43,8 @@ class Tag(Cog):
         content = await self.tag_manager.get_tag_content(name)
         if not content:
             await ctx.send('Tag not found.')
+
+            return
         
         await ctx.send(escape_mentions(content))
     
@@ -57,6 +64,18 @@ class Tag(Cog):
             return
 
         await ctx.send('Tag created.')
+    
+    @tag.command(alias=['delete'])
+    async def remove(self, ctx: BoboContext, name: str) -> None:
+        """
+        Deletes a tag.
+        """
+        if not await self.tag_manager.remove_tag(ctx, name):
+            await ctx.send('Tag not found, are you sure you owns it?')
+
+            return
+        
+        await ctx.send('Tag deleted.')
     
 
 setup = Tag.setup
