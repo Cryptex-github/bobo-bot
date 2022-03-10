@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from discord.utils import escape_mentions
+from discord.ext import commands
 
 from core import BoboContext, Cog, group
 
@@ -30,7 +31,7 @@ class Tag(Cog):
     def init(self):
         self.tag_manager = TagManager(self.bot.db)
     
-    @group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
     async def tag(self, ctx: BoboContext, *, name: str) -> None:
         """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
