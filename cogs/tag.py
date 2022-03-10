@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core import BoboContext, Cog, group
+from discord.ext import commands
+
+from core import BoboContext, Cog
 
 if TYPE_CHECKING:
     from asyncpg.pool import Pool
@@ -28,7 +30,7 @@ class Tag(Cog):
     def init(self):
         self.tag_manager = TagManager(self.bot.db)
     
-    @group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
     async def tag(self, ctx: BoboContext, *, name: str) -> str:
         """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
