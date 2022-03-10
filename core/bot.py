@@ -84,8 +84,10 @@ class BoboBot(commands.Bot):
             await self.http.get_user(self.user.id)
         
         res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
+        
+        r = lambda x: round(x, 3)
 
-        return res(postgres_timer * 1000, redis_timer * 1000, discord_rest_timer * 1000, self.latency * 1000)
+        return res(r(float(postgres_timer) * 1000), r(float(redis_timer) * 1000), r(float(discord_rest_timer) * 1000), r(float(self.latency) * 1000))
         
 
     async def process_output(self, ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
