@@ -33,7 +33,7 @@ class Tag(Cog):
         """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
         if not content:
-            return 'Tag not found.'
+            await ctx.send('Tag not found.')
         
         return content
     
@@ -44,8 +44,8 @@ class Tag(Cog):
             return 'Tag name is too long.'
 
         await self.tag_manager.new_tag(ctx, name, content)
-
-        return 'Tag created.'
+        
+        await ctx.send('Tag created.')
     
 
 setup = Tag.setup
