@@ -4,8 +4,8 @@ from asyncio.subprocess import PIPE
 from core import Cog, BoboContext, command, Regexs
 
 class Owner(Cog):
-    def cog_check(self, ctx: BoboContext) -> bool:
-        return ctx.author.id == self.bot.owner_id
+    async def cog_check(self, ctx: BoboContext) -> bool:
+        return await self.bot.is_owner(ctx.author)
     
     @command()
     async def pull(self, ctx: BoboContext):
