@@ -54,6 +54,8 @@ class Tag(Cog):
         except UniqueViolationError:
             await ctx.send('Tag already exists.')
 
+            return
+
         await ctx.send('Tag created.')
     
 
