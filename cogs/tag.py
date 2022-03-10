@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from asyncpg.exceptions import UniqueViolationError
+from asyncpg.exceptions import UniqueViolationError, UndefinedColumnError
 from discord.ext import commands
 from discord.utils import escape_mentions
 
@@ -31,6 +31,12 @@ class TagManager:
         return (await self.db.execute(
             'DELETE FROM tags WHERE name = $1 AND author_id = $2', name, ctx.author.id
         )) != 'DELETE 0'
+    
+    async def edit_tag(self, ctx: BoboContext, name: str, content: str):
+        await self.db.execute(
+            'UPDATE tags SET content = $1 WHERE name = $2 AND author_id = $3',
+            content, name, ctx.author.id
+        )
 
 
 class Tag(Cog):
@@ -76,6 +82,20 @@ class Tag(Cog):
             return
         
         await ctx.send('Tag deleted.')
+    
+    @tag.command()
+    async def edit(self, ctx: BoboContext, name: str, *, content: str) -> None:
+        """
+        Edits a tag.
+        """
+        try:
+            await self.tag_manager.edit_tag(ctx, name, content)
+        except UndefinedColumnError:
+            await ctx.send('Tag not found, are you sure you owns it?')
+
+            return
+        
+        await ctx.send('Tag edited.')
     
 
 setup = Tag.setup
