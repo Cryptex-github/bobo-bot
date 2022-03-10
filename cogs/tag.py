@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord.ext import commands
+from discord.utils import escape_mentions
 
-from core import BoboContext, Cog
+from core import BoboContext, Cog, group
 
 if TYPE_CHECKING:
     from asyncpg.pool import Pool
@@ -30,20 +30,22 @@ class Tag(Cog):
     def init(self):
         self.tag_manager = TagManager(self.bot.db)
     
-    @commands.group(invoke_without_command=True)
-    async def tag(self, ctx: BoboContext, *, name: str) -> str:
+    @group(invoke_without_command=True)
+    async def tag(self, ctx: BoboContext, *, name: str) -> None:
         """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
         if not content:
             await ctx.send('Tag not found.')
         
-        return content
+        await ctx.send(escape_mentions(content))
     
     @tag.command(alias=['create'])
-    async def new(self, ctx: BoboContext, name: str, *, content: str) -> str:
+    async def new(self, ctx: BoboContext, name: str, *, content: str) -> None:
         """Creates a new tag."""
         if len(name) > 200:
-            return 'Tag name is too long.'
+            await ctx.send('Tag name is too long.')
+
+            return
 
         await self.tag_manager.new_tag(ctx, name, content)
         
