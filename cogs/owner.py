@@ -48,7 +48,7 @@ class Owner(Cog):
         
         fmted += f'\n\n{len(res)} result(s) in {float(timer):.2f} seconds'
 
-        if len(res) <= 2000:
+        if len(fmted) <= 2000:
             return fmted, True
         
         return File(StringIO(fmted), filename='sql.txt'), True
