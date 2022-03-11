@@ -4,4 +4,4 @@ asyncpg
 psutil
 mystbin.py
 aioredis[hiredis]
-tabulate
+uvloop

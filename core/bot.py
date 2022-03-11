@@ -11,6 +11,7 @@ import asyncpg
 import discord
 import jishaku
 import mystbin
+import uvloop
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 
@@ -194,6 +195,8 @@ class BoboBot(commands.Bot):
         await super().close()
 
     def run(self):
+        uvloop.install()
+
         self.loop.run_until_complete(self.setup())
         self.load_all_extensions()
         super().run(token=token)
