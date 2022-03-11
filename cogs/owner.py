@@ -47,8 +47,8 @@ class Owner(Cog):
             fmted += tabulate(res, headers='keys', tablefmt='psql') + '\n```'
         
         fmted += f'\n\n{len(res)} result(s) in {float(timer):.2f} seconds'
-    
-        if res <= 2000:
+
+        if len(res) <= 2000:
             return res, True
         
         return File(StringIO(fmted), filename='sql.txt'), True
