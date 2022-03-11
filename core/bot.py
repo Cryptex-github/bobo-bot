@@ -116,8 +116,7 @@ class BoboBot(commands.Bot):
         if i is True:
             des = ctx.reply
 
-        if c := kwargs.pop('content'):
-            await des(content=c, **kwargs)
+        await des(**kwargs)
 
     async def getch(self, /, id: int) -> discord.User:
         user = self.get_user(id)
