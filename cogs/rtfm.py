@@ -75,9 +75,11 @@ class RTFM(Cog):
                 
                 decompressed_line = decompressor.decompress(chunk)
 
-                yield decompressed_line.decode('utf-8').rstrip()
+                yield decompressed_line.decode('utf-8')
         
-        for line in yield_decompressed_bytes(stream):
+        data = ''.join(yield_decompressed_bytes(stream))
+
+        for line in data.split('\n'):
             match = Regexs.SPHINX_ENTRY_REGEX.match(line)
 
             if not match:
