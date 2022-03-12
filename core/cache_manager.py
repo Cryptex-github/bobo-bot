@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from aioredis import Redis
     from .types import POSSIBLE_RTFM_SOURCES
 
-__all__ = ('Cache', 'DeleteMessageManager', 'RTFMCacheManager')
+__all__ = ('DeleteMessageManager', 'RTFMCacheManager')
 
 
 class CacheManager(ABC):
