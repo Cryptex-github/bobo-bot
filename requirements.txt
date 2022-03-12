@@ -7,3 +7,4 @@ psutil
 mystbin.py
 aioredis[hiredis]
 uvloop
+requests-html
