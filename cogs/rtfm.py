@@ -10,7 +10,7 @@ from discord.ext import commands
 from discord.ext.menus import ListPageSource
 from discord.ext.menus.views import ViewMenuPages
 
-from core import Cog, Regexs, RTFMCacheManager
+from core import Cog, Regexs, RTFMCacheManager, finder
 from core.types import POSSIBLE_RTFM_SOURCES
 
 
@@ -83,14 +83,20 @@ class RTFM(Cog):
             if not match:
                 continue
 
-            name, _, _, location, display = match.groups()
+            name, directive, _, location, display = match.groups()
+
+            domain, _, subdirective = directive.partition(':')
+
+            if directive == 'std:doc':
+                subdirective = 'label'
 
             if location.endswith('$'):
                 location = location[:-1] + name
             
             key = name if display == '-' else display
+            prefix = f'{subdirective}:' if domain == 'std' else ''
 
-            data[key] = os.path.join(base_url, location)
+            data[f'{prefix}{key}'] = os.path.join(base_url, location)
         
         return data
     
@@ -117,14 +123,15 @@ class RTFM(Cog):
 
             await self.cache.add(source, '', results) # Set query to '' because we are caching the entire object
         
-        matches = self.fuzzy_finder(query, results)
+        # matches = self.fuzzy_finder(query, results)
+        matches = finder(query, list(results.items()), key=lambda x: x[0], lazy=False)
 
         if not matches:
             await ctx.send(f'No results found for your query.')
 
             return
         
-        pages = ViewMenuPages(source=RTFMMenuSource(list(matches.items), source))
+        pages = ViewMenuPages(source=RTFMMenuSource(matches, source))
 
         await pages.start(ctx)
     

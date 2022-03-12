@@ -1,6 +1,7 @@
 import time
+import re
 
-__all__ = ('Timer',)
+__all__ = ('Timer', 'finder')
 
 class Timer:
     def __init__(self):
@@ -37,3 +38,24 @@ class Timer:
         if self._end is None:
             raise ValueError("Timer has not been ended.")
         return self._end - self._start
+
+# Shamelessly robbed from R. Danny
+def finder(text, collection, *, key=None, lazy=True):
+    maybe = []
+    text = str(text)
+    to_compile = ".*?".join(map(re.escape, text))
+    regex = re.compile(to_compile, flags=re.IGNORECASE)
+    for item in collection:
+        to_search = key(item) if key else item
+        r = regex.search(to_search)
+        if r:
+            maybe.append((len(r.group()), r.start(), item))
+
+    def sort_(var):
+        if key:
+            return var[0], var[1], key(var[2])
+        return var
+
+    if lazy:
+        return (z for _, _, z in sorted(maybe, key=sort_))
+    return [z for _, _, z in sorted(maybe, key=sort_)]
