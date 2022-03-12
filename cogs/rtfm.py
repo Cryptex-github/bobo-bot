@@ -141,3 +141,5 @@ class RTFM(Cog):
         Search Python 3 documentation.
         """
         await self.sphinx_rtfm(ctx, 'python', query)
+
+setup = RTFM.setup
