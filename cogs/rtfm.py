@@ -113,7 +113,7 @@ class RTFM(Cog):
                 return
 
             async with self.bot.session.get(url) as resp:
-                results = to_thread(self.parse_sphinx_object_inv, BytesIO(await resp.read()), url)
+                results = await to_thread(self.parse_sphinx_object_inv, BytesIO(await resp.read()), url)
 
             await self.cache.add(source, '', results) # Set query to '' because we are caching the entire object
         
