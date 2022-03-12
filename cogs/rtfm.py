@@ -1,5 +1,6 @@
 import os
 import re
+from urllib.parse import quote
 import zlib
 from asyncio import to_thread
 from io import BytesIO
@@ -9,6 +10,7 @@ import discord
 from discord.ext import commands
 from discord.ext.menus import ListPageSource
 from discord.ext.menus.views import ViewMenuPages
+from requests_html import AsyncHTMLSession
 
 from core import Cog, Regexs, RTFMCacheManager, finder
 from core.types import POSSIBLE_RTFM_SOURCES
@@ -33,6 +35,11 @@ class RTFMMenuSource(ListPageSource):
 class RTFM(Cog):
     def init(self):
         self.cache = RTFMCacheManager(self.bot.redis)
+
+        self.html_session = AsyncHTMLSession()
+    
+    def unload(self):
+        self.bot.loop.create_task(self.html_session.close())
     
     @staticmethod
     def fuzzy_finder(query: str, collection: Dict[str, str]) -> Dict[str, str]:
@@ -171,5 +178,53 @@ class RTFM(Cog):
         Search discordpy master branch documentation.
         """
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
+    
+    @rtfm.command()
+    async def rust(self, ctx, *, query: str = None) -> None:
+        """
+        Search Rust standard library documentation.
+        """
+        base_url = 'https://doc.rust-lang.org/std/'
+
+        if not query:
+            await ctx.send(base_url)
+
+            return
+        
+        query = quote(query.lower())
+        
+        if cached := await self.cache.get('rust', query):
+            pages = ViewMenuPages(source=RTFMMenuSource(list(cached.items()), 'Rust Standard Library'))
+
+            await pages.start(ctx)
+
+            return
+        
+        results = {}
+
+        resp = await self.html_session.get(base_url + '?search=' + query)
+        await resp.html.arender()
+
+        try:
+            a = resp.html.find('.search-results')[0].find('a')
+        except IndexError:
+            await ctx.send('No results found for your query.')
+        
+        for element in a:
+            try:
+                div = element.find('.result-name')[0]
+            except IndexError:
+                div = element
+            
+            key = ''.join(e.text for e in div.find('span')).replace(':', '\:')
+
+            results[key] = 'https://doc.rust-lang.org' + element.attrs['href'].replace('..', '')
+        
+        await self.cache.add('rust', query, results)
+        
+        pages = ViewMenuPages(source=RTFMMenuSource(list(results.items()), 'Rust Standard Library'))
+
+        await pages.start(ctx)
+
 
 setup = RTFM.setup
