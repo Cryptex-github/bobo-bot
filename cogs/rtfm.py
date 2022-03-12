@@ -67,7 +67,7 @@ class RTFM(Cog):
         
         decompressor = zlib.decompressobj()
 
-        def yield_decompressed_bytes(self, data: BytesIO) -> Iterator[str]:
+        def yield_decompressed_bytes(data: BytesIO) -> Iterator[str]:
             while True:
                 chunk = data.read(16 * 1024)
                 if not chunk:
