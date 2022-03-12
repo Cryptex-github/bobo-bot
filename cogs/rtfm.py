@@ -95,7 +95,7 @@ class RTFM(Cog):
         return data
     
     async def sphinx_rtfm(self, ctx, source: POSSIBLE_RTFM_SOURCES, query: str) -> None:
-        if results := await self.cache.get(source):
+        if results := await self.cache.get(source, ''):
             ...
         else:
             source_to_url_map = {
