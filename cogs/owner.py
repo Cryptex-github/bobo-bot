@@ -3,7 +3,7 @@ from asyncio.subprocess import PIPE
 from io import StringIO
 
 from discord import File
-from tabulate import tabulate
+from tabulate import tabulate # type: ignore
 
 from core import Cog, BoboContext, command, Regexs, Timer
 
