@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from collections import namedtuple
@@ -190,10 +191,15 @@ class BoboBot(commands.Bot):
     
     async def close(self):
         self.unload_all_extensions()
-        await self.db.close()
-        await self.session.close()
-        await self.redis.close()
-        await self.html_session.close()
+        tasks = [
+            self.db.close(),
+            self.session.close(),
+            self.redis.close(),
+            self.html_session.close()
+        ]
+
+
+        await asyncio.gather(*tasks)
         
         await super().close()
 
