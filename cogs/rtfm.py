@@ -10,7 +10,6 @@ import discord
 from discord.ext import commands
 from discord.ext.menus import ListPageSource
 from discord.ext.menus.views import ViewMenuPages
-from requests_html import AsyncHTMLSession
 
 from core import Cog, Regexs, RTFMCacheManager, finder
 from core.types import POSSIBLE_RTFM_SOURCES
@@ -35,11 +34,6 @@ class RTFMMenuSource(ListPageSource):
 class RTFM(Cog):
     def init(self):
         self.cache = RTFMCacheManager(self.bot.redis)
-
-        self.html_session = AsyncHTMLSession()
-    
-    def unload(self):
-        self.bot.loop.create_task(self.html_session.close())
     
     @staticmethod
     def fuzzy_finder(query: str, collection: Dict[str, str]) -> Dict[str, str]:
@@ -66,8 +60,8 @@ class RTFM(Cog):
         if sphinx_version != b'Sphinx inventory version 2':
             raise RuntimeError(f'Unsupported Sphinx version: {sphinx_version.decode()}')
         
-        _ = stream.readline().rstrip()[2:]
-        _ = stream.readline()
+        stream.readline()
+        stream.readline()
 
         if b'zlib' not in stream.readline():
             raise RuntimeError('Unsupported compression method')
@@ -202,7 +196,7 @@ class RTFM(Cog):
         
         results = {}
 
-        resp = await self.html_session.get(base_url + '?search=' + query)
+        resp = await self.bot.html_session.get(base_url + '?search=' + query)
         await resp.html.arender()
 
         try:
@@ -245,7 +239,7 @@ class RTFM(Cog):
 
         query = quote(query.lower())
         
-        resp = await self.html_session.get(f'https://docs.rs/{crate}/?search=' + query)
+        resp = await self.bot.html_session.get(f'https://docs.rs/{crate}/?search=' + query)
         await resp.html.arender()
 
         try:
