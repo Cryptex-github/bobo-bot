@@ -35,7 +35,7 @@ class RTFM(Cog):
         self.cache = RTFMCacheManager(self.bot.redis)
     
     @staticmethod
-    def fuzzy_finder(query: str, collection: Dict[str, str]) -> List[str, str]:
+    def fuzzy_finder(query: str, collection: Dict[str, str]) -> Dict[str, str]:
         results = []
 
         comp = '.*?'.join(map(re.escape, query))
@@ -124,7 +124,7 @@ class RTFM(Cog):
 
             return
         
-        pages = ViewMenuPages(source=RTFMMenuSource(matches, source))
+        pages = ViewMenuPages(source=RTFMMenuSource(list(matches.items), source))
 
         await pages.start(ctx)
     
