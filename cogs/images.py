@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from core import BoboContext
 
 class ImageResolver:
+    __slots__ = ('ctx', 'static')
+
     def __init__(self, ctx: BoboContext, static: bool) -> None:
         self.ctx = ctx
         self.static = static
