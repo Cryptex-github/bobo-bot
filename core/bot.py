@@ -36,7 +36,6 @@ __all__ = ('BoboBot',)
 
 class BoboBot(commands.Bot):
     def __init__(self):
-        self.connector = aiohttp.TCPConnector(limit=200)
         self.logger = __log__
         
         intents = discord.Intents.all()
@@ -152,8 +151,15 @@ class BoboBot(commands.Bot):
             command._max_concurrency = MaxConcurrency(
                 1, per=commands.BucketType.user, wait=False
             )
+    
+    async def _async_setup_hook(self):
+        loop = asyncio.get_running_loop()
+        self.connector = aiohttp.TCPConnector(limit=0, loop=loop)
+        self.http.connector = self.connector
 
-    async def setup(self):
+        await super()._async_setup_hook()
+
+    async def setup_hook(self):
         await self.initialize_constants()
         self.initialize_libaries()
 
@@ -163,6 +169,8 @@ class BoboBot(commands.Bot):
             password=DbConnectionDetails.password,
             database=DbConnectionDetails.database,
         )
+        
+        self.load_all_extensions()
     
     def load_all_extensions(self):
         for file in os.listdir('./cogs'):
@@ -204,6 +212,4 @@ class BoboBot(commands.Bot):
         await super().close()
 
     def run(self):
-        self.loop.run_until_complete(self.setup())
-        self.load_all_extensions()
         super().run(token=token)
