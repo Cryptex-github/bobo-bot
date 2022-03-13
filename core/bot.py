@@ -41,7 +41,6 @@ class BoboBot(commands.Bot):
         intents = discord.Intents.all()
 
         super().__init__(
-            connector=self.connector,
             command_prefix='bobo ',
             intents=intents,
             description='Bobo Bot, The Anime Bot but better.',
