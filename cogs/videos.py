@@ -29,7 +29,7 @@ class YouTube:
     
     @async_executor
     def get_best_video(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = self._yt.streams.filter(only_audio=True, mime_type='audio/mp4').order_by('resolution').desc()
+        ordered = self._yt.streams.filter(progressive=True).order_by('resolution').desc()
         
         filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
 
@@ -46,7 +46,7 @@ class YouTube:
     
     @async_executor
     def get_best_audio(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = self._yt.streams.filter(only_audio=True).order_by('abr').desc()
+        ordered = self._yt.streams.filter(only_audio=True, mine_type='audio/mp4').order_by('abr').desc()
 
         filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
 
