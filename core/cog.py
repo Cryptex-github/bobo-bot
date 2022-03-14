@@ -52,19 +52,11 @@ class Cog(commands.Cog, metaclass=MetaTask):
     def __init__(self, bot):
         self.bot = bot
         self.__class__._load_tasks(self)
-        coro = discord.utils.maybe_coroutine(self.init)
-        self.bot.loop.create_task(coro)
 
-    def init(self):
-        pass
-
-    def unload(self):
-        pass
-
-    def cog_unload(self):
+    async def cog_unload(self):
         self.__class__._unload_tasks()
-        self.unload()
+        await self.unload()
 
     @classmethod
-    def setup(cls, bot):
-        bot.add_cog(cls(bot))
+    async def setup(cls, bot):
+        await bot.add_cog(cls(bot))

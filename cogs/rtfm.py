@@ -32,7 +32,7 @@ class RTFMMenuSource(ListPageSource):
 
 
 class RTFM(Cog):
-    def init(self):
+    async def cog_load(self):
         self.cache = RTFMCacheManager(self.bot.redis)
     
     @staticmethod
