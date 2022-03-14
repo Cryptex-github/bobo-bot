@@ -46,7 +46,7 @@ class YouTube:
     
     @async_executor
     def get_best_audio(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = self._yt.streams.filter(only_audio=True, mine_type='audio/mp4').order_by('abr').desc()
+        ordered = self._yt.streams.filter(only_audio=True, subtype='mp4').order_by('abr').desc()
 
         filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
 
