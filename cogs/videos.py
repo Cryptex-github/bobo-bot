@@ -59,7 +59,7 @@ class YouTube:
         stream.stream_to_buffer(b)
         b.seek(0)
 
-        return b, stream
+        return b, stream.subtype
 
 class VideoPrompt(BaseView):
     @discord.ui.button(label='Video', style=discord.ButtonStyle.primary)
