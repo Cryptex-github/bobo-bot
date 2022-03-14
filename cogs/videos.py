@@ -39,7 +39,7 @@ class YouTube:
         except IndexError:
             return None
 
-        stream.download_to_buffer(b)
+        stream.stream_to_buffer(b)
         b.seek(0)
 
         return b, stream.subtype
@@ -56,7 +56,7 @@ class YouTube:
         except IndexError:
             return None
 
-        stream.download_to_buffer(b)
+        stream.stream_to_buffer(b)
         b.seek(0)
 
         return b, stream
