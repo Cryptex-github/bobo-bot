@@ -46,7 +46,7 @@ class YouTube:
     
     @async_executor
     def get_best_audio(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = self._yt.streams.filter(only_audio=True, subtype='mp3').order_by('abr').desc()
+        ordered = self._yt.streams.filter(only_audio=True, mine_type='audio/mp4').order_by('abr').desc()
 
         filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
 
@@ -59,7 +59,7 @@ class YouTube:
         stream.stream_to_buffer(b)
         b.seek(0)
 
-        return b, stream.subtype
+        return b, 'mp4'
 
 class VideoPrompt(BaseView):
     @discord.ui.button(label='Video', style=discord.ButtonStyle.primary)
@@ -114,9 +114,15 @@ class Videos(Cog):
             filesize_limit = 8388608
 
         if prompt.result == 'video':
-            b, file_type = await tube.get_best_video(filesize_limit)
+            if x := await tube.get_best_video(filesize_limit):
+                b, file_type = x
+            else:
+                return 'Video not available for download. Likely because is too large.'
         else:
-            b, file_type = await tube.get_best_audio(filesize_limit)
+            if x := await tube.get_best_audio(filesize_limit):
+                b, file_type = x
+            else:
+                return 'Audio not available for download. Likely because is too large.'
         
         return discord.File(b, filename=f'bobo-bot-youtube-download.{file_type}')
 
