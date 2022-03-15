@@ -15,4 +15,8 @@ class Listeners(Cog):
             
             await self.bot.delete_message_manager.delete_messages(payload.message_id)
 
+    @Cog.listener()
+    async def on_socket_event_type(self, event: str) -> None:
+        await self.bot.redis.incr(f'events:{event}')
+
 setup = Listeners.setup
