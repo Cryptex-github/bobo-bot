@@ -31,7 +31,7 @@ class Misc(Cog):
         """Events"""
         events_count = await self.get_event_counts()
 
-        time_difference = (int(datetime.now().timestamp()) - int(await self.bot.redis.get('events_start_time'))) / 60
+        time_difference = (float(datetime.now().timestamp()) - float(await self.bot.redis.get('events_start_time'))) / 60
 
         return dedent(f"""
             Total WS Events: {events_count}
