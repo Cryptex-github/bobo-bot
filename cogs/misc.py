@@ -28,7 +28,7 @@ class Misc(Cog):
     
     @command()
     async def events(self, ctx: BoboContext) -> str:
-        """Events"""
+        """Shows the number of events since the bot was started."""
         events_count = await self.get_event_counts()
 
         time_difference = (float(datetime.now().timestamp()) - float(await self.bot.redis.get('events_start_time'))) / 60
