@@ -7,8 +7,8 @@ from core import Cog
 
 class Listeners(Cog):
     async def cog_load(self):
-        if not await self.redis.get('events_start_time'):
-            await self.redis.set('events_start_time', datetime.now().timestamp())
+        if not await self.bot.redis.get('events_start_time'):
+            await self.bot.redis.set('events_start_time', datetime.now().timestamp())
 
     @Cog.listener()
     async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent) -> None:
