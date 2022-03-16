@@ -19,7 +19,7 @@ class BaseView(discord.ui.View):
     
     async def interaction_check(self, interaction: Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message('You are not allowed to use this view.')
+            await interaction.response.send_message('You are not allowed to use this view.', ephemeral=True)
 
             return False
         
@@ -27,7 +27,7 @@ class BaseView(discord.ui.View):
     
     async def disable_all(self, interaction: Interaction) -> None:
         for i in self.children:
-            if isinstance(i, discord.ui.Button):
+            if hasattr(i, 'disabled'):
                 i.disabled = True
 
         await interaction.message.edit(view=self)
