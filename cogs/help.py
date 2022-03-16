@@ -1,4 +1,5 @@
-from re import L
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Iterable
 
 import discord
