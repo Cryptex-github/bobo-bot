@@ -29,9 +29,9 @@ class BoboHelpCommand(HelpCommand):
     async def send_bot_help(self, mapping):
         self.view = view = BaseView(user_id=self.context.author.id)
 
-        cogs = sorted(mapping.keys())
+        cogs = sorted((cog.qualified_name for cog in mapping.keys()))
 
-        view.add_item(BoboHelpSelect(map(lambda cog: cog.qualified_name, cogs)))
+        view.add_item(BoboHelpSelect(cogs))
         
         embed = self.context.embed(title='Help Command', description='Invite | Support\n\n')
         embed.add_field(name='Categories', value='\n'.join(cogs), inline=False)
