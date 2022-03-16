@@ -29,7 +29,7 @@ class BoboHelpCommand(HelpCommand):
     async def send_bot_help(self, mapping):
         self.view = view = BaseView(user_id=self.context.author.id)
 
-        cogs = sorted((cog.qualified_name for cog in mapping.keys()))
+        cogs = sorted((cog.qualified_name for cog in mapping.keys() if cog is not None))
 
         view.add_item(BoboHelpSelect(cogs))
         
