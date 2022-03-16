@@ -27,7 +27,7 @@ class BoboHelpSelect(discord.ui.Select):
 
 class BoboHelpCommand(HelpCommand):
     async def send_bot_help(self, mapping):
-        self.view = view = BaseView(user_id=self.context.user.id)
+        self.view = view = BaseView(user_id=self.context.author.id)
 
         cogs = sorted(mapping.keys())
 
