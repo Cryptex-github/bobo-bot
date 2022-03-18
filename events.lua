@@ -1,8 +1,7 @@
 local sum = 0
-local matches = redis.call('KEYS', 'events:*')
+local matches = redis.call('HVALS', 'events')
 
-for _, key in ipairs(matches) do
-    local val = redis.call('GET', key)
+for _, val in ipairs(matches) do
     sum = sum + tonumber(val)
 end
 
