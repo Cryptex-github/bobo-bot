@@ -23,6 +23,6 @@ class Listeners(Cog):
 
     @Cog.listener()
     async def on_socket_event_type(self, event: str) -> None:
-        await self.bot.redis.incr(f'events:{event}')
+        await self.bot.redis.hincrby('events', event, 1)
 
 setup = Listeners.setup
