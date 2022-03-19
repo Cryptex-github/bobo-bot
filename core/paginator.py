@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, Any
 
 import discord
 
@@ -11,7 +11,7 @@ from discord.ext import menus  # type: ignore
 from core.view import BaseView
 
 if TYPE_CHECKING:
-    from discord import Interaction
+    from discord import Embed, Interaction
     from discord.ui import Button
     from asyncio import Task
 
@@ -203,3 +203,18 @@ class ViewMenuPages(menus.MenuPages, ViewMenu):
     @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0fStop Paginator")
     async def stop_pages(self, payload):
         self.stop()
+
+class EmbedListPageSource(menus.ListPageSource):
+    def __init__(self, entries: Iterable[Any], *, title: str = 'Paginator', per_page: int = 10) -> None:
+        super().__init__(entries, per_page=per_page)
+        
+        self.title = title
+
+    async def format_page(self, menu, entries) -> dict[str, Embed]:
+        return {
+            'embed': menu.ctx.embed(title=self.title, description='\n'.join(entries))
+                .set_author(name=str(menu.ctx.author), icon_url=str(menu.ctx.author.display_avatar))
+                .set_footer(
+                    text=f'Page {menu.current_page + 1}/{self.get_max_pages()} Total Entries: {len(self.entries)}'
+                )
+        }
