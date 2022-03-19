@@ -141,11 +141,9 @@ class ViewMenu(menus.Menu):
             try:
                 if self.delete_message_after:
                     return await self.message.delete()
-
-                if self.clear_reactions_after:
+                elif self.clear_reactions_after:
                     return await self.message.edit(view=None)
-                
-                if self.disable_buttons_after:
+                else:
                     return await self.message.edit(view=self.view._disable_all()) # type: ignore
             except Exception:
                 pass
