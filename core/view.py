@@ -28,9 +28,14 @@ class BaseView(discord.ui.View):
     async def disable_all(self, interaction: Interaction) -> None:
         for i in self.children:
             if hasattr(i, 'disabled'):
-                i.disabled = True
+                i.disabled = True # type: ignore
 
-        await interaction.message.edit(view=self)
+        await interaction.response.edit_message(view=self)
+
+    def _disable_all(self) -> None:
+        for i in self.children:
+            if hasattr(i, 'disabled'):
+                i.disabled = True # type: ignore
     
     async def on_timeout(self, interaction: Interaction) -> None:
         await self.disable_all(interaction)
