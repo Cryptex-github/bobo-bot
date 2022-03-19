@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 class ViewMenu(menus.Menu):
     def __init__(self, *, auto_defer: bool = True, **kwargs):
+        self.extra_component = kwargs.pop('extra_component', None)
+
         super().__init__(**kwargs)
 
         self.auto_defer: bool = auto_defer
@@ -56,6 +58,9 @@ class ViewMenu(menus.Menu):
 
             item.callback = make_callback(button)
             view.add_item(item)
+        
+        if self.extra_component:
+            view.add_item(self.extra_component)
 
         self.view = view
         return view
