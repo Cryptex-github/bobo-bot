@@ -60,7 +60,7 @@ class BoboHelpCommand(HelpCommand):
         
         del mapping[None] # type: ignore
 
-        view.add_item(BoboHelpSelect(self.context, mapping)) # type: ignore
+        view.add_item(BoboHelpSelect(ctx, mapping)) # type: ignore
         
         embed = ctx.embed(title='Help Command', description='Invite | Support\n\n') # type: ignore
         embed.add_field(name='Categories', value='\n'.join(cog.qualified_name for cog in mapping.keys()), inline=False) # type: ignore
