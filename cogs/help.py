@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Iterable, Mapping
 
 import discord
 
@@ -87,6 +87,13 @@ class BoboHelpCommand(HelpCommand):
         res += BoboHelpCommand.format_commands(ctx, commands)
 
         return res
+    
+    async def send_cog_help(self, cog: Cog):
+        source = EmbedListPageSource(self.get_cog_help(self.context, cog), title=cog.qualified_name) # type: ignore
+
+        pages = ViewMenuPages(source=source)
+
+        await pages.start(self.context)
 
 
 async def setup(bot):
