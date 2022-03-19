@@ -3,7 +3,11 @@ import functools
 import time
 import re
 
-__all__ = ('Timer', 'finder', 'async_executor')
+from typing import TypeVar
+
+__all__ = ('Timer', 'finder', 'async_executor', 'unique_list')
+
+T = TypeVar('T')
 
 class Timer:
     def __init__(self):
@@ -38,14 +42,17 @@ class Timer:
     @property
     def time(self):
         if self._end is None:
-            raise ValueError("Timer has not been ended.")
+            raise ValueError('Timer has not been ended.')
+        if self._start is None:
+            raise ValueError('Timer has not been started.')
+
         return self._end - self._start
 
 # Shamelessly robbed from R. Danny
 def finder(text, collection, *, key=None, lazy=True):
     maybe = []
     text = str(text)
-    to_compile = ".*?".join(map(re.escape, text))
+    to_compile = '.*?'.join(map(re.escape, text))
     regex = re.compile(to_compile, flags=re.IGNORECASE)
     for item in collection:
         to_search = key(item) if key else item
@@ -72,3 +79,12 @@ def async_executor(func):
         return loop.run_in_executor(None, partial)
     
     return wrapper
+
+def unique_list(seq: list[T]) -> list[T]:
+    unique = []
+
+    for item in seq:
+        if item not in unique:
+            unique.append(item)
+    
+    return unique
