@@ -31,13 +31,13 @@ class BoboHelpSelect(discord.ui.Select):
         self.cog_mapping = {cog.qualified_name: cog for cog in mapping.keys()}
     
     async def callback(self, interaction: Interaction):
-        print('moment')
+        _ = self.ctx.send
         try:
             cog = self.cog_mapping[self.values[0]]
-            print('cog')
+            await _('cog')
         except KeyError:
             embed, view = BoboHelpCommand.get_bot_help(self.ctx, self.mapping)
-            print('bot help')
+            await _('bot help')
             await interaction.response.edit_message(embed=embed, view=view)
 
             return
@@ -47,7 +47,7 @@ class BoboHelpSelect(discord.ui.Select):
             pages = ViewMenuPages(source=source, extra_component=self, message=interaction.message)
 
             await pages.start(self.ctx)
-            print('started pages')
+            await _('started pages')
 
 
 
