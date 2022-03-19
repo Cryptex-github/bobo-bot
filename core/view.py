@@ -12,7 +12,7 @@ __all__ = ('BaseView', 'ConfirmView')
 
 
 class BaseView(discord.ui.View):
-    def __init__(self, timeout: int = 180, user_id: int = None) -> None:
+    def __init__(self, user_id: int, timeout: int = 180) -> None:
         super().__init__(timeout=timeout)
 
         self.user_id = user_id
@@ -24,21 +24,11 @@ class BaseView(discord.ui.View):
             return False
         
         return True
-    
-    async def disable_all(self, interaction: Interaction) -> None:
-        for i in self.children:
-            if hasattr(i, 'disabled'):
-                i.disabled = True # type: ignore
-
-        await interaction.response.edit_message(view=self)
 
     def _disable_all(self) -> None:
         for i in self.children:
             if hasattr(i, 'disabled'):
                 i.disabled = True # type: ignore
-    
-    async def on_timeout(self, interaction: Interaction) -> None:
-        await self.disable_all(interaction)
 
 
 class ConfirmView(BaseView):
