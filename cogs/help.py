@@ -31,6 +31,7 @@ class BoboHelpSelect(discord.ui.Select):
         self.cog_mapping = {cog.qualified_name: cog for cog in mapping.keys()}
     
     async def callback(self, interaction: Interaction):
+        print('moment')
         try:
             cog = self.cog_mapping[self.values[0]]
             print('cog')
