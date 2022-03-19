@@ -6,7 +6,7 @@ from asyncpg.exceptions import UniqueViolationError, UndefinedColumnError
 from discord.ext import commands
 from discord.utils import escape_mentions
 
-from core import BoboContext, Cog, group
+from core import BoboContext, Cog
 
 if TYPE_CHECKING:
     from asyncpg.pool import Pool
