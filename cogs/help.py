@@ -9,6 +9,7 @@ from core.context import BoboContext
 
 from core.view import BaseView
 from core.paginator import ViewMenuPages, EmbedListPageSource
+from core.constants import INVITE_LINK, SUPPORT_SERVER
 
 if TYPE_CHECKING:
     from core.cog import Cog
@@ -63,7 +64,7 @@ class BoboHelpCommand(HelpCommand):
 
         view.add_item(BoboHelpSelect(ctx, mapping)) # type: ignore
         
-        embed = ctx.embed(title='Help Command', description='Invite | Support\n\n') # type: ignore
+        embed = ctx.embed(title='Help Command', description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n') # type: ignore
         embed.add_field(name='Categories', value='\n'.join(cog.qualified_name for cog in mapping.keys()), inline=False) # type: ignore
         embed.set_thumbnail(url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png')
 
@@ -72,7 +73,7 @@ class BoboHelpCommand(HelpCommand):
     @staticmethod
     def format_commands(ctx: BoboContext, commands: list[Command]) -> list[str]:
         formatted_commands = [
-            f'{ctx.clean_prefix}{command.qualified_name} {command.signature}\n{command.description or command.short_doc or "No Help Provided"}' 
+            f'{ctx.clean_prefix}{command.qualified_name} {command.signature}\n{command.description or command.short_doc or "No Help Provided"}\n\u200b' 
             for command in commands
             ]
 
@@ -82,7 +83,7 @@ class BoboHelpCommand(HelpCommand):
     def get_cog_help(ctx: BoboContext, cog: Cog) -> list[str]:
         commands = cog.get_commands()
 
-        res = [f'Total Commands in this Cog: {len(commands)}'] 
+        res = [f'Total Commands in this Cog: {len(commands)}\n\u200b'] 
         res += BoboHelpCommand.format_commands(ctx, commands)
 
         return res
