@@ -185,6 +185,15 @@ class ViewMenu(menus.Menu):
 
     def send_with_view(self, messageable, *args, **kwargs):
         return messageable.send(*args, **kwargs, view=self.build_view())
+    
+    def edit_with_view(self, *args, **kwargs):
+        if message := self.message:
+            return message.edit(*args, **kwargs, view=self.build_view())
+        
+        async def dummy():
+            return
+        
+        return dummy()
 
     def stop(self):
         self._running = False
@@ -203,6 +212,11 @@ class ViewMenuPages(menus.MenuPages, ViewMenu):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
         return await self.send_with_view(channel, **kwargs)
+    
+    async def edit_initial_message(self):
+        page = await self._source.get_page(0)
+        kwargs = await self._get_kwargs_from_page(page)
+        return await self.edit_with_view(**kwargs)
 
 class EmbedListPageSource(menus.ListPageSource):
     def __init__(self, entries: Iterable[Any], *, title: str = 'Paginator', per_page: int = 10) -> None:
