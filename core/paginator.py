@@ -28,6 +28,12 @@ class ViewMenu(menus.Menu):
 
     def build_view(self) -> BaseView | None:
         if not self.should_add_reactions():
+            if self.extra_component:
+                view = BaseView(timeout=self.timeout, user_id=self._author_id)
+                view.add_item(self.extra_component)
+
+                return view
+
             return None
 
         def make_callback(button: menus.Button):
