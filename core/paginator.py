@@ -199,11 +199,6 @@ class ViewMenuPages(menus.MenuPages, ViewMenu):
         kwargs = await self._get_kwargs_from_page(page)
         return await self.send_with_view(channel, **kwargs)
 
-    @discord.utils.copy_doc(menus.MenuPages.stop_pages)
-    @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0fStop Paginator")
-    async def stop_pages(self, payload):
-        self.stop()
-
 class EmbedListPageSource(menus.ListPageSource):
     def __init__(self, entries: Iterable[Any], *, title: str = 'Paginator', per_page: int = 10) -> None:
         super().__init__(entries, per_page=per_page)
