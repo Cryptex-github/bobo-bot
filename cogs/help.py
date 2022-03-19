@@ -65,7 +65,7 @@ class BoboHelpCommand(HelpCommand):
         view.add_item(BoboHelpSelect(ctx, mapping)) # type: ignore
         
         embed = ctx.embed(title='Help Command', description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n') # type: ignore
-        embed.add_field(name='Categories', value='\n'.join(cog.qualified_name for cog in mapping.keys()), inline=False) # type: ignore
+        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys()), inline=False) # type: ignore
         embed.set_thumbnail(url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png')
 
         return embed, view
@@ -73,7 +73,7 @@ class BoboHelpCommand(HelpCommand):
     @staticmethod
     def format_commands(ctx: BoboContext, commands: list[Command]) -> list[str]:
         formatted_commands = [
-            f'{ctx.clean_prefix}{command.qualified_name} {command.signature}\n{command.description or command.short_doc or "No Help Provided"}\n\u200b' 
+            f'**{ctx.clean_prefix}{command.qualified_name} {command.signature}**\n{command.description or command.short_doc or "No Help Provided"}\n\u200b' 
             for command in commands
             ]
 
