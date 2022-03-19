@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from discord import StickerFormatType, DeletedReferencedMessage
 from discord.ext.commands import PartialEmojiConverter, PartialEmojiConversionFailure, UserConverter, UserNotFound
 
-from core import Regexs
+from core import Cog, Regexs
 
 if TYPE_CHECKING:
     from discord import Message, User, Member
@@ -111,3 +111,10 @@ class ImageResolver:
             return res
         
         return self.to_avatar(self.ctx.author)
+
+
+class Images(Cog):
+    ...
+
+
+setup = Images.setup
