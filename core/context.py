@@ -29,7 +29,7 @@ class BoboContext(commands.Context):
         return await self.bot.db.fetchval('SELECT uses FROM commands_usage WHERE command = $1;', command.qualified_name)
     
     async def inicrease_command_usage(self, command: BoboBotCommand) -> int:
-        return await self.bot.fetchval('INSERT INTO commands_usage VALUES ($1) ON CONFLICT (command) DO UPDATE SET uses = commands_usage.uses + 1 RETURNING uses;', command.qualified_name)
+        return await self.bot.db.fetchval('INSERT INTO commands_usage VALUES ($1) ON CONFLICT (command) DO UPDATE SET uses = commands_usage.uses + 1 RETURNING uses;', command.qualified_name)
 
     async def send(self, content: str | None = None, **kwargs: Any) -> discord.Message:
         codeblock = kwargs.pop('codeblock', False)
