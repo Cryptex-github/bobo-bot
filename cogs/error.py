@@ -20,7 +20,7 @@ class ErrorHandler(Cog):
             if '\n' in content:
                 content = f'\n{indent(content, "  ")}'
             
-            await ctx.send(f'```py\nErr({content})\nAborting due to previous error.\n```')
+            await ctx.send(f'```py\nErr({content})\n\u200bAborting due to previous error.\n```')
 
         if isinstance(error, commands.CommandOnCooldown):
             await send(f'You are on cooldown, try again in {error.retry_after:.2f} seconds.')
