@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from core import Cog
+from core.context import BoboContext
 
 class Listeners(Cog):
     async def cog_load(self):
@@ -24,5 +25,10 @@ class Listeners(Cog):
     @Cog.listener()
     async def on_socket_event_type(self, event: str) -> None:
         await self.bot.redis.hincrby('events', event, 1)
+    
+    @Cog.listener()
+    async def on_command_completion(self, ctx: BoboContext):
+        if ctx.command:
+            await ctx.inicrease_command_usage(ctx.command) # type: ignore
 
 setup = Listeners.setup

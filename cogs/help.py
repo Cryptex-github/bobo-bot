@@ -1,10 +1,11 @@
 from __future__ import annotations
+from functools import _Descriptor
 
-from typing import TYPE_CHECKING, Iterable, Mapping
+from typing import TYPE_CHECKING, Iterable, Mapping, Any
 
 import discord
 
-from discord.ext.commands import HelpCommand, DefaultHelpCommand
+from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError
 from core.context import BoboContext
 
 from core.view import BaseView
@@ -94,7 +95,27 @@ class BoboHelpCommand(HelpCommand):
         pages = ViewMenuPages(source=source)
 
         await pages.start(self.context)
+    
+    async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
+        embed = self.context.embed(title=f'{self.context.clean_prefix}{command.qualified_name} {command.signature}') # type: ignore
+        embed.description = command.description or command.short_doc or 'No Help Provided'
 
+        if bucket := getattr(command, '_buckets'):
+            if cooldown := getattr(bucket, '_cooldown'):
+                embed.add_field(name='Cooldown', value=f'{cooldown.rate} time(s) per {cooldown.per} second(s)')
+        
+        embed.add_field(name='Category', value=command.cog_name)
+
+        try:
+            can_run = await command.can_run(self.context)
+        except CommandError:
+            can_run = False
+        
+        embed.add_field(name='Runnable by you', value=str(can_run))
+        embed.add_field(name='Usage', value=await self.context.get_command_usage(command)) # type: ignore
+        embed.add_field(name='Aliases', value='\n'.join(command.aliases))
+
+        await self.context.send(embed=embed)
 
 async def setup(bot):
     bot.help_command = BoboHelpCommand()
