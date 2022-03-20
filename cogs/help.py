@@ -44,6 +44,8 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
 
             return
         else:
+            await interaction.response.defer()
+
             source = EmbedListPageSource(BoboHelpCommand.get_cog_help(self.ctx, cog), title=cog.qualified_name)
 
             pages = ViewMenuPages(source=source, extra_component=self, message=interaction.message)
