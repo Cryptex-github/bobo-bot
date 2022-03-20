@@ -86,7 +86,7 @@ def hooked_wrapped_callback(command, ctx: BoboContext, coro: Callable[[Any], Any
     return wrapped
 
 
-class BoboBotCommand(commands.Command[Cog, P, T]):
+class BoboBotCommand(commands.Command):
     def __init__(self, func: Any, **kwargs: Any) -> None:
         super().__init__(func, **kwargs)
 
