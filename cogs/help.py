@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Iterable, Mapping, Any
 import discord
 
 from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError
-from core.context import BoboContext
 
 from core.view import BaseView
 from core.paginator import ViewMenuPages, EmbedListPageSource
@@ -15,10 +14,10 @@ if TYPE_CHECKING:
     from core.cog import Cog
 
     from discord import Embed, Interaction
-    from discord.ext.commands import Command
+    from discord.ext.commands import Context, Command, Group
 
 class BoboHelpSelect(discord.ui.Select):
-    def __init__(self, ctx: BoboContext, mapping: dict[Cog, list[Command]]) -> None:
+    def __init__(self, ctx: Context, mapping: dict[Cog, list[Command]]) -> None:
         options = [
             discord.SelectOption(label=cog.qualified_name, description=f'View help for {cog.qualified_name} category.') for cog in mapping.keys()
         ]
@@ -59,7 +58,7 @@ class BoboHelpCommand(HelpCommand):
         await self.context.send(embed=embed, view=view)
     
     @staticmethod
-    def get_bot_help(ctx: BoboContext, mapping: dict[Cog, list[Command]]) -> tuple[discord.Embed, BaseView]:
+    def get_bot_help(ctx: Context, mapping: dict[Cog, list[Command]]) -> tuple[discord.Embed, BaseView]:
         view = BaseView(user_id=ctx.author.id)
         
         mapping.pop(None, None) # type: ignore
@@ -73,7 +72,7 @@ class BoboHelpCommand(HelpCommand):
         return embed, view
     
     @staticmethod
-    def format_commands(ctx: BoboContext, commands: list[Command]) -> list[str]:
+    def format_commands(ctx: Context, commands: list[Command]) -> list[str]:
         formatted_commands = [
             f'**{ctx.clean_prefix}{command.qualified_name} {command.signature}**\n{command.description or command.short_doc or "No Help Provided"}\n\u200b' 
             for command in commands
@@ -82,7 +81,7 @@ class BoboHelpCommand(HelpCommand):
         return formatted_commands
 
     @staticmethod
-    def get_cog_help(ctx: BoboContext, cog: Cog) -> list[str]:
+    def get_cog_help(ctx: Context, cog: Cog) -> list[str]:
         commands = cog.get_commands()
 
         res = [f'Total Commands in this Cog: {len(commands)}\n\u200b'] 
@@ -117,6 +116,18 @@ class BoboHelpCommand(HelpCommand):
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 
         await self.context.send(embed=embed)
+    
+    async def send_group_help(self, group: Group[Any, ..., Any]) -> None:
+        commands = list(group.walk_commands())
+
+        res = [f'Total Commands in this Group: {len(commands)}\n\u200b']
+        res += self.format_commands(self.context, commands)
+
+        source = EmbedListPageSource(res, title=group.qualified_name)
+
+        pages = ViewMenuPages(source=source)
+
+        await pages.start(self.context)
 
 async def setup(bot):
     bot.help_command = BoboHelpCommand()
