@@ -1,6 +1,8 @@
 from __future__ import annotations
+from textwrap import indent
+from trace import Trace
 
-from traceback import format_exc
+from traceback import TracebackException
 from typing import TYPE_CHECKING
 
 from discord.ext import commands
@@ -14,7 +16,7 @@ if TYPE_CHECKING:
 class ErrorHandler(Cog):
     @Cog.listener()
     async def on_command_error(self, ctx: BoboContext, error: CommandError) -> None:
-        send = lambda x: ctx.send(f'```Err({x})\nAborting due to previous error.\n```')
+        send = lambda x: ctx.send(f'```Err({x if "\n" not in x else "\n" + indent(x, "  ") + "\n"})\nAborting due to previous error.\n```')
 
         if isinstance(error, commands.CommandOnCooldown):
             await send(f'You are on cooldown, try again in {error.retry_after:.2f} seconds.')
@@ -26,6 +28,7 @@ class ErrorHandler(Cog):
 
             return
         
-        await send(format_exc())
+        exc = TracebackException.from_exception(error)
+        await send(''.join(exc.format()))
 
 setup = ErrorHandler.setup
