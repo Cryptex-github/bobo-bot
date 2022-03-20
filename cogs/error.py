@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from discord.ext.commands import CommandError
 
 class ErrorHandler(Cog):
+    ignore = True
+
     @Cog.listener()
     async def on_command_error(self, ctx: BoboContext, error: CommandError) -> None:
         async def send(content: str) -> None:

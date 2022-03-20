@@ -23,6 +23,7 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
     def __init__(self, ctx: BoboContext, mapping: dict[Cog, list[Command]]) -> None:
         options = [
             discord.SelectOption(label=cog.qualified_name, description=f'View help for {cog.qualified_name} category.') for cog in mapping.keys()
+            if getattr(cog, 'ignore', False) is False
         ]
 
         options.insert(0, discord.SelectOption(label='Home', description='Go back to the main help menu.'))
