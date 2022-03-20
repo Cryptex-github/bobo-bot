@@ -65,7 +65,7 @@ class ANSIBuilder:
     def append(self, text: str, **kwargs) -> Self:
         parts = self.get_ansi_code(**kwargs)
 
-        if kwargs.pop('clear'):
+        if kwargs.pop('clear', None):
             parts += '\u001b[0m'
         
         self.text += parts + text + self.clear_code
