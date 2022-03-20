@@ -62,7 +62,7 @@ class BoboHelpCommand(HelpCommand):
     def get_bot_help(ctx: BoboContext, mapping: dict[Cog, list[Command]]) -> tuple[discord.Embed, BaseView]:
         view = BaseView(user_id=ctx.author.id)
         
-        del mapping[None] # type: ignore
+        mapping.pop(None, None) # type: ignore
 
         view.add_item(BoboHelpSelect(ctx, mapping)) # type: ignore
         
