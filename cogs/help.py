@@ -137,4 +137,3 @@ async def setup(bot):
 
 async def teardown(bot):
     bot.help_command = DefaultHelpCommand()
-        
