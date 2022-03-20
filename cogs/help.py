@@ -9,11 +9,12 @@ from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError
 from core.view import BaseView
 from core.paginator import ViewMenuPages, EmbedListPageSource
 from core.constants import INVITE_LINK, SUPPORT_SERVER
+from core.context import BoboContext
+
 
 if TYPE_CHECKING:
     from core.cog import Cog
     from core.view import BaseView
-    from core.context import BoboContext
 
     from discord import Interaction
     from discord.ext.commands import Command, Group
