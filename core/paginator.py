@@ -76,7 +76,7 @@ class ViewMenu(menus.Menu):
             modal = JumpToPage()
             async def on_submit(interaction) -> None:
                 try:
-                    await self.show_checked_page(int(modal.page)) # type: ignore
+                    await self.show_checked_page(int(modal.page.value)) # type: ignore
                 except ValueError:
                     pass
 
