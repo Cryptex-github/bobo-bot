@@ -86,6 +86,8 @@ class ViewMenu(menus.Menu):
         button = discord.ui.Button(style=discord.ButtonStyle.primary, label='Jump', row=2)
         button.callback = _callback
 
+        view.add_item(button)
+
         self.view = view
         return view
 
