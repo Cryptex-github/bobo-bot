@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class ErrorHandler(Cog):
     @Cog.listener()
     async def on_command_error(self, ctx: BoboContext, error: CommandError) -> None:
-        send = lambda x: ctx.send(f'```\nErr({x})\nAborting due to previous error.\n```')
+        send = lambda x: ctx.send(f'```Err({x})\nAborting due to previous error.\n```')
 
         if isinstance(error, commands.CommandOnCooldown):
             await send(f'You are on cooldown, try again in {error.retry_after:.2f} seconds.')
@@ -26,6 +26,6 @@ class ErrorHandler(Cog):
 
             return
         
-        await send('\n' + format_exc())
+        await send(format_exc())
 
 setup = ErrorHandler.setup
