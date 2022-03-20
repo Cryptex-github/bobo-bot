@@ -90,5 +90,3 @@ class ANSIBuilder:
     
     def build_raw(self) -> str:
         return self.raw_text
-    
-
