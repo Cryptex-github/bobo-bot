@@ -17,10 +17,14 @@ class ErrorHandler(Cog):
     @Cog.listener()
     async def on_command_error(self, ctx: BoboContext, error: CommandError) -> None:
         async def send(content: str) -> None:
+            command = f'{ctx.clean_prefix}{ctx.command.qualified_name if ctx.command else ""}'
+
             if '\n' in content:
-                content = f'\n{indent(content, "  | ")}'
-            
-            await ctx.send(f'```py\nErr({content}\n\nAborting due to previous error.\n```')
+                content = f'error: An error occured while executing the command\n --> {command}\n{indent(content, "  | ")}'
+            else:
+                content = f'error: {content}\n --> {command}'
+
+            await ctx.send(f'```py\n{content}\n\nAborting due to previous error.\n```')
 
         if isinstance(error, commands.CommandOnCooldown):
             await send(f'You are on cooldown, try again in {error.retry_after:.2f} seconds.')
