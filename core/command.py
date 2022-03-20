@@ -10,9 +10,13 @@ import discord
 from discord.ext import commands
 
 if TYPE_CHECKING:
-    from typing import Any, AsyncGenerator, Callable, Type
+    from typing import Any, AsyncGenerator, Callable, TypeVar, ParamSpec
     from core.context import BoboContext
     from core.types import OUTPUT_TYPE
+    from core.cog import Cog
+
+    P = ParamSpec('P')
+    T = TypeVar('T')
 
 
 __all__ = ('BoboBotCommand', 'command')
@@ -82,7 +86,7 @@ def hooked_wrapped_callback(command, ctx: BoboContext, coro: Callable[[Any], Any
     return wrapped
 
 
-class BoboBotCommand(commands.Command):
+class BoboBotCommand(commands.Command[Cog, P, T]):
     def __init__(self, func: Any, **kwargs: Any) -> None:
         super().__init__(func, **kwargs)
 
@@ -90,7 +94,7 @@ class BoboBotCommand(commands.Command):
         self.checks.append(user_permissions_predicate) #type: ignore
 
     async def invoke(self, ctx: BoboContext) -> AsyncGenerator[OUTPUT_TYPE, None]:
-        await self.prepare(ctx)
+        await self.prepare(ctx)  # type: ignore
 
         # terminate the invoked_subcommand chain.
         # since we're in a regular command (and not a group) then

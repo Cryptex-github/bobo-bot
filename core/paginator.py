@@ -12,13 +12,17 @@ from core.view import BaseView
 
 if TYPE_CHECKING:
     from discord import Embed, Interaction
-    from discord.ui import Button
     from asyncio import Task
+
+    from core.view import BaseView
 
 
 class JumpToPage(discord.ui.Modal, title='Jump To Page'):
     page = discord.ui.TextInput(label='Page Number', placeholder='Enter page number here.')
 
+
+class Button(discord.ui.Button[BaseView]):
+    ...
 
 class ViewMenu(menus.Menu):
     def __init__(self, *, auto_defer: bool = True, **kwargs):
@@ -174,8 +178,8 @@ class ViewMenu(menus.Menu):
                     return await self.message.delete()
                 elif self.clear_reactions_after:
                     return await self.message.edit(view=None)
-                else:
-                    return await self.message.edit(view=self.view._disable_all()) # type: ignore
+                elif self.view:
+                        return await self.message.edit(view=self.view._disable_all())
             except Exception:
                 pass
 

@@ -1,13 +1,17 @@
+from ast import Param
 import asyncio
 import functools
 import time
 import re
 
-from typing import TypeVar
+from typing import Awaitable, Callable, TypeVar, ParamSpec, Iterable, Generator
 
 __all__ = ('Timer', 'finder', 'async_executor', 'unique_list')
 
+R = TypeVar('R')
+P = ParamSpec('P')
 T = TypeVar('T')
+U = TypeVar('U')
 
 class Timer:
     def __init__(self):
@@ -49,11 +53,12 @@ class Timer:
         return self._end - self._start
 
 # Shamelessly robbed from R. Danny
-def finder(text, collection, *, key=None, lazy=True):
+def finder(text: str, collection: Iterable[T], *, key: Callable[[T], U] | None = None, lazy: bool = True) -> list[T | U] | Generator[T | U, None, None]:
     maybe = []
-    text = str(text)
     to_compile = '.*?'.join(map(re.escape, text))
+
     regex = re.compile(to_compile, flags=re.IGNORECASE)
+
     for item in collection:
         to_search = key(item) if key else item
         r = regex.search(to_search)
@@ -67,12 +72,13 @@ def finder(text, collection, *, key=None, lazy=True):
 
     if lazy:
         return (z for _, _, z in sorted(maybe, key=sort_))
+
     return [z for _, _, z in sorted(maybe, key=sort_)]
 
 
-def async_executor(func):
+def async_executor(func: Callable[P, R]) -> Callable[P, Awaitable[R]]:
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> Awaitable[R]:
         partial = functools.partial(func, *args, **kwargs)
 
         loop = asyncio.get_running_loop()

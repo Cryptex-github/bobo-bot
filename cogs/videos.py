@@ -24,6 +24,8 @@ class YouTube:
     def check_availablity(self) -> bool:
         try:
             self._yt.check_availability()
+            return True
+
         except pytube.exceptions.VideoUnavailable:
             return False
     
@@ -115,12 +117,12 @@ class Videos(Cog):
 
         if prompt.result == 'video':
             try:
-                b, file_type = await tube.get_best_video(filesize_limit)
+                b, file_type = await tube.get_best_video(filesize_limit)  # type: ignore
             except TypeError:
                 return 'Video is too large.'
         else:
             try:
-                b, file_type = await tube.get_best_audio(filesize_limit)
+                b, file_type = await tube.get_best_audio(filesize_limit)  # type: ignore
             except TypeError:
                 return 'Audio is too large.'
         

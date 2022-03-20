@@ -22,6 +22,7 @@ from core.utils import Timer
 
 if TYPE_CHECKING:
     from core import OUTPUT_TYPE
+    from .cog import Cog
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
@@ -34,6 +35,12 @@ __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
 
 
+# @discord.utils.copy_doc(commands.bot.BotBase)
+# class BotBase(commands.bot.GroupMixin[Cog]):
+#     ...
+
+
+# @discord.utils.copy_doc(commands.Bot)
 class BoboBot(commands.Bot):
     def __init__(self):
         self.logger = __log__
@@ -57,8 +64,8 @@ class BoboBot(commands.Bot):
             try:
                 if await self.can_run(ctx, call_once=True):
                     if isinstance(ctx.command, BoboBotCommand):
-                        async for m in ctx.command.invoke(ctx):
-                            await self.process_output(ctx, m)
+                        async for m in ctx.command.invoke(ctx):  # type: ignore
+                            await self.process_output(ctx, m)  # type: ignore
                     else:
                         await ctx.command.invoke(ctx)
                 else:
@@ -73,7 +80,7 @@ class BoboBot(commands.Bot):
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
     
-    async def self_test(self) -> NamedTuple[float]:
+    async def self_test(self, ctx: BoboContext | None = None) -> NamedTuple:
         with Timer() as postgres_timer:
             await self.db.execute('SELECT 1')
         
@@ -81,7 +88,11 @@ class BoboBot(commands.Bot):
             await self.redis.ping()
         
         with Timer() as discord_rest_timer:
-            await self.http.get_user(self.user.id)
+            if ctx:
+                await ctx.channel.trigger_typing()
+            else:
+                if user := self.user:
+                    await self.http.get_user(user.id)
         
         res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
         
@@ -112,9 +123,12 @@ class BoboBot(commands.Bot):
 
             elif isinstance(i, dict):
                 kwargs.update(i)
-
-        if i is True:
-            des = ctx.reply
+        
+        try:
+            if i is True: # type: ignore
+                des = ctx.reply
+        except NameError:
+            pass
 
         await des(**kwargs)
 
