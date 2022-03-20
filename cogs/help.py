@@ -23,6 +23,8 @@ class BoboHelpSelect(discord.ui.Select):
             discord.SelectOption(label=cog.qualified_name, description=f'View help for {cog.qualified_name} category.') for cog in mapping.keys()
         ]
 
+        options.insert(0, discord.SelectOption(label='Home', description='Go back to the main help menu.'))
+
         super().__init__(placeholder='Pick a category to learn more about it.', options=options, min_values=1, max_values=1)
 
         self.ctx = ctx

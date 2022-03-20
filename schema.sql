@@ -11,5 +11,5 @@ CREATE INDEX IF NOT EXISTS idx_author_id ON tags(author_id);
 
 CREATE TABLE IF NOT EXISTS commands_usage (
     command TEXT PRIMARY KEY,
-    uses BIGINT NOT NULL DEFAULT 0
+    uses BIGINT NOT NULL DEFAULT 1
 );
