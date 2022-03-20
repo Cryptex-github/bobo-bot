@@ -1,5 +1,4 @@
 from __future__ import annotations
-from functools import _Descriptor
 
 from typing import TYPE_CHECKING, Iterable, Mapping, Any
 
