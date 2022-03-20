@@ -18,9 +18,9 @@ class ErrorHandler(Cog):
     async def on_command_error(self, ctx: BoboContext, error: CommandError) -> None:
         async def send(content: str) -> None:
             if '\n' in content:
-                content = f'\n{indent(content, "  ")}'
+                content = f'\n{indent(content, "  | ")}'
             
-            await ctx.send(f'```py\nErr({content})\n\u200bAborting due to previous error.\n```')
+            await ctx.send(f'```py\nErr({content}\n\nAborting due to previous error.\n```')
 
         if isinstance(error, commands.CommandOnCooldown):
             await send(f'You are on cooldown, try again in {error.retry_after:.2f} seconds.')
