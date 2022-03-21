@@ -160,5 +160,10 @@ class Fun(Cog):
         await m.edit(embed=embed, view=akinator_view)
 
         await akinator_view.wait()
+    
+    @command()
+    async def http(self, ctx: BoboContext, code: int) -> discord.File:
+        async with self.bot.session.get(f'https://http.cat/{code}') as resp:
+            return discord.File(await resp.read(), filename=f'{code}.png')
 
 setup = Fun.setup
