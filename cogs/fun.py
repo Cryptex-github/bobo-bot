@@ -141,15 +141,16 @@ class Fun(Cog):
         m = await ctx.send(embed=embed, view=view)
 
         if await view.wait():
-            await ctx.send('funni')
             return
         
         embed.set_footer(text=f'You selected {view.selected}')
         await m.edit(embed=embed, view=None)
+        await ctx.send('edited')
 
         akinator_view = AkinatorView(user_id=ctx.author.id)
 
         embed = await akinator_view.start(ctx, view.selected) # type: ignore
+        await ctx.send('started')
 
         await m.edit(embed=embed, view=akinator_view)
 
