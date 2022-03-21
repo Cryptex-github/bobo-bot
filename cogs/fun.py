@@ -144,7 +144,7 @@ class Fun(Cog):
             return
         
         embed.set_footer(text=f'You selected {view.selected}')
-        await m.edit(embed=embed, view=None)
+        await m.edit(embed=embed, view=view._disable_all())
         await ctx.send('edited')
 
         akinator_view = AkinatorView(user_id=ctx.author.id)
