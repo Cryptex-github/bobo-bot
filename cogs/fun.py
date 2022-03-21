@@ -138,7 +138,7 @@ class Fun(Cog):
 
         view = AkinatorOptionsView(user_id=ctx.author.id)
 
-        m = await ctx.send(view=view)
+        m = await ctx.send(embed=embed, view=view)
 
         if await view.wait():
             return
