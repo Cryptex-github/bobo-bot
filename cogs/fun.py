@@ -65,7 +65,8 @@ class AkinatorView(BaseView):
 
         for k, v in self.controls.items():
             button = discord.ui.Button(style=discord.ButtonStyle.secondary, emoji=k, label=v, custom_id=v)
-            button.callback = callback
+
+            self.add_item(button)
     
     def make_progress_bar(self) -> str:
         total_value = 100
@@ -149,13 +150,11 @@ class Fun(Cog):
         if await view.wait():
             return
         
-        embed.set_footer(text=f'You selected {view.selected}')
-        await m.edit(embed=embed, view=None)
+        await m.edit(view=view._disable_all())
 
         akinator_view = AkinatorView(user_id=ctx.author.id)
 
         embed = await akinator_view.start(ctx, view.selected) # type: ignore
-        await ctx.send('started')
 
         await m.edit(embed=embed, view=akinator_view)
 
