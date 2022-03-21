@@ -1,8 +1,7 @@
 from __future__ import annotations
-from code import interact
 
-from enum import IntEnum
-from typing import TYPE_CHECKING, Callable, ParamSpec
+from typing import TYPE_CHECKING
+from io import BytesIO
 
 from akinator.async_aki import Akinator
 from akinator import CantGoBackAnyFurther
@@ -164,6 +163,6 @@ class Fun(Cog):
     @command()
     async def http(self, ctx: BoboContext, code: int) -> discord.File:
         async with self.bot.session.get(f'https://http.cat/{code}') as resp:
-            return discord.File(await resp.read(), filename=f'{code}.png')
+            return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
 
 setup = Fun.setup
