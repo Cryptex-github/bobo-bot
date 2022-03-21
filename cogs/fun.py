@@ -141,6 +141,7 @@ class Fun(Cog):
         m = await ctx.send(embed=embed, view=view)
 
         if await view.wait():
+            await ctx.send('funni')
             return
         
         embed.set_footer(text=f'You selected {view.selected}')
