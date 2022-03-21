@@ -143,6 +143,11 @@ class Fun(Cog):
         if await view.wait():
             return
         
+        embed = ctx.embed(title='Akinator', description='What do you want me to guess?')
+        embed.set_thumbnail(
+            url='https://en.akinator.com/bundles/elokencesite/images/akinator.png?v94'
+        )
+
         embed.set_footer(text=f'You selected {view.selected}')
         await m.edit(embed=embed, view=view._disable_all())
         await ctx.send('edited')
