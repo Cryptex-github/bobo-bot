@@ -64,7 +64,7 @@ class AkinatorView(BaseView):
             await interaction.response.defer()
 
         for k, v in self.controls.items():
-            button = discord.ui.Button(style=discord.ButtonStyle.secondary, emoji=k, label=v, custom_id=v)
+            button = discord.ui.Button(style=discord.ButtonStyle.secondary, label=v, custom_id=v)
             button.callback = callback
 
             self.add_item(button)
