@@ -21,18 +21,24 @@ class AkinatorOptionsView(BaseView):
         self.selected = button.custom_id
 
         await interaction.response.defer()
+
+        self.stop()
     
     @discord.ui.button(label='Animals', custom_id='en_animals', style=discord.ButtonStyle.primary, emoji='🐶')
     async def animals(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         self.selected = button.custom_id
 
         await interaction.response.defer()
+
+        self.stop()
     
     @discord.ui.button(label='Objects', custom_id='en_objects', style=discord.ButtonStyle.primary, emoji='🏠')
     async def objects(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         self.selected = button.custom_id
 
         await interaction.response.defer()
+
+        self.stop()
 
 
 class AkinatorView(BaseView):
@@ -144,9 +150,7 @@ class Fun(Cog):
             return
         
         embed.set_footer(text=f'You selected {view.selected}')
-        await ctx.send('attempting to edit message')
-        await m.edit(embed=embed, view=view._disable_all())
-        await ctx.send('edited')
+        await m.edit(embed=embed, view=None)
 
         akinator_view = AkinatorView(user_id=ctx.author.id)
 
