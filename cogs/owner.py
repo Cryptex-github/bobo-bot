@@ -79,26 +79,28 @@ class Owner(Cog):
             env[lib] = importlib.import_module(lib)
         
         env.update(globals())
-        to_execute = f'async def _execute():\n{textwrap.indent(code, " " * 4)}'
+        _to_execute = f'async def _execute():\n{textwrap.indent(code, " " * 4)}'
 
         def wrap_exception(exc: str) -> str:
-            return f'error: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}'
+            return f'```py\nerror: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}\n```'
 
         async with ReactionProcedureTimer(ctx.message, self.bot.loop):
             try:
-                import_expression.exec(to_execute, env)
+                import_expression.exec(_to_execute, env)
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format()))
+            
+            to_execute = env['_execute']
 
             try:
                 if inspect.isasyncgenfunction(to_execute):
-                    async for res in to_execute(): # type: ignore
+                    async for res in to_execute():
                         yield res
 
                     return
 
-                result = await to_execute() # type: ignore
+                result = await to_execute()
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format()))
