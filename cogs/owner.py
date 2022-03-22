@@ -58,6 +58,7 @@ class Owner(Cog):
     
     @command(aliases=['exe', 'exec'])
     async def execute(self, ctx: BoboContext, *, code: str) -> AsyncGenerator[OUTPUT_TYPE, None]:
+        yield 'called'
         _, code = codeblock_converter(code)
 
         env = {
