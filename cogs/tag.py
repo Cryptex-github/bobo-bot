@@ -54,7 +54,7 @@ class Tag(Cog):
         
         await ctx.send(escape_mentions(content))
     
-    @tag.command(alias=['create'])
+    @tag.command(aliases=['create'])
     async def new(self, ctx: BoboContext, name: str, *, content: str) -> None:
         """Creates a new tag."""
         if len(name) > 200:
@@ -71,7 +71,7 @@ class Tag(Cog):
 
         await ctx.send('Tag created.')
     
-    @tag.command(alias=['delete'])
+    @tag.command(aliases=['delete'])
     async def remove(self, ctx: BoboContext, name: str) -> None:
         """
         Deletes a tag.

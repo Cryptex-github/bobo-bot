@@ -56,7 +56,7 @@ class Owner(Cog):
 
         return embed
     
-    @command(alias=['exe', 'exec'])
+    @command(aliases=['exe', 'exec'])
     async def execute(self, ctx: BoboContext, *, code: str) -> AsyncGenerator[OUTPUT_TYPE, None]:
         _, code = codeblock_converter(code)
 

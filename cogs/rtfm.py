@@ -133,28 +133,28 @@ class RTFM(Cog):
         """
         await ctx.send_help(ctx.command)
     
-    @rtfm.command(alias=['py', 'python3'])
+    @rtfm.command(aliases=['py', 'python3'])
     async def python(self, ctx, *, query: str | None = None) -> None:
         """
         Search Python 3 documentation.
         """
         await self.sphinx_rtfm(ctx, 'python', query)
     
-    @rtfm.command(alias=['pg', 'postgresql'])
+    @rtfm.command(aliases=['pg', 'postgresql'])
     async def asyncpg(self, ctx, *, query: str | None = None) -> None:
         """
         Search asyncpg documentation.
         """
         await self.sphinx_rtfm(ctx, 'asyncpg', query)
     
-    @rtfm.command(alias=['dpy', 'discordpy_latest'])
+    @rtfm.command(aliases=['dpy', 'discordpy_latest'])
     async def discordpy(self, ctx, *, query: str | None = None) -> None:
         """
         Search discordpy documentation.
         """
         await self.sphinx_rtfm(ctx, 'discordpy', query)
     
-    @rtfm.command(alias=['dpy_master', 'discordpy_master'])
+    @rtfm.command(aliases=['dpy_master', 'discordpy_master'])
     async def discordpy_master(self, ctx, *, query: str | None = None) -> None:
         """
         Search discordpy master branch documentation.
