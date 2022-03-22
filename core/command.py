@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import asyncio
 import functools
 import inspect
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Awaitable
 
 import discord
 from discord.ext import commands
@@ -19,7 +18,7 @@ if TYPE_CHECKING:
     T = TypeVar('T')
 
 
-__all__ = ('BoboBotCommand', 'command')
+__all__ = ('user_permissions_predicate', 'bot_permissions_predicate', 'command')
 
 
 def user_permissions_predicate(ctx: BoboContext) -> bool:
@@ -58,62 +57,56 @@ def bot_permissions_predicate(ctx: BoboContext) -> bool:
 
     raise commands.BotMissingPermissions(missing)
 
+async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
+    if output is None:
+        return
 
-def hooked_wrapped_callback(command, ctx: BoboContext, coro: Callable[[Any], Any]) -> Callable[[Any, Any], AsyncGenerator[OUTPUT_TYPE, None]]:
-    @functools.wraps(coro)
-    async def wrapped(*args: Any, **kwargs: Any) -> AsyncGenerator[OUTPUT_TYPE, None]:
-        try:
-            if inspect.isasyncgenfunction(coro):
-                async for ret in coro(*args, **kwargs):
-                    yield ret
-            else:
-                yield await coro(*args, **kwargs)
-        except commands.CommandError:
-            ctx.command_failed = True
-            raise
-        except asyncio.CancelledError:
-            ctx.command_failed = True
-            return
-        except Exception as exc:
-            ctx.command_failed = True
-            raise commands.CommandInvokeError(exc) from exc
-        finally:
-            if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx)
+    kwargs = {}
+    des = ctx.send
 
-            await command.call_after_hooks(ctx)
+    if not isinstance(output, tuple):
+        output = (output,)
 
-    return wrapped
+    for i in output:
+        if isinstance(i, discord.Embed):
+            kwargs['embed'] = i
 
+        elif isinstance(i, str):
+            kwargs['content'] = i
 
-class BoboBotCommand(commands.Command):
-    def __init__(self, func: Any, **kwargs: Any) -> None:
-        super().__init__(func, **kwargs)
+        elif isinstance(i, discord.File):
+            kwargs['file'] = i
 
-        self.checks.append(bot_permissions_predicate) #type: ignore
-        self.checks.append(user_permissions_predicate) #type: ignore
+        elif isinstance(i, dict):
+            kwargs.update(i)
+    
+    try:
+        if i is True: # type: ignore
+            des = ctx.reply
+    except NameError:
+        pass
 
-    async def invoke(self, ctx: BoboContext) -> AsyncGenerator[OUTPUT_TYPE, None]:
-        await self.prepare(ctx)  # type: ignore
+    await des(**kwargs)
 
-        # terminate the invoked_subcommand chain.
-        # since we're in a regular command (and not a group) then
-        # the invoked subcommand is None.
-        ctx.invoked_subcommand = None
-        ctx.subcommand_passed = None
-        injected = hooked_wrapped_callback(self, ctx, self.callback) #type: ignore
-        async for item in injected(*ctx.args, **ctx.kwargs):
-            yield item
+async def _command_callback(ctx: BoboContext, coro: AsyncGenerator[Any, None] | Awaitable[Any]) -> None:
+    if inspect.isasyncgenfunction(coro):
+        async for ret in coro: # type: ignore
+            await process_output(ctx, ret)
+    else:
+        await process_output(ctx, await coro) # type: ignore
 
-
-class Group(commands.Group):
-    def command(self, *args: Any, **kwargs: Any) -> Any:
-        if 'cls' not in kwargs:
-            kwargs['cls'] = BoboBotCommand
-        
-        return super().command(*args, **kwargs)
-
+def command_callback(func: Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]) -> Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]:
+    @functools.wraps(func)
+    async def wrapper(self: Cog, ctx: BoboContext, *args: Any, **kwargs: Any) -> None:
+        await _command_callback(ctx, func(self, ctx, *args, **kwargs))
+    
+    return wrapper
 
 @discord.utils.copy_doc(commands.command)
-def command(name=None, cls=BoboBotCommand, **attrs) -> Any:
-    return commands.command(name=name, cls=cls, **attrs)
+def command(name=None, *, **attrs) -> Any:
+    command = commands.command(name=name, **attrs)
+
+    def wrapper(func):
+        return command(command_callback(func)) # type: ignore
+    
+    return wrapper
