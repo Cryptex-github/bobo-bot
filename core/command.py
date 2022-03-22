@@ -103,8 +103,8 @@ def command_callback(func: Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator
     return wrapper
 
 @discord.utils.copy_doc(commands.command)
-def command(name=None, *, **attrs) -> Any:
-    command = commands.command(name=name, **attrs)
+def command(**attrs) -> Any:
+    command = commands.command(**attrs)
 
     def wrapper(func):
         return command(command_callback(func)) # type: ignore
