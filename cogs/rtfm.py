@@ -154,7 +154,7 @@ class RTFM(Cog):
         """
         await self.sphinx_rtfm(ctx, 'discordpy', query)
     
-    @rtfm.command(aliases=['dpy_master', 'discordpy_master'])
+    @rtfm.command(aliases=['dpy_master'])
     async def discordpy_master(self, ctx, *, query: str | None = None) -> None:
         """
         Search discordpy master branch documentation.
