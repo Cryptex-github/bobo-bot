@@ -89,7 +89,7 @@ async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
     await des(**kwargs)
 
 async def _command_callback(ctx: BoboContext, coro: AsyncGenerator[Any, None] | Awaitable[Any]) -> None:
-    if inspect.isasyncgenfunction(coro):
+    if inspect.isasyncgen(coro):
         async for ret in coro: # type: ignore
             await process_output(ctx, ret)
     else:
