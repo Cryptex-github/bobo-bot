@@ -112,7 +112,8 @@ class Owner(Cog):
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
             else:
-                yield safe_result(result), SAFE_SEND, CAN_DELETE
+                if result:
+                    yield safe_result(result), SAFE_SEND, CAN_DELETE
     
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):

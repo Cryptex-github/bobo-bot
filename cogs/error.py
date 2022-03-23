@@ -36,6 +36,11 @@ class ErrorHandler(Cog):
 
             return
         
+        if isinstance(error, commands.MaxConcurrencyReached):
+            await send(str(error))
+
+            return
+        
         if isinstance(error, (commands.MissingPermissions, commands.BotMissingPermissions)):
             await send(f'You need the following permissions to execute this command: {", ".join(error.missing_permissions)}')
 
