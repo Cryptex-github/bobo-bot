@@ -1,13 +1,15 @@
 from __future__ import annotations
 from textwrap import indent
-from trace import Trace
 
 from traceback import TracebackException
 from typing import TYPE_CHECKING
 
+from discord.utils import escape_mentions
 from discord.ext import commands
+from discord.ext.commands.view import StringView
 
 from core import Cog
+from core.utils import cutoff
 
 if TYPE_CHECKING:
     from core.context import BoboContext
@@ -19,7 +21,11 @@ class ErrorHandler(Cog):
     @Cog.listener()
     async def on_command_error(self, ctx: BoboContext, error: CommandError) -> None:
         async def send(content: str) -> None:
-            command = f'{ctx.clean_prefix}{ctx.command.qualified_name if ctx.command else ""}'
+            view = StringView(ctx.message.content)
+            view.skip_string(ctx.prefix or '')
+            view.skip_ws()
+
+            command = cutoff(escape_mentions(f'{ctx.clean_prefix}{view.read_rest()}'), max_length=20)
 
             if '\n' in content:
                 content = f'error: An error occured while executing the command\n --> {command}\n{indent(content, "  | ")}'
