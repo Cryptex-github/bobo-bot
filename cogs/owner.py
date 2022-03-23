@@ -16,6 +16,7 @@ from jishaku.exception_handling import ReactionProcedureTimer
 from tabulate import tabulate  # type: ignore
 
 from core import BoboContext, Cog, Regexs, Timer, command, unique_list
+from core.constants import CAN_DELETE, SAFE_SEND
 from core.types import OUTPUT_TYPE
 
 
@@ -88,26 +89,26 @@ class Owner(Cog):
                 import_expression.exec(_to_execute, env)
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
-                yield wrap_exception(''.join(exc.format()))
+                yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
             
             to_execute = env['_execute']
 
             try:
                 if inspect.isasyncgenfunction(to_execute):
                     async for res in to_execute():
-                        yield res
+                        yield res, SAFE_SEND
 
                     return
 
                 result = await to_execute()
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
-                yield wrap_exception(''.join(exc.format()))
+                yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
             else:
                 if not result or result == ' ':
-                    yield '\u200b'
+                    yield '\u200b', CAN_DELETE
                 
-                yield result
+                yield result, SAFE_SEND, CAN_DELETE
     
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):

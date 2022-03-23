@@ -1,4 +1,3 @@
-from operator import truediv
 import discord
 
 from config import Emojis
@@ -13,9 +12,6 @@ class DeleteButton(discord.ui.Button):
             emoji=discord.PartialEmoji.from_str(Emojis.Trash),
             style=discord.ButtonStyle.grey,
         )
-
-    async def interaction_check(self, interaction) -> bool:
-        return interaction.user.id == self.user_id
 
     async def callback(self, interaction) -> None:
         if interaction.message:

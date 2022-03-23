@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Awaitable
 import discord
 from discord.ext import commands
 
+from core.constants import REPLY, CAN_DELETE, SAFE_SEND
+
 if TYPE_CHECKING:
     from typing import Any, AsyncGenerator, Callable, TypeVar, ParamSpec
     from core.context import BoboContext
@@ -79,12 +81,15 @@ async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
 
         elif isinstance(i, dict):
             kwargs.update(i)
-    
-    try:
-        if i is True: # type: ignore
+
+        elif i is REPLY:
             des = ctx.reply
-    except NameError:
-        pass
+
+        elif i is CAN_DELETE:
+            kwargs['can_delete'] = True
+
+        elif i is SAFE_SEND:
+            kwargs['safe_send'] = True
 
     await des(**kwargs)
 
