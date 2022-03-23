@@ -5,7 +5,7 @@ import traceback
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from io import BytesIO
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
 import discord
 import import_expression
@@ -83,6 +83,13 @@ class Owner(Cog):
 
         def wrap_exception(exc: str) -> str:
             return f'```py\nerror: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}\n```'
+        
+        def safe_result(result: Any) -> str:
+            if isinstance(result, str):
+                if not result or result == ' ':
+                    return '\u200b'
+            
+            return repr(result)
 
         async with ReactionProcedureTimer(ctx.message, self.bot.loop):
             try:
@@ -96,7 +103,7 @@ class Owner(Cog):
             try:
                 if inspect.isasyncgenfunction(to_execute):
                     async for res in to_execute():
-                        yield res, SAFE_SEND
+                        yield safe_result(res), SAFE_SEND
 
                     return
 
@@ -105,10 +112,7 @@ class Owner(Cog):
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
             else:
-                if not result or result == ' ':
-                    yield '\u200b', CAN_DELETE
-                
-                yield result, SAFE_SEND, CAN_DELETE
+                yield safe_result(result), SAFE_SEND, CAN_DELETE
     
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):
