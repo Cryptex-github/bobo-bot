@@ -26,6 +26,9 @@ class ReactionRoles(Cog):
         if not payload.guild_id:
             return
         
+        if not hasattr(self, 'cache'):
+            return
+
         if emojis_to_roles := await self.cache.get_message(payload.message_id):
             if role := emojis_to_roles.get(str(payload.emoji.id) or payload.emoji.name):
                 async with self.locks[payload.message_id]:
@@ -42,6 +45,9 @@ class ReactionRoles(Cog):
         if not payload.guild_id:
             return
         
+        if not hasattr(self, 'cache'):
+            return
+        
         if emojis_to_roles := await self.cache.get_message(payload.message_id):
             if role := emojis_to_roles.get(str(payload.emoji.id) or payload.emoji.name):
                 async with self.locks[payload.message_id]:
@@ -50,7 +56,7 @@ class ReactionRoles(Cog):
                     except discord.Forbidden:
                         pass
     
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     async def reactionrole(self, ctx: BoboContext) -> None:
         """Manage reaction roles."""
@@ -83,16 +89,10 @@ class ReactionRoles(Cog):
 
             return
         
-        await ctx.send('What emoji do you want to add reaction roles to?')
+        reaction_message = await ctx.send('What emoji do you want to add reaction roles to? React to this message.')
 
-        emoji = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
-
-        try:
-            emoji = await commands.PartialEmojiConverter().convert(ctx, emoji.content)
-        except commands.PartialEmojiConversionFailure:
-            await ctx.send('That emoji does not exist.')
-
-            return
+        payload = await self.bot.wait_for('raw_reaction_add', check=lambda payload: payload.message_id == reaction_message.id)
+        emoji = payload.emoji
         
         try:
             m = await ctx.send('testing emoji')
