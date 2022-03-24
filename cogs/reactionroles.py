@@ -33,7 +33,7 @@ class ReactionRoles(Cog):
             if role := emojis_to_roles.get(str(payload.emoji.id or payload.emoji.name)):
                 async with self.locks[payload.message_id]:
                     try:
-                        await self.bot.http.add_role(payload.guild_id, payload.user_id, role, 'Bobo Bot Reaction Role')
+                        await self.bot.http.add_role(payload.guild_id, payload.user_id, role, reason='Bobo Bot Reaction Role')
                     except discord.Forbidden:
                         pass
     
@@ -52,7 +52,7 @@ class ReactionRoles(Cog):
             if role := emojis_to_roles.get(str(payload.emoji.id or payload.emoji.name)):
                 async with self.locks[payload.message_id]:
                     try:
-                        await self.bot.http.remove_role(payload.guild_id, payload.user_id, role, 'Bobo Bot Reaction Role')
+                        await self.bot.http.remove_role(payload.guild_id, payload.user_id, role, reason='Bobo Bot Reaction Role')
                     except discord.Forbidden:
                         pass
     
