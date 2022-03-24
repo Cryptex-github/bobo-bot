@@ -9,7 +9,7 @@ from core.context import BoboContext
 
 
 class ReactionRoles(Cog):
-    async def cog_setup(self) -> None:
+    async def cog_load(self) -> None:
         self.cache = ReactionRoleManager(self.bot.redis)
         self.locks: defaultdict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
 
