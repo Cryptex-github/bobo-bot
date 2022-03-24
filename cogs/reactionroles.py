@@ -120,6 +120,8 @@ class ReactionRoles(Cog):
         await self.bot.db.execute('INSERT INTO reaction_roles VALUES ($1, $2, $3, $4)', ctx.guild.id, message.id, str(emoji.id or emoji.name), role.id)
         await self.cache.add(message.id, role.id, str(emoji.id or emoji.name))
 
+        await message.add_reaction(emoji)
+
         await ctx.send(f'Successfully added reaction role to channel: {channel.mention} with message ID: {message.id} and emoji: {str(emoji)} for role: {role.mention}.', allowed_mentions=discord.AllowedMentions.none())
 
 setup = ReactionRoles.setup
