@@ -30,7 +30,7 @@ class ReactionRoles(Cog):
             return
 
         if emojis_to_roles := await self.cache.get_message(payload.message_id):
-            if role := emojis_to_roles.get(str(payload.emoji.id) or payload.emoji.name):
+            if role := emojis_to_roles.get(str(payload.emoji.id or payload.emoji.name)):
                 async with self.locks[payload.message_id]:
                     try:
                         await self.bot.http.add_role(payload.guild_id, payload.user_id, role, 'Bobo Bot Reaction Role')
@@ -49,7 +49,7 @@ class ReactionRoles(Cog):
             return
         
         if emojis_to_roles := await self.cache.get_message(payload.message_id):
-            if role := emojis_to_roles.get(str(payload.emoji.id) or payload.emoji.name):
+            if role := emojis_to_roles.get(str(payload.emoji.id or payload.emoji.name)):
                 async with self.locks[payload.message_id]:
                     try:
                         await self.bot.http.remove_role(payload.guild_id, payload.user_id, role, 'Bobo Bot Reaction Role')
