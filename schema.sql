@@ -13,3 +13,10 @@ CREATE TABLE IF NOT EXISTS commands_usage (
     command TEXT PRIMARY KEY,
     uses BIGINT NOT NULL DEFAULT 1
 );
+
+CREATE TABLE IF NOT EXISTS reaction_roles (
+    message_id BIGINT NOT NULL,
+    channel_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    emoji TEXT NOT NULL
+);
