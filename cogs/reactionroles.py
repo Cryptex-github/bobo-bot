@@ -139,7 +139,7 @@ class ReactionRoles(Cog):
 
         if not reaction_roles:
             return 'There are no reaction roles in this server.'
-        formatted = [f'Message ID: {message_id} and emoji: {emoji if not emoji.isnumeric() else str(self.bot.get_emoji(emoji))} for role: {role.mention}\n' for _, message_id, emoji, role in reaction_roles]
+        formatted = [f'Message ID: {message_id} and emoji: {emoji if not emoji.isnumeric() else str(self.bot.get_emoji(emoji))} for role: {ctx.guild.get_role(role).mention if ctx.guild.get_role(role) else "Role not found"}\n' for _, message_id, emoji, role in reaction_roles] # type: ignore
 
         source = EmbedListPageSource(formatted, title='Reaction Roles in this server.')
         pages = ViewMenuPages(source=source)
