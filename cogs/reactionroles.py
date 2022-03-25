@@ -58,7 +58,7 @@ class ReactionRoles(Cog):
                     except discord.Forbidden:
                         pass
     
-    @group()
+    @group(aliases=['rr', 'reactionroles'])
     @commands.guild_only()
     async def reactionrole(self, ctx: BoboContext) -> None:
         """Manage reaction roles."""
