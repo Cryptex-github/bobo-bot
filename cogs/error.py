@@ -32,7 +32,7 @@ class ErrorHandler(Cog):
             else:
                 content = f'error: {content}\n --> {command}'
 
-            await ctx.send(f'```py\n{content}\nerror: Aborting due to previous error.\n```')
+            await ctx.send(f'```py\n{content}\nerror: Aborting due to previous error.\n```', safe_send=True)
         
         if isinstance(error, commands.CommandNotFound):
             return
