@@ -5,7 +5,9 @@ import discord
 from discord.ext import commands
 
 from core import Cog, ReactionRoleManager
+from core.command import group
 from core.context import BoboContext
+from core.paginator import EmbedListPageSource, ViewMenuPages
 
 
 class ReactionRoles(Cog):
@@ -56,7 +58,7 @@ class ReactionRoles(Cog):
                     except discord.Forbidden:
                         pass
     
-    @commands.group(invoke_without_command=True)
+    @group()
     @commands.guild_only()
     async def reactionrole(self, ctx: BoboContext) -> None:
         """Manage reaction roles."""
@@ -123,5 +125,28 @@ class ReactionRoles(Cog):
         await message.add_reaction(emoji)
 
         await ctx.send(f'Successfully added reaction role to channel: {channel.mention} with message ID: {message.id} and emoji: {str(emoji)} for role: {role.mention}.', allowed_mentions=discord.AllowedMentions.none())
+
+    @reactionrole.command(name='list')
+    @commands.guild_only()
+    async def list_(self, ctx: BoboContext) -> str | None:
+        """
+        List all reaction roles.
+        """
+        if not ctx.guild:
+            raise RuntimeError('Guild not found')
+        
+        reaction_roles = await self.bot.db.fetch("SELECT * FROM reaction_roles WHERE guild_id = $1", ctx.guild.id)
+
+        if not reaction_roles:
+            return 'There are no reaction roles in this server.'
+        
+        formatted = [f'Message ID: {message_id} and emoji: {emoji} for role: {role.mention}\n' for _, message_id, emoji, role in reaction_roles]
+
+        source = EmbedListPageSource(formatted, title='Reaction Roles in this server.')
+        pages = ViewMenuPages(source=source)
+
+        await pages.start(ctx)
+            
+
 
 setup = ReactionRoles.setup
