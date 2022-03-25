@@ -1,5 +1,6 @@
 import asyncio
 from collections import defaultdict
+from typing import AsyncGenerator
 
 import discord
 from discord.ext import commands
@@ -66,28 +67,28 @@ class ReactionRoles(Cog):
     
     @reactionrole.command()
     @commands.guild_only()
-    async def add(self, ctx: BoboContext) -> None:
+    async def add(self, ctx: BoboContext) -> AsyncGenerator[str, None]:
         """
         Add a reaction role.
         """
-        await ctx.send('What channel is the reaction role message in?')
+        yield 'What channel is the reaction role message in?'
 
         channel = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
         try:
             channel = await commands.TextChannelConverter().convert(ctx, channel.content)
         except commands.ChannelNotFound:
-            await ctx.send('That channel does not exist.')
+            yield 'That channel does not exist.'
 
             return
         
-        await ctx.send('What is the message ID of the message you want to add reaction roles to?')
+        yield 'What is the message ID of the message you want to add reaction roles to?'
 
         message = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
         try:
             message_id = int(message.content)
             message = await channel.fetch_message(message_id)
         except (ValueError, commands.MessageNotFound):
-            await ctx.send('That message does not exist.')
+            yield 'That message does not exist.'
 
             return
         
@@ -101,18 +102,18 @@ class ReactionRoles(Cog):
             await m.add_reaction(emoji)
             await m.delete()
         except discord.HTTPException:
-            await ctx.send('It seems like I do not have permission to add reactions to that message.')
+            yield 'It seems like I do not have permission to add reactions to that message.'
 
             return
         
-        await ctx.send('Lastly, what role do you want to add?')
+        yield 'Lastly, what role do you want to add?'
 
         role = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
 
         try:
             role = await commands.RoleConverter().convert(ctx, role.content)
         except commands.RoleNotFound:
-            await ctx.send('That role does not exist.')
+            yield 'That role does not exist.'
             
             return
         
@@ -122,9 +123,12 @@ class ReactionRoles(Cog):
         await self.bot.db.execute('INSERT INTO reaction_roles VALUES ($1, $2, $3, $4)', ctx.guild.id, message.id, str(emoji.id or emoji.name), role.id)
         await self.cache.add(message.id, role.id, str(emoji.id or emoji.name))
 
-        await message.add_reaction(emoji)
+        try:
+            await message.add_reaction(emoji)
+        except discord.HTTPException:
+            yield 'It seems like I do not have permission to add reactions to that message.'
 
-        await ctx.send(f'Successfully added reaction role to channel: {channel.mention} with message ID: {message.id} and emoji: {str(emoji)} for role: {role.mention}.', allowed_mentions=discord.AllowedMentions.none())
+        yield f'Successfully added reaction role to channel: {channel.mention} with message ID: {message.id} and emoji: {str(emoji)} for role: {role.mention}.'
 
     @reactionrole.command(name='list')
     @commands.guild_only()
