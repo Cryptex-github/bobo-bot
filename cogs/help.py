@@ -117,7 +117,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
         except CommandError:
             can_run = False
         
-        embed.add_field(name='Runnable by you', value=str(can_run))
+        embed.add_field(name='Useable by you', value=str(can_run))
         embed.add_field(name='Usage', value=await self.context.get_command_usage(command)) # type: ignore
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 
