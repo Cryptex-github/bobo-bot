@@ -11,10 +11,11 @@ from .button import DeleteButton
 
 if TYPE_CHECKING:
     from typing import Any
+    from core.bot import BoboBot
 
 __all__ = ('BoboContext',)
 
-class BoboContext(commands.Context): # type: ignore
+class BoboContext(commands.Context['BoboBot']): # type: ignore
     async def confirm(self, content: str | None = None, timeout: int = 60, **kwargs: Any) -> bool:
         view = ConfirmView(timeout=timeout, user_id=self.author.id)
         await self.send(content, view=view, **kwargs)
