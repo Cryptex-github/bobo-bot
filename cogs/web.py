@@ -13,13 +13,20 @@ async def index():
 @app.get('/stats')
 async def stats():
     total_command_uses = await app.bot.db.fetchval('SELECT SUM(uses) FROM commands_usage')
+    most_used_command = await app.bot.db.fetchval('SELECT command FROM commands_usage ORDER BY uses DESC LIMIT 1')
+    latency = await app.bot.self_test()
 
     return {
-        'guilds': len(app.bot.guilds),
-        'users': len(app.bot.users),
-        'channels': len(list(app.bot.get_all_channels())),
-        'commands': len(list(app.bot.walk_commands())),
-        'total_command_uses': int(total_command_uses),
+        'Servers': len(app.bot.guilds),
+        'Users': len(app.bot.users),
+        'Channels': len(list(app.bot.get_all_channels())),
+        'Commands': len(list(app.bot.walk_commands())),
+        'Total Command Uses': int(total_command_uses),
+        'Most Used Command': most_used_command,
+        'Postgres Latency': latency.postgres,
+        'Redis Latency': latency.redis,
+        'Discord REST Latency': latency.discord_rest,
+        'Discord WebSocket Latency': latency.discord_ws,
     }
 
 
