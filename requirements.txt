@@ -12,3 +12,4 @@ requests-html
 pytube
 import-expression
 quart
+Quart-CORS

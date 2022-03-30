@@ -1,12 +1,26 @@
 from quart import Quart
+from quart_cors import cors
 
 app = Quart(__name__)
+app = cors(app)
 
 TASK = None
 
 @app.get('/')
 async def index():
     return {'message': 'Hello World!'}
+
+@app.get('/stats')
+async def stats():
+    total_command_uses = await app.bot.db.fetchval('SELECT SUM(uses) FROM commands_usage')
+
+    return {
+        'guilds': len(app.bot.guilds),
+        'users': len(app.bot.users),
+        'channels': len(app.bot.get_all_channels()),
+        'commands': len(list(app.bot.walk_commands())),
+        'total_command_uses': total_command_uses,
+    }
 
 
 async def setup(bot):
