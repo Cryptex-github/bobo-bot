@@ -3,7 +3,7 @@ from quart_cors import cors
 
 app = Quart(__name__)
 
-app.JSON_SORT_KEYS['JSON_SORT_KEYS'] = False
+app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
