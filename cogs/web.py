@@ -41,3 +41,4 @@ async def teardown(bot):
     if TASK is not None:
         TASK.cancel()
 
+        await TASK
