@@ -50,7 +50,7 @@ class BoboBot(commands.Bot):
             strip_after_prefix=True,
         )
     
-    async def self_test(self, ctx: BoboContext | None = None) -> NamedTuple:
+    async def self_test(self) -> NamedTuple:
         with Timer() as postgres_timer:
             await self.db.execute('SELECT 1')
         
@@ -58,10 +58,7 @@ class BoboBot(commands.Bot):
             await self.redis.ping()
         
         with Timer() as discord_rest_timer:
-            if ctx:
-                await ctx.channel.trigger_typing()
-            else:
-                await self.http.get_gateway()
+            await self.http.get_gateway()
         
         res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
         
