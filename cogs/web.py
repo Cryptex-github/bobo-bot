@@ -19,7 +19,7 @@ async def stats():
         'users': len(app.bot.users),
         'channels': len(list(app.bot.get_all_channels())),
         'commands': len(list(app.bot.walk_commands())),
-        'total_command_uses': total_command_uses,
+        'total_command_uses': int(total_command_uses),
     }
 
 
