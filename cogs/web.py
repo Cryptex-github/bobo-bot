@@ -17,7 +17,7 @@ async def stats():
     return {
         'guilds': len(app.bot.guilds),
         'users': len(app.bot.users),
-        'channels': len(app.bot.get_all_channels()),
+        'channels': len(list(app.bot.get_all_channels())),
         'commands': len(list(app.bot.walk_commands())),
         'total_command_uses': total_command_uses,
     }
