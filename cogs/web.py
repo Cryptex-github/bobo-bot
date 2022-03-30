@@ -1,9 +1,10 @@
-from json import dumps
-
 from quart import Quart
 from quart_cors import cors
 
 app = Quart(__name__)
+
+app.JSON_SORT_KEYS['JSON_SORT_KEYS'] = False
+
 app = cors(app)
 
 TASK = None
@@ -18,7 +19,7 @@ async def stats():
     most_used_command = await app.bot.db.fetchval('SELECT command FROM commands_usage ORDER BY uses DESC LIMIT 1')
     latency = await app.bot.self_test()
 
-    return dumps({
+    return {
         'Servers': len(app.bot.guilds),
         'Users': len(app.bot.users),
         'Channels': len(list(app.bot.get_all_channels())),
@@ -29,7 +30,7 @@ async def stats():
         'Redis Latency': f'{latency.redis} ms',
         'Discord REST Latency': f'{latency.discord_rest} ms',
         'Discord WebSocket Latency': f'{latency.discord_ws} ms',
-    })
+    }
 
 
 async def setup(bot):
