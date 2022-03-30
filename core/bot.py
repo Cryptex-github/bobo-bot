@@ -61,8 +61,7 @@ class BoboBot(commands.Bot):
             if ctx:
                 await ctx.channel.trigger_typing()
             else:
-                if user := self.user:
-                    await self.http.get_user(user.id)
+                await self.http.get_gateway()
         
         res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
         
