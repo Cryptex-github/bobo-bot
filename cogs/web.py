@@ -23,10 +23,10 @@ async def stats():
         'Commands': len(list(app.bot.walk_commands())),
         'Total Command Uses': int(total_command_uses),
         'Most Used Command': most_used_command,
-        'Postgres Latency': latency.postgres,
-        'Redis Latency': latency.redis,
-        'Discord REST Latency': latency.discord_rest,
-        'Discord WebSocket Latency': latency.discord_ws,
+        'Postgres Latency': f'{latency.postgres} ms',
+        'Redis Latency': f'{latency.redis} ms',
+        'Discord REST Latency': f'{latency.discord_rest} ms',
+        'Discord WebSocket Latency': f'{latency.discord_ws} ms',
     }
 
 
