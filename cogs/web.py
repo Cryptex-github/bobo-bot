@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from quart import Quart
 from quart_cors import cors
 
@@ -12,9 +14,15 @@ async def index():
 
 @app.get('/stats')
 async def stats():
-    total_command_uses = await app.bot.db.fetchval('SELECT SUM(uses) FROM commands_usage')
-    most_used_command = await app.bot.db.fetchval('SELECT command FROM commands_usage ORDER BY uses DESC LIMIT 1')
+    async with app.bot.db.acquire() as conn:
+        total_command_uses = await conn.fetchval('SELECT SUM(uses) FROM commands_usage')
+        most_used_command = await conn.fetchval('SELECT command FROM commands_usage ORDER BY uses DESC LIMIT 1')
+    
     latency = await app.bot.self_test()
+    
+    events = await app.bot.get_cog('Misc').get_event_counts()
+
+    time_difference = (float(datetime.now().timestamp()) - float(await app.bot.redis.get('events_start_time'))) / 60
 
     return {
         'Servers': len(app.bot.guilds),
@@ -27,6 +35,8 @@ async def stats():
         'Redis Latency': f'{latency.redis} ms',
         'Discord REST Latency': f'{latency.discord_rest} ms',
         'Discord WebSocket Latency': f'{latency.discord_ws} ms',
+        'Total Gateway Events': events,
+        'Average Events per minute': f'{events // time_difference}'
     }
 
 
