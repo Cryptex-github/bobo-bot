@@ -4,6 +4,9 @@ from quart import Quart
 from quart_cors import cors
 
 app = Quart(__name__)
+
+app.config['JSON_SORT_KEYS'] = False
+
 app = cors(app)
 
 TASK = None
