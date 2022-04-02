@@ -73,7 +73,7 @@ class YouTube:
 
 class VideoPrompt(BaseView):
     @discord.ui.button(label='Video', style=discord.ButtonStyle.primary)
-    async def video(self, _, interaction: Interaction) -> None:
+    async def video(self, interaction: Interaction, _) -> None:
         self.result = 'video'
 
         await self.disable_all(interaction)
@@ -82,7 +82,7 @@ class VideoPrompt(BaseView):
         self.stop()
 
     @discord.ui.button(label='Audio', style=discord.ButtonStyle.primary)
-    async def audio(self, _, interaction: Interaction) -> None:
+    async def audio(self, interaction: Interaction, _) -> None:
         self.result = 'audio'
 
         await self.disable_all(interaction)
@@ -91,7 +91,7 @@ class VideoPrompt(BaseView):
         self.stop()
 
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
-    async def cancel(self, _, interaction: Interaction) -> None:
+    async def cancel(self, interaction: Interaction, _) -> None:
         await interaction.response.send_message('Cancelling')
 
         self.stop()

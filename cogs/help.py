@@ -4,12 +4,11 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 
-from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError
+from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError, Context
 
 from core.view import BaseView
 from core.paginator import ViewMenuPages, EmbedListPageSource
 from core.constants import INVITE_LINK, SUPPORT_SERVER
-from core.context import BoboContext
 
 
 if TYPE_CHECKING:
@@ -22,7 +21,7 @@ if TYPE_CHECKING:
 
 class BoboHelpSelect(discord.ui.Select[BaseView]):
     def __init__(
-        self, ctx: BoboContext, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
+        self, ctx: Context, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
     ) -> None:
         options = [
             discord.SelectOption(
@@ -77,7 +76,7 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
             await pages.edit_initial_message()
 
 
-class BoboHelpCommand(HelpCommand[BoboContext]):
+class BoboHelpCommand(HelpCommand[Context]):
     async def send_bot_help(
         self, mapping: dict[Cog | None, list[Command[Cog, ..., Any]]]
     ):
@@ -92,7 +91,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
 
     @staticmethod
     def get_bot_help(
-        ctx: BoboContext, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
+        ctx: Context, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
     ) -> tuple[discord.Embed, BaseView]:
         view = BaseView(user_id=ctx.author.id)
 
@@ -110,7 +109,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
         return embed, view
 
     @staticmethod
-    def format_commands(ctx: BoboContext, commands: list[Command]) -> list[str]:
+    def format_commands(ctx: Context, commands: list[Command]) -> list[str]:
         formatted_commands = [
             f'**{ctx.clean_prefix}{command.qualified_name} {command.signature}**\n{command.description or command.short_doc or "No Help Provided"}\n\u200b'
             for command in commands
@@ -119,7 +118,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
         return formatted_commands
 
     @staticmethod
-    def get_cog_help(ctx: BoboContext, cog: Cog) -> list[str]:
+    def get_cog_help(ctx: Context, cog: Cog) -> list[str]:
         commands = cog.get_commands()
 
         res = [f'Total Commands in this Cog: {len(commands)}\n\u200b']

@@ -13,3 +13,4 @@ pytube
 import-expression
 quart
 Quart-CORS
+tabulate
