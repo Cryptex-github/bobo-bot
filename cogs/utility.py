@@ -62,7 +62,10 @@ class Utility(Cog):
             if status is not discord.Status.offline:
                 user_status += f'\n{str(status).title()} on Web'
         
-        join_position = f'{user.guild.members.index(user) + 1}/{len(user.guild.members)}'
+        members = sorted(user.guild.members, key=lambda m: m.joined_at if m.joined_at else m.created_at, reverse=False) 
+        # Just to fool type checker because i do not want to import datetime and create a dummy object just for this
+
+        join_position = f'{members.index(user) + 1}/{len(members)}'
 
         guild_field = dedent(f"""
         **Joined At:** {joined_at}
