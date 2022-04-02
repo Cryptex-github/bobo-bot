@@ -47,12 +47,24 @@ class Utility(Cog):
 
         if user.joined_at:
             joined_at = f"{user.joined_at.strftime('%Y-%m-%d %H:%M:%S')} ({discord.utils.format_dt(user.joined_at, style='R')})"
+        
+        user_status = ''
+
+        if status := user.desktop_status:
+            user_status += f'{str(status).title()} on Desktop'
+        
+        if status := user.mobile_status:
+            user_status += f'\n{str(status).title()} on Mobile'
+        
+        if status := user.web_status:
+            user_status += f'\n{str(status).title()} on Web'
 
         guild_field = dedent(f"""
         **Joined At:** {joined_at}
         **Total Roles:** {len(user.roles)}
         **Top Role:** {user.top_role.mention}
         **All Roles:** {', '.join(role.mention for role in user.roles)}
+        **Status:** {user_status}
         """)
 
         embed.add_field(name='Guild Informations', value=guild_field)
