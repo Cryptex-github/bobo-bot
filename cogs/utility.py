@@ -51,13 +51,16 @@ class Utility(Cog):
         user_status = ''
 
         if status := user.desktop_status:
-            user_status += f'{str(status).title()} on Desktop'
+            if status is not discord.Status.offline:
+                user_status += f'{str(status).title()} on Desktop'
         
         if status := user.mobile_status:
-            user_status += f'\n{str(status).title()} on Mobile'
+            if status is not discord.Status.offline:
+                user_status += f'\n{str(status).title()} on Mobile'
         
         if status := user.web_status:
-            user_status += f'\n{str(status).title()} on Web'
+            if status is not discord.Status.offline:
+                user_status += f'\n{str(status).title()} on Web'
 
         guild_field = dedent(f"""
         **Joined At:** {joined_at}
