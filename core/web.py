@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from datetime import datetime
 
-from quart import _Quart
+from quart import Quart as _Quart
 from quart_cors import cors
 
 if TYPE_CHECKING:
