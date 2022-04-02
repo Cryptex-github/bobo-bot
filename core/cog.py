@@ -52,7 +52,7 @@ class Cog(commands.Cog, metaclass=MetaTask):
     def __init__(self, bot):
         self.bot = bot
         self.__class__._load_tasks(self)
-    
+
     async def unload(self):
         ...
 

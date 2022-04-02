@@ -13,6 +13,7 @@ P = ParamSpec('P')
 T = TypeVar('T')
 U = TypeVar('U')
 
+
 class Timer:
     def __init__(self):
         self._start = None
@@ -52,8 +53,15 @@ class Timer:
 
         return self._end - self._start
 
+
 # Shamelessly robbed from R. Danny
-def finder(text: str, collection: Iterable[T], *, key: Callable[[T], U] | None = None, lazy: bool = True) -> list[T | U] | Generator[T | U, None, None]:
+def finder(
+    text: str,
+    collection: Iterable[T],
+    *,
+    key: Callable[[T], U] | None = None,
+    lazy: bool = True,
+) -> list[T | U] | Generator[T | U, None, None]:
     maybe = []
     to_compile = '.*?'.join(map(re.escape, text))
 
@@ -83,8 +91,9 @@ def async_executor(func: Callable[P, R]) -> Callable[P, Awaitable[R]]:
 
         loop = asyncio.get_running_loop()
         return loop.run_in_executor(None, partial)
-    
+
     return wrapper
+
 
 def unique_list(seq: list[T]) -> list[T]:
     unique = []
@@ -92,11 +101,12 @@ def unique_list(seq: list[T]) -> list[T]:
     for item in seq:
         if item not in unique:
             unique.append(item)
-    
+
     return unique
+
 
 def cutoff(text: str, *, max_length: int = 2000) -> str:
     if len(text) > max_length:
-        return text[:max_length - 1] + '…'
+        return text[: max_length - 1] + '…'
 
     return text

@@ -20,14 +20,19 @@ class RTFMMenuSource(ListPageSource):
         self.name = name
 
         super().__init__(data, per_page=10)
-    
+
     async def format_page(self, menu, entries) -> Dict[str, discord.Embed]:
         return {
-            'embed': menu.ctx.embed(title=self.name, description='\n'.join(f'[{key}]({url})' for key, url in entries))
-                .set_author(name=str(menu.ctx.author), icon_url=str(menu.ctx.author.display_avatar))
-                .set_footer(
-                    text=f'Page {menu.current_page + 1}/{self.get_max_pages()} Total Entries: {len(self.entries)}'
-                )
+            'embed': menu.ctx.embed(
+                title=self.name,
+                description='\n'.join(f'[{key}]({url})' for key, url in entries),
+            )
+            .set_author(
+                name=str(menu.ctx.author), icon_url=str(menu.ctx.author.display_avatar)
+            )
+            .set_footer(
+                text=f'Page {menu.current_page + 1}/{self.get_max_pages()} Total Entries: {len(self.entries)}'
+            )
         }
 
 
@@ -42,17 +47,17 @@ class RTFM(Cog):
         """
         data = {}
 
-        sphinx_version = stream.readline().rstrip()[2:] # To strip \n
+        sphinx_version = stream.readline().rstrip()[2:]  # To strip \n
 
         if sphinx_version != b'Sphinx inventory version 2':
             raise RuntimeError(f'Unsupported Sphinx version: {sphinx_version.decode()}')
-        
+
         stream.readline()
         stream.readline()
 
         if b'zlib' not in stream.readline():
             raise RuntimeError('Unsupported compression method')
-        
+
         decompressor = zlib.decompressobj()
 
         def yield_decompressed_bytes(data: BytesIO) -> Iterator[str]:
@@ -60,11 +65,11 @@ class RTFM(Cog):
                 chunk = data.read(16 * 1024)
                 if not chunk:
                     break
-                
+
                 decompressed_line = decompressor.decompress(chunk)
 
                 yield decompressed_line.decode('utf-8')
-        
+
         _data = ''.join(yield_decompressed_bytes(stream))
 
         for line in _data.split('\n'):
@@ -82,15 +87,17 @@ class RTFM(Cog):
 
             if location.endswith('$'):
                 location = location[:-1] + name
-            
+
             key = name if display == '-' else display
             prefix = f'{subdirective}:' if domain == 'std' else ''
 
             data[f'{prefix}{key}'] = os.path.join(base_url, location)
-        
+
         return data
-    
-    async def sphinx_rtfm(self, ctx, source: POSSIBLE_RTFM_SOURCES, query: str | None) -> None:
+
+    async def sphinx_rtfm(
+        self, ctx, source: POSSIBLE_RTFM_SOURCES, query: str | None
+    ) -> None:
         source_to_url_map = {
             'python': 'https://docs.python.org/3/',
             'asyncpg': 'https://magicstack.github.io/asyncpg/current/',
@@ -110,10 +117,14 @@ class RTFM(Cog):
         else:
 
             async with self.bot.session.get(url + 'objects.inv') as resp:
-                results = await to_thread(self.parse_sphinx_object_inv, BytesIO(await resp.read()), url)
+                results = await to_thread(
+                    self.parse_sphinx_object_inv, BytesIO(await resp.read()), url
+                )
 
-            await self.cache.add(source, '', results) # Set query to '' because we are caching the entire object
-        
+            await self.cache.add(
+                source, '', results
+            )  # Set query to '' because we are caching the entire object
+
         # matches = self.fuzzy_finder(query, results)
         matches = finder(query, list(results.items()), key=lambda x: x[0], lazy=False)
 
@@ -121,46 +132,46 @@ class RTFM(Cog):
             await ctx.send(f'No results found for your query.')
 
             return
-        
-        pages = ViewMenuPages(source=RTFMMenuSource(matches, source)) # type: ignore
+
+        pages = ViewMenuPages(source=RTFMMenuSource(matches, source))  # type: ignore
 
         await pages.start(ctx)
-    
+
     @commands.group(invoke_without_command=True)
     async def rtfm(self, ctx) -> None:
         """
         Query documentations.
         """
         await ctx.send_help(ctx.command)
-    
+
     @rtfm.command(aliases=['py', 'python3'])
     async def python(self, ctx, *, query: str | None = None) -> None:
         """
         Search Python 3 documentation.
         """
         await self.sphinx_rtfm(ctx, 'python', query)
-    
+
     @rtfm.command(aliases=['pg', 'postgresql'])
     async def asyncpg(self, ctx, *, query: str | None = None) -> None:
         """
         Search asyncpg documentation.
         """
         await self.sphinx_rtfm(ctx, 'asyncpg', query)
-    
+
     @rtfm.command(aliases=['dpy', 'discordpy_latest'])
     async def discordpy(self, ctx, *, query: str | None = None) -> None:
         """
         Search discordpy documentation.
         """
         await self.sphinx_rtfm(ctx, 'discordpy', query)
-    
+
     @rtfm.command(aliases=['dpy_master'])
     async def discordpy_master(self, ctx, *, query: str | None = None) -> None:
         """
         Search discordpy master branch documentation.
         """
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
-    
+
     @rtfm.command()
     async def rust(self, ctx, *, query: str | None = None) -> None:
         """
@@ -172,16 +183,18 @@ class RTFM(Cog):
             await ctx.send(base_url)
 
             return
-        
+
         query = quote(query.lower())
-        
+
         if cached := await self.cache.get('rust', query):
-            pages = ViewMenuPages(source=RTFMMenuSource(list(cached.items()), 'Rust Standard Library'))
+            pages = ViewMenuPages(
+                source=RTFMMenuSource(list(cached.items()), 'Rust Standard Library')
+            )
 
             await pages.start(ctx)
 
             return
-        
+
         results = {}
 
         resp = await self.bot.html_session.get(base_url + '?search=' + query)
@@ -193,23 +206,27 @@ class RTFM(Cog):
             await ctx.send('No results found for your query.')
 
             return
-        
+
         for element in a:
             try:
                 div = element.find('.result-name')[0]
             except IndexError:
                 div = element
-            
+
             key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
 
-            results[key] = 'https://doc.rust-lang.org' + element.attrs['href'].replace('..', '')
-        
+            results[key] = 'https://doc.rust-lang.org' + element.attrs['href'].replace(
+                '..', ''
+            )
+
         await self.cache.add('rust', query, results)
-        
-        pages = ViewMenuPages(source=RTFMMenuSource(list(results.items()), 'Rust Standard Library'))
+
+        pages = ViewMenuPages(
+            source=RTFMMenuSource(list(results.items()), 'Rust Standard Library')
+        )
 
         await pages.start(ctx)
-    
+
     @rtfm.command()
     async def crates(self, ctx, crate: str, *, query: str | None = None) -> None:
         """
@@ -219,7 +236,7 @@ class RTFM(Cog):
             await ctx.send('https://docs.rs/' + crate)
 
             return
-        
+
         if cached := await self.cache.get('crates', f'{crate}:{query}'):
             pages = ViewMenuPages(source=RTFMMenuSource(list(cached.items()), crate))
 
@@ -228,8 +245,10 @@ class RTFM(Cog):
             return
 
         query = quote(query.lower())
-        
-        resp = await self.bot.html_session.get(f'https://docs.rs/{crate}/?search=' + query)
+
+        resp = await self.bot.html_session.get(
+            f'https://docs.rs/{crate}/?search=' + query
+        )
         await resp.html.arender()
 
         try:
@@ -238,7 +257,7 @@ class RTFM(Cog):
             await ctx.send('No results found for your query.')
 
             return
-        
+
         results = {}
 
         for element in a:
@@ -246,13 +265,15 @@ class RTFM(Cog):
                 div = element.find('.result-name')[0]
             except IndexError:
                 div = element
-            
+
             key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
 
-            results[key] = f'https://docs.rs/{crate}/latest' + element.attrs['href'].replace('..', '')
-        
+            results[key] = f'https://docs.rs/{crate}/latest' + element.attrs[
+                'href'
+            ].replace('..', '')
+
         await self.cache.add('crates', f'{crate}:{query}', results)
-        
+
         pages = ViewMenuPages(source=RTFMMenuSource(list(results.items()), crate))
 
         await pages.start(ctx)

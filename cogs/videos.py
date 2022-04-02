@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from core import BoboContext
 
+
 class YouTube:
     __slots__ = ('_yt',)
 
@@ -28,11 +29,13 @@ class YouTube:
 
         except pytube.exceptions.VideoUnavailable:
             return False
-    
+
     @async_executor
     def get_best_video(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = self._yt.streams.filter(progressive=True).order_by('resolution').desc()
-        
+        ordered = (
+            self._yt.streams.filter(progressive=True).order_by('resolution').desc()
+        )
+
         filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
 
         b = BytesIO()
@@ -45,10 +48,14 @@ class YouTube:
         b.seek(0)
 
         return b, stream.subtype
-    
+
     @async_executor
     def get_best_audio(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = self._yt.streams.filter(only_audio=True, mime_type='audio/mp4').order_by('abr').desc()
+        ordered = (
+            self._yt.streams.filter(only_audio=True, mime_type='audio/mp4')
+            .order_by('abr')
+            .desc()
+        )
 
         filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
 
@@ -63,6 +70,7 @@ class YouTube:
 
         return b, 'mp3'
 
+
 class VideoPrompt(BaseView):
     @discord.ui.button(label='Video', style=discord.ButtonStyle.primary)
     async def video(self, _, interaction: Interaction) -> None:
@@ -71,9 +79,8 @@ class VideoPrompt(BaseView):
         await self.disable_all(interaction)
         await interaction.followup.send('Downloading video, please wait.')
 
-        
         self.stop()
-    
+
     @discord.ui.button(label='Audio', style=discord.ButtonStyle.primary)
     async def audio(self, _, interaction: Interaction) -> None:
         self.result = 'audio'
@@ -81,14 +88,14 @@ class VideoPrompt(BaseView):
         await self.disable_all(interaction)
         await interaction.followup.send('Downloading audio, please wait.')
 
-        
         self.stop()
-    
+
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
     async def cancel(self, _, interaction: Interaction) -> None:
         await interaction.response.send_message('Cancelling')
-        
+
         self.stop()
+
 
 class Videos(Cog):
     @command()
@@ -97,11 +104,11 @@ class Videos(Cog):
 
         if not tube.check_availablity():
             return 'Video not available for download.'
-        
+
         prompt = VideoPrompt(user_id=ctx.author.id)
 
         embed = ctx.embed(title=tube._yt.title, url=url)
-        
+
         embed.set_thumbnail(url=tube._yt.thumbnail_url)
         embed.set_author(name=tube._yt.author, url=tube._yt.channel_url)
 
@@ -109,7 +116,7 @@ class Videos(Cog):
 
         if await prompt.wait():
             return
-        
+
         filesize_limit = 0
 
         if ctx.guild:
@@ -127,7 +134,8 @@ class Videos(Cog):
                 b, file_type = await tube.get_best_audio(filesize_limit)  # type: ignore
             except TypeError:
                 return 'Audio is too large.'
-        
+
         return discord.File(b, filename=f'bobo-bot-youtube-download.{file_type}')
+
 
 setup = Videos.setup
