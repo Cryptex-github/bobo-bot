@@ -57,7 +57,7 @@ class ViewMenu(menus.Menu):
                             if self._running:
                                 await button(self, interaction)
                     else:
-                        await button(self, interaction)  # type: ignore
+                        await button(self, interaction)
                 except Exception as exc:
                     await self.on_menu_button_error(exc)
 

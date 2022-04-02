@@ -1,10 +1,9 @@
 import os
-import re
 from urllib.parse import quote
 import zlib
 from asyncio import to_thread
 from io import BytesIO
-from typing import Dict, Iterator, List, Tuple, cast
+from typing import Dict, Iterator, List, Tuple
 
 import discord
 from discord.ext import commands

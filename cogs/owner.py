@@ -13,7 +13,7 @@ from discord import File
 from discord.ext import commands
 from jishaku.codeblocks import codeblock_converter
 from jishaku.exception_handling import ReactionProcedureTimer
-from tabulate import tabulate  # type: ignore
+from tabulate import tabulate
 
 from core import BoboContext, Cog, Regexs, Timer, command, unique_list
 from core.constants import CAN_DELETE, SAFE_SEND

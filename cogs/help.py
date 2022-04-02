@@ -102,7 +102,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
             title='Help Command',
             description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n',
         )
-        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys() if getattr(cog, 'ignore', False) is False), inline=False)  # type: ignore
+        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys() if getattr(cog, 'ignore', False) is False), inline=False)
         embed.set_thumbnail(
             url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png'
         )
