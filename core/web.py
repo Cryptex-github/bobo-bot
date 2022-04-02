@@ -1,17 +1,7 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from datetime import datetime
 
-from quart import Quart as _Quart
+from quart import Quart
 from quart_cors import cors
-
-if TYPE_CHECKING:
-    from core.bot import BoboBot
-
-class Quart(_Quart):
-    bot: BoboBot
 
 app = Quart(__name__)
 
