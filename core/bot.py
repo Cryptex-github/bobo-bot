@@ -89,6 +89,8 @@ class BoboBot(commands.Bot):
         self.redis = aioredis.from_url('redis://127.0.0.1', decode_responses=True)
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
+        self.ready_once = False
+
     def add_command(self, command):
         ignore_list = ('help',)
 
@@ -111,6 +113,22 @@ class BoboBot(commands.Bot):
         self.http.connector = self.connector
 
         await super()._async_setup_hook()
+    
+    async def on_ready(self):
+        if self.ready_once:
+            return
+        
+        self.ready_once = True
+        self.dispatch('ready_once')
+    
+    async def on_ready_once(self):
+        chunk_tasks = []
+
+        for guild in self.guilds:
+            if not guild.chunked:
+                chunk_tasks.append(guild.chunk())
+        
+        await asyncio.gather(*chunk_tasks)
 
     async def setup_hook(self):
         await self.initialize_constants()
