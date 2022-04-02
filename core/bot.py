@@ -66,12 +66,16 @@ class BoboBot(commands.Bot):
 
         return res(r(float(postgres_timer) * 1000), r(float(redis_timer) * 1000), r(float(discord_rest_timer) * 1000), r(float(self.latency) * 1000))
 
-    async def getch(self, /, id: int) -> discord.User:
-        user = self.get_user(id)
-        if not user:
-            user = await self.fetch_user(id)
+    async def getch(self, object_: str, id_: int) -> discord.abc.Snowflake:
+        get = getattr(self, f'get_{object_}')
+        fetch = getattr(self, f'fetch_{object_}')
 
-        return user
+        obj = await get(id_)
+
+        if not obj:
+            obj = await fetch(id_)
+
+        return obj
 
     def initialize_libaries(self):
         self.context = BoboContext
