@@ -61,6 +61,8 @@ class Utility(Cog):
         if status := user.web_status:
             if status is not discord.Status.offline:
                 user_status += f'\n{str(status).title()} on Web'
+        
+        join_position = f'{user.guild.members.index(user) + 1}/{len(user.guild.members)}'
 
         guild_field = dedent(f"""
         **Joined At:** {joined_at}
@@ -68,6 +70,7 @@ class Utility(Cog):
         **Top Role:** {user.top_role.mention}
         **All Roles:** {', '.join(role.mention for role in user.roles)}
         **Status:** {user_status}
+        **Join Position:** {join_position}
         """)
 
         embed.add_field(name='Guild Informations', value=guild_field)
