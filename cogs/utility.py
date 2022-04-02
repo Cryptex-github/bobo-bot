@@ -1,0 +1,41 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import discord
+from textwrap import dedent
+
+from core import Cog, command
+
+if TYPE_CHECKING:
+    from core.context import BoboContext
+
+
+class Utility(Cog):
+    @command(aliases=['ui'])
+    async def userinfo(self, ctx: BoboContext, user: discord.User | discord.Member) -> discord.Embed:
+        """
+        Get information about a user.
+        """
+        user_avatar = user.display_avatar.with_static_format('png').url
+
+        embed = ctx.embed()
+        embed.set_author(name=user.display_name, icon_url=user_avatar)
+        embed.set_thumbnail(url=user_avatar)
+
+        bot_status = 'Verified Bot' if user.public_flags.verified_bot else 'Bot' if user.bot else 'Not Bot'
+
+        general_field = dedent(f"""
+        **Name:** {user.name}
+        **Display Name:** {user.display_name}
+        **Discriminator:** {user.discriminator}
+        **ID:** {user.id}
+        **Created At:** {user.created_at.strftime('%Y-%m-%d %H:%M:%S')} ({discord.utils.format_dt(user.created_at, style='R')})
+        **Bot Status:** {bot_status}
+        """)
+
+        embed.add_field(name='General Informations', value=general_field)
+
+        return embed
+
+setup = Utility.setup
