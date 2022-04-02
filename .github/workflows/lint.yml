@@ -5,32 +5,6 @@ on:
   pull_request:
 
 jobs:
-<<<<<<< HEAD
-    check:
-      runs-on: ubuntu-latest
-    
-      steps:
-        - uses: actions/checkout@v2
-
-        - name: Setup latest CPython
-          uses: actions/setup-python@v2
-          with:
-            python-version: "3.x"
-
-        - name: Install dependencies
-          run: |
-            python -m pip install -U pip setuptools wheel black
-            pip install -U -r requirements.txt
-
-        - name: Setup node.js
-          uses: actions/setup-node@v2
-          with:
-            node-version: "16"
-
-        - name: Install pyright
-          run: |
-            npm install -g pyright
-=======
   check:
     runs-on: ubuntu-latest
 
@@ -55,7 +29,6 @@ jobs:
       - name: Instal pyright
         run: |
           npm install -g pyright
->>>>>>> d985a71a99e864632d348a3813dcd6ba324b52ff
 
       - name: Run pyright
         run: |
