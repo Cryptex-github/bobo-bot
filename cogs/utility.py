@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class Utility(Cog):
     @command(aliases=['ui'])
-    async def userinfo(self, ctx: BoboContext, user: discord.User | discord.Member | None = None) -> discord.Embed:
+    async def userinfo(self, ctx: BoboContext, user: discord.Member | discord.User | None = None) -> discord.Embed:
         """
         Get information about a user.
         """
