@@ -97,11 +97,19 @@ class BoboHelpCommand(HelpCommand):
 
         view.add_item(BoboHelpSelect(ctx, mapping))
 
-        embed = ctx.embed( # type: ignore
+        embed = ctx.embed(  # type: ignore
             title='Help Command',
             description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n',
         )
-        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys() if getattr(cog, 'ignore', False) is False), inline=False)
+        embed.add_field(
+            name='Categories',
+            value='\n'.join(
+                '**' + cog.qualified_name + '**'
+                for cog in mapping.keys()
+                if getattr(cog, 'ignore', False) is False
+            ),
+            inline=False,
+        )
         embed.set_thumbnail(
             url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png'
         )
@@ -136,7 +144,7 @@ class BoboHelpCommand(HelpCommand):
         await pages.start(self.context)
 
     async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
-        embed = self.context.embed( # type: ignore
+        embed = self.context.embed(  # type: ignore
             title=f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
         )
         embed.description = (
@@ -159,7 +167,7 @@ class BoboHelpCommand(HelpCommand):
 
         embed.add_field(name='Useable by you', value=str(can_run))
         embed.add_field(
-            name='Usage', value=await self.context.get_command_usage(command) # type: ignore
+            name='Usage', value=await self.context.get_command_usage(command)  # type: ignore
         )
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 

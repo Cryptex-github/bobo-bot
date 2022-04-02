@@ -102,7 +102,7 @@ async def _command_callback(
         async for ret in coro:
             await process_output(ctx, ret)
     else:
-        await process_output(ctx, await coro) # type: ignore
+        await process_output(ctx, await coro)  # type: ignore
 
 
 def command_callback(
