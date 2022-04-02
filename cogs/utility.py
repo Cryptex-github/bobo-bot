@@ -6,6 +6,7 @@ import discord
 from textwrap import dedent
 
 from core import Cog, command
+from core.utils import cutoff
 
 if TYPE_CHECKING:
     from core.context import BoboContext
@@ -13,10 +14,13 @@ if TYPE_CHECKING:
 
 class Utility(Cog):
     @command(aliases=['ui'])
-    async def userinfo(self, ctx: BoboContext, user: discord.User | discord.Member) -> discord.Embed:
+    async def userinfo(self, ctx: BoboContext, user: discord.User | discord.Member | None = None) -> discord.Embed:
         """
         Get information about a user.
         """
+        if not user:
+            user = ctx.author
+
         user_avatar = user.display_avatar.with_static_format('png').url
 
         embed = ctx.embed()
@@ -35,6 +39,21 @@ class Utility(Cog):
         """)
 
         embed.add_field(name='General Informations', value=general_field)
+
+        if not isinstance(user, discord.Member):
+            return embed
+        
+        joined_at = 'N/A'
+
+        if user.joined_at:
+            joined_at = f"{user.joined_at.strftime('%Y-%m-%d %H:%M:%S')} ({discord.utils.format_dt(user.joined_at, style='R')})"
+
+        guild_field = dedent(f"""
+        **Joined At:** {joined_at}
+        **Total Roles:** {len(user.roles)}
+        **Top Role:** {user.top_role.mention}
+        **All Roles:** {', '.join(role.mention for role in user.roles)}
+        """)
 
         return embed
 
