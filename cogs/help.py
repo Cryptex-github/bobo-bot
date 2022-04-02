@@ -76,7 +76,7 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
             await pages.edit_initial_message()
 
 
-class BoboHelpCommand(HelpCommand[Context]):
+class BoboHelpCommand(HelpCommand):
     async def send_bot_help(
         self, mapping: dict[Cog | None, list[Command[Cog, ..., Any]]]
     ):
@@ -97,7 +97,7 @@ class BoboHelpCommand(HelpCommand[Context]):
 
         view.add_item(BoboHelpSelect(ctx, mapping))
 
-        embed = ctx.embed(
+        embed = ctx.embed( # type: ignore
             title='Help Command',
             description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n',
         )
@@ -136,7 +136,7 @@ class BoboHelpCommand(HelpCommand[Context]):
         await pages.start(self.context)
 
     async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
-        embed = self.context.embed(
+        embed = self.context.embed( # type: ignore
             title=f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
         )
         embed.description = (
@@ -159,7 +159,7 @@ class BoboHelpCommand(HelpCommand[Context]):
 
         embed.add_field(name='Useable by you', value=str(can_run))
         embed.add_field(
-            name='Usage', value=await self.context.get_command_usage(command)
+            name='Usage', value=await self.context.get_command_usage(command) # type: ignore
         )
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 

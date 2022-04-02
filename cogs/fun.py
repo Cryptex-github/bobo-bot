@@ -19,7 +19,7 @@ class AkinatorOptionsView(BaseView):
         label='Peoples', custom_id='en', style=discord.ButtonStyle.primary, emoji='👤'
     )
     async def peoples(
-        self, button: discord.ui.Button, interaction: discord.Interaction
+        self, interaction: discord.Interaction, button: discord.ui.Button
     ) -> None:
         self.selected = button.custom_id
 
@@ -34,7 +34,7 @@ class AkinatorOptionsView(BaseView):
         emoji='🐶',
     )
     async def animals(
-        self, button: discord.ui.Button, interaction: discord.Interaction
+        self, interaction: discord.Interaction, button: discord.ui.Button
     ) -> None:
         self.selected = button.custom_id
 
@@ -49,7 +49,7 @@ class AkinatorOptionsView(BaseView):
         emoji='🏠',
     )
     async def objects(
-        self, button: discord.ui.Button, interaction: discord.Interaction
+        self, interaction: discord.Interaction, button: discord.ui.Button
     ) -> None:
         self.selected = button.custom_id
 
