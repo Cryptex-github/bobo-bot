@@ -131,6 +131,8 @@ class BoboBot(commands.Bot):
         await asyncio.gather(*chunk_tasks)
 
     async def setup_hook(self):
+        from core.web import app
+
         await self.initialize_constants()
         self.initialize_libaries()
 
@@ -142,6 +144,12 @@ class BoboBot(commands.Bot):
         )
         
         await self.load_all_extensions()
+
+        self.web = app
+
+        app.bot = self
+
+        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082))
     
     async def load_all_extensions(self):
         for file in os.listdir('./cogs'):
@@ -175,11 +183,13 @@ class BoboBot(commands.Bot):
             self.db.close(),
             self.session.close(),
             self.redis.close(),
-            self.html_session.close()
+            self.html_session.close(),
+            self.web.shutdown()
         ]
 
 
         await asyncio.gather(*tasks)
+        await self.web_task
         
         await super().close()
 

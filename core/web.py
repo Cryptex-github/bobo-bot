@@ -9,7 +9,6 @@ app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
-TASK = None
 
 @app.get('/')
 async def index():
@@ -41,24 +40,3 @@ async def stats():
         'Total Gateway Events': events,
         'Average Events per minute': f'{events // time_difference}'
     }
-
-
-async def setup(bot):
-    global TASK
-
-    app.bot = bot
-
-    if TASK:
-        await teardown(bot)
-
-    TASK = bot.loop.create_task(app.run_task(host='0.0.0.0', port=8082))
-
-async def teardown(bot):
-    global TASK
-
-    await app.shutdown()
-
-    if TASK is not None:
-        TASK.cancel()
-
-        await TASK
