@@ -55,6 +55,8 @@ class Utility(Cog):
         **All Roles:** {', '.join(role.mention for role in user.roles)}
         """)
 
+        embed.add_field(name='Guild Informations', value=guild_field)
+
         return embed
 
 setup = Utility.setup
