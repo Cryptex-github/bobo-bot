@@ -29,6 +29,29 @@ class Listeners(Cog):
                     await self.bot.http.delete_message(payload.channel_id, m)
 
             await self.bot.delete_message_manager.delete_messages(payload.message_id)
+    
+    @Cog.listener()
+    async def on_raw_bulk_message_delete(
+        self, payload: discord.RawBulkMessageDeleteEvent
+    ) -> None:
+        for message in payload.message_ids:
+            if messages := await self.bot.delete_message_manager.get_messages(message):
+                try:
+                    await self.bot.http.delete_messages(
+                        payload.channel_id, messages
+                    )
+                except (discord.Forbidden, discord.NotFound):
+                    for m in messages:
+                        await self.bot.http.delete_message(payload.channel_id, m)
+
+                await self.bot.delete_message_manager.delete_messages(message)
+    
+    @Cog.listener()
+    async def on_message_edit(self, old: discord.Message, new: discord.Message) -> None:
+        if old.embeds or new.embeds:
+            return
+        
+        await self.bot.process_commands(new)
 
     @Cog.listener()
     async def on_socket_event_type(self, event: str) -> None:
