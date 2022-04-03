@@ -47,17 +47,14 @@ class BaseTagManager(ABC):
         ) != 'DELETE 0'
 
     async def edit_tag(self, name: str, content: str, author_id: int) -> bool:
-        try:
+        return (
             await self.db.execute(
                 'UPDATE tags SET content = $1 WHERE name = $2 AND author_id = $3',
                 content,
                 name,
                 author_id,
             )
-
-            return True
-        except UndefinedColumnError:
-            return False
+        ) != 'UPDATE 0'
 
 
 class ContextBasedTagManager(BaseTagManager):
