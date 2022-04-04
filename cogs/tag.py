@@ -97,7 +97,7 @@ class Tag(Cog):
         self.ctx_tag_manager = ContextBasedTagManager(self.bot.db)
         self.slash_tag_manager = SlashBasedTagManager(self.bot.db)
     
-    slash_group = app_commands.Group(name='tag', description='Commands to access and manage tags.', guild_ids=[786359602241470464])
+    slash_group = app_commands.Group(name='tag', description='Commands to access and manage tags.')
 
     @group()
     async def tag(self, ctx: BoboContext, *, name: str) -> str:
