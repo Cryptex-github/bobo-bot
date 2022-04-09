@@ -205,7 +205,7 @@ class Fun(Cog):
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
         
-        async with self.bot.session.get(url + '.json&raw_json=1') as resp:
+        async with self.bot.session.get(url + '.json?raw_json=1') as resp:
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
             
