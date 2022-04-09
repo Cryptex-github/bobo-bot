@@ -10,6 +10,7 @@ import discord
 from core import Cog
 from core.command import command, group
 from core.view import BaseView
+from core.utils import cutoff
 
 if TYPE_CHECKING:
     from core.context import BoboContext
@@ -204,7 +205,7 @@ class Fun(Cog):
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
         
-        async with self.bot.session.get(url + '.json') as resp:
+        async with self.bot.session.get(url + '.json&raw_json=1') as resp:
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
             
@@ -212,7 +213,7 @@ class Fun(Cog):
             
             js = js[0]['data']['children'][0]['data']
             
-            embed = ctx.embed(title=js['title'], description=js['selftext'], url='https://www.reddit.com' + js['permalink'])
+            embed = ctx.embed(title=js['title'], description=cutoff(js['selftext'], max_length=4000), url='https://www.reddit.com' + js['permalink'])
             embed.set_author(name=js['author'])
 
             embed.set_footer(text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments')
@@ -221,14 +222,5 @@ class Fun(Cog):
                 embed.set_image(url=js['url_overridden_by_dest'])
             
             return embed
-
-
-
-
-
-        
-        
-
-
 
 setup = Fun.setup
