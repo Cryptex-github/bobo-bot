@@ -14,7 +14,14 @@ from core.utils import cutoff
 
 if TYPE_CHECKING:
     from core.context import BoboContext
-    from discord import Embed
+    from discord import Embed, Interaction
+    from discord.ui import Button
+
+    from core.types import OUTPUT_TYPE
+
+    from typing import TypeVar
+
+    EmbedT = TypeVar('EmbedT', bound=Embed)
 
 
 class AkinatorOptionsView(BaseView):
@@ -169,6 +176,67 @@ class AkinatorView(BaseView):
         return embed
 
 
+class RedditCommentsView(BaseView):
+    def __init__(self, comments: list[Embed], user_id: int, timeout: int = 180) -> None:
+        super().__init__(user_id, timeout)
+
+        self.comments = comments
+        self.index = 0
+    
+    def handle_embed(self, embed: EmbedT) -> EmbedT:
+        embed.set_footer(text=f'{self.index + 1}/{len(self.comments)} {embed.footer or ""}' )
+
+        return embed
+
+    @discord.ui.button(emoji='⏮️')
+    async def front(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        self.index = 0
+        embed = self.handle_embed(self.comments[0])
+
+        await interaction.response.edit_message(embed=embed)
+    
+    @discord.ui.button(emoji='◀️')
+    async def backward(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        self.index -= 1
+
+        if self.index <= len(self.comments):
+            self.index = 0
+        
+        embed = self.handle_embed(self.comments[self.index])
+
+        await interaction.response.edit_message(embed=embed)
+    
+    @discord.ui.button(emoji='▶️')
+    async def forward(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        self.index += 1
+
+        if self.index >= len(self.comments):
+            self.index = len(self.comments) - 1
+        
+        embed = self.handle_embed(self.comments[self.index])
+
+        await interaction.response.edit_message(embed=embed)
+
+    @discord.ui.button(emoji='⏭️')
+    async def back(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        self.index = len(self.comments) - 1
+        embed = self.handle_embed(self.comments[self.index])
+
+        await interaction.response.edit_message(embed=embed)
+
+class RedditView(BaseView):
+    def __init__(self, comments: list[Embed], user_id: int, timeout: int = 180) -> None:
+        super().__init__(user_id, timeout)
+
+        self._comments = comments
+    
+    @discord.ui.button(label='Comments')
+    async def comments(self, interaction: Interaction, button: Button) -> None:
+        view = RedditCommentsView(self._comments, self.user_id)
+
+        await interaction.response.edit_message(view=view)
+
+
 class Fun(Cog):
     @command()
     async def akinator(self, ctx: BoboContext) -> None:
@@ -198,7 +266,7 @@ class Fun(Cog):
             return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
 
     @group(aliases=['r'])
-    async def reddit(self, ctx: BoboContext, url: str | None = None) -> str | Embed | None:
+    async def reddit(self, ctx: BoboContext, url: str | None = None) -> OUTPUT_TYPE:
         if not url:
             return await ctx.send_help(ctx.command)
         
@@ -221,6 +289,17 @@ class Fun(Cog):
             if js.get('url_overridden_by_dest'):
                 embed.set_image(url=js['url_overridden_by_dest'])
             
+            if comments := js[1]['children']:
+                embeds = [
+                    ctx.embed(description=cutoff(c['data']['body'], max_length=4000), url='https://www.reddit.com' + c['data']['permalink'])
+                    .set_footer(text=f'\U0001f815 {c["data"]["ups"]} | {c["data"]["num_comments"]} comments | r/{c["data"]["subreddit"]}')
+                    for c in comments
+                ]
+
+                view = RedditView(embeds, ctx.author.id)
+
+                return embed, view
+
             return embed
 
 setup = Fun.setup
