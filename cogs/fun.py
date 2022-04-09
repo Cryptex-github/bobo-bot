@@ -185,7 +185,7 @@ class RedditCommentsView(BaseView):
 
     def handle_embed(self, embed: EmbedT) -> EmbedT:
         embed.set_footer(
-            text=f'{self.index + 1}/{len(self.comments)} {embed.footer or ""}'
+            text=f'{self.index + 1}/{len(self.comments)} {embed.footer.text if embed.footer else ""}'
         )
 
         return embed
