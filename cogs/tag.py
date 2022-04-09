@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from abc import ABC
 
-from asyncpg.exceptions import UniqueViolationError, UndefinedColumnError
+from asyncpg.exceptions import UniqueViolationError
 from discord.utils import escape_mentions
 from discord import app_commands
 from discord.app_commands import Choice
