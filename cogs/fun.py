@@ -207,7 +207,7 @@ class RedditCommentsView(BaseView):
     ) -> None:
         self.index -= 1
 
-        if self.index <= len(self.comments):
+        if self.index < 0:
             self.index = 0
 
         embed = self.handle_embed(self.comments[self.index])
