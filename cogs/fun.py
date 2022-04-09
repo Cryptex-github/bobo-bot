@@ -295,7 +295,7 @@ class Fun(Cog):
         )
 
         if image_url := js.get('url_overridden_by_dest'):
-            if 'v.reddit.it' not in image_url:
+            if 'v.redd.it' not in image_url:
                 embed.set_image(url=image_url)
 
         if comments := _js[1]['data']['children']:
