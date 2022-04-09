@@ -187,7 +187,7 @@ class RedditCommentsView(BaseView):
         page_number = f'{self.index + 1}/{len(self.comments)}'
 
         embed.set_footer(
-            text=f'{page_number} {embed.footer.text.replace(page_number, "") if embed.footer and embed.footer.text else ""}'
+            text=f'{page_number} {embed.footer.text.replace(page_number, "").strip() if embed.footer and embed.footer.text else ""}'
         )
 
         return embed
