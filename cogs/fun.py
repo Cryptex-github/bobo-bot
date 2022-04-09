@@ -245,7 +245,7 @@ class RedditView(BaseView):
     async def comments(self, interaction: Interaction, button: Button) -> None:
         view = RedditCommentsView(self._comments, self.user_id)
 
-        await interaction.response.edit_message(embed=self._comments[0], view=view)
+        await interaction.response.edit_message(embed=view.handle_embed(self._comments[0]), view=view)
 
 
 class Fun(Cog):
