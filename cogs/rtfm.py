@@ -173,16 +173,14 @@ class RTFM(Cog):
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
 
     @rtfm.command()
-    async def rust(self, ctx, *, query: str | None = None) -> None:
+    async def rust(self, ctx, *, query: str | None = None) -> str | None:
         """
         Search Rust standard library documentation.
         """
         base_url = 'https://doc.rust-lang.org/std/'
 
         if not query:
-            await ctx.send(base_url)
-
-            return
+            return base_url
 
         query = quote(query.lower())
 
@@ -203,9 +201,7 @@ class RTFM(Cog):
         try:
             a = resp.html.find('.search-results')[0].find('a')
         except IndexError:
-            await ctx.send('No results found for your query.')
-
-            return
+            return 'No results found for your query.'
 
         for element in a:
             try:
@@ -227,7 +223,7 @@ class RTFM(Cog):
 
         await pages.start(ctx)
 
-    @rtfm.command()
+    @rtfm.command(aliases=['crate'])
     async def crates(self, ctx, crate: str, *, query: str | None = None) -> str | None:
         """
         Search a crate's documentation.
