@@ -309,7 +309,7 @@ class Fun(Cog):
             if js.get('url_overridden_by_dest'):
                 embed.set_image(url=js['url_overridden_by_dest'])
 
-            if comments := _js[1]['children']:
+            if comments := _js[1]['data']['children']:
                 embeds = [
                     ctx.embed(
                         description=cutoff(c['data']['body'], max_length=4000),
