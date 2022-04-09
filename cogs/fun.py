@@ -288,9 +288,9 @@ class Fun(Cog):
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
 
-            js = await resp.json()
+            _js = await resp.json()
 
-            js = js[0]['data']['children'][0]['data']
+            js = _js[0]['data']['children'][0]['data']
 
             embed = ctx.embed(
                 title=js['title'],
@@ -309,7 +309,7 @@ class Fun(Cog):
             if js.get('url_overridden_by_dest'):
                 embed.set_image(url=js['url_overridden_by_dest'])
 
-            if comments := js[1]['children']:
+            if comments := _js[1]['children']:
                 embeds = [
                     ctx.embed(
                         description=cutoff(c['data']['body'], max_length=4000),
