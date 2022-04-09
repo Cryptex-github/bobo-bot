@@ -282,6 +282,9 @@ class Fun(Cog):
     def process_reddit_post(ctx, _js) -> OUTPUT_TYPE:
         js = _js[0]['data']['children'][0]['data']
 
+        if js['over_18'] and not ctx.channel.is_nsfw():
+            return 'This post is NSFW and this is an non-NSFW channel.'
+
         embed = ctx.embed(
             title=js['title'],
             description=cutoff(js['selftext'], max_length=4000),
@@ -335,10 +338,15 @@ class Fun(Cog):
 
     @reddit.command(name='random', aliases=['r'])
     async def reddit_random(self, ctx, subreddit: str) -> OUTPUT_TYPE:
-        async with self.bot.session.get(f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1') as resp:
-            if resp.status != 200:
-                return 'Invalid subreddit'
+        while not self.bot.is_closed():
+            async with self.bot.session.get(f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1') as resp:
+                if resp.status != 200:
+                    return 'Invalid subreddit'
             
-            return self.process_reddit_post(ctx, await resp.json())
+                if res := self.process_reddit_post(ctx, await resp.json()):
+                    if res == 'This post is NSFW and this is an non-NSFW channel.':
+                        continue
+
+                    return res
 
 setup = Fun.setup
