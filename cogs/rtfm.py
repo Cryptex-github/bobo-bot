@@ -11,7 +11,7 @@ from discord.ext.menus.views import ViewMenuPages
 
 from core import Cog, Regexs, RTFMCacheManager, finder
 from core.command import group
-from core.types import POSSIBLE_RTFM_SOURCES
+from core.types import PossibleRTFMSources
 
 
 class RTFMMenuSource(ListPageSource):
@@ -95,7 +95,7 @@ class RTFM(Cog):
         return data
 
     async def sphinx_rtfm(
-        self, ctx, source: POSSIBLE_RTFM_SOURCES, query: str | None
+        self, ctx, source: PossibleRTFMSources, query: str | None
     ) -> None:
         source_to_url_map = {
             'python': 'https://docs.python.org/3/',

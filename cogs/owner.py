@@ -17,7 +17,7 @@ from tabulate import tabulate
 
 from core import BoboContext, Cog, Regexs, Timer, command, unique_list
 from core.constants import CAN_DELETE, SAFE_SEND
-from core.types import OUTPUT_TYPE
+from core.types import OutputType
 
 
 class Owner(Cog):
@@ -63,7 +63,7 @@ class Owner(Cog):
     @command(aliases=['exe', 'exec'])
     async def execute(
         self, ctx: BoboContext, *, code: str
-    ) -> AsyncGenerator[OUTPUT_TYPE, None]:
+    ) -> AsyncGenerator[OutputType, None]:
         _, code = codeblock_converter(code)
 
         env = {
