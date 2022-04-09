@@ -294,8 +294,9 @@ class Fun(Cog):
             text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
         )
 
-        if js.get('url_overridden_by_dest'):
-            embed.set_image(url=js['url_overridden_by_dest'])
+        if image_url := js.get('url_overridden_by_dest'):
+            if 'v.reddit.it' not in image_url:
+                embed.set_image(url=image_url)
 
         if comments := _js[1]['data']['children']:
             embeds = [
@@ -329,7 +330,7 @@ class Fun(Cog):
 
             return self.process_reddit_post(ctx, await resp.json())
 
-    @reddit.command(aliases=['r'])
+    @reddit.command(name='random', aliases=['r'])
     async def reddit_random(self, ctx, subreddit: str) -> OUTPUT_TYPE:
         async with self.bot.session.get(f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1') as resp:
             if resp.status != 200:
