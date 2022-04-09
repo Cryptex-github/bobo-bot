@@ -275,6 +275,45 @@ class Fun(Cog):
     async def http(self, ctx: BoboContext, code: int) -> discord.File:
         async with self.bot.session.get(f'https://http.cat/{code}') as resp:
             return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
+    
+    @staticmethod
+    def process_reddit_post(ctx, _js) -> OUTPUT_TYPE:
+        js = _js[0]['data']['children'][0]['data']
+
+        embed = ctx.embed(
+            title=js['title'],
+            description=cutoff(js['selftext'], max_length=4000),
+            url='https://www.reddit.com' + js['permalink'],
+        )
+        embed.set_author(
+            name='u/' + js['author'],
+            url='https://www.reddit.com/user/' + js['author'],
+        )
+
+        embed.set_footer(
+            text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
+        )
+
+        if js.get('url_overridden_by_dest'):
+            embed.set_image(url=js['url_overridden_by_dest'])
+
+        if comments := _js[1]['data']['children']:
+            embeds = [
+                ctx.embed(
+                    description=cutoff(c['data']['body'], max_length=4000),
+                    url='https://www.reddit.com' + c['data']['permalink'],
+                ).set_footer(
+                    text=f'\U0001f815 {c["data"]["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
+                )
+                .set_author(name='u/' + c['data']['author'], url='https://www.reddit.com/user/' + c['data']['author'])
+                for c in comments
+            ]
+
+            view = RedditView(embeds, ctx.author.id)
+
+            return embed, view
+
+        return embed
 
     @group(aliases=['r'])
     async def reddit(self, ctx: BoboContext, url: str | None = None) -> OUTPUT_TYPE:
@@ -288,44 +327,14 @@ class Fun(Cog):
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
 
-            _js = await resp.json()
+            return self.process_reddit_post(ctx, await resp.json())
 
-            js = _js[0]['data']['children'][0]['data']
-
-            embed = ctx.embed(
-                title=js['title'],
-                description=cutoff(js['selftext'], max_length=4000),
-                url='https://www.reddit.com' + js['permalink'],
-            )
-            embed.set_author(
-                name='u/' + js['author'],
-                url='https://www.reddit.com/user/' + js['author'],
-            )
-
-            embed.set_footer(
-                text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
-            )
-
-            if js.get('url_overridden_by_dest'):
-                embed.set_image(url=js['url_overridden_by_dest'])
-
-            if comments := _js[1]['data']['children']:
-                embeds = [
-                    ctx.embed(
-                        description=cutoff(c['data']['body'], max_length=4000),
-                        url='https://www.reddit.com' + c['data']['permalink'],
-                    ).set_footer(
-                        text=f'\U0001f815 {c["data"]["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
-                    )
-                    .set_author(name='u/' + c['data']['author'], url='https://www.reddit.com/user/' + c['data']['author'])
-                    for c in comments
-                ]
-
-                view = RedditView(embeds, ctx.author.id)
-
-                return embed, view
-
-            return embed
-
+    @reddit.command(aliases=['r'])
+    async def reddit_random(self, ctx, subreddit: str) -> OUTPUT_TYPE:
+        async with self.bot.session.get(f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1') as resp:
+            if resp.status != 200:
+                return 'Invalid subreddit'
+            
+            return self.process_reddit_post(ctx, await resp.json())
 
 setup = Fun.setup
