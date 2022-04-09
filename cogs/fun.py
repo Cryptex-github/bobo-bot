@@ -308,6 +308,7 @@ class Fun(Cog):
                 )
                 .set_author(name='u/' + c['data']['author'], url='https://www.reddit.com/user/' + c['data']['author'])
                 for c in comments
+                if c
             ]
 
             view = RedditView(embeds, ctx.author.id)
