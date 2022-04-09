@@ -216,7 +216,7 @@ class Fun(Cog):
             embed = ctx.embed(title=js['title'], description=cutoff(js['selftext'], max_length=4000), url='https://www.reddit.com' + js['permalink'])
             embed.set_author(name='u/' + js['author'], url='https://www.reddit.com/user/' + js['author'])
 
-            embed.set_footer(text=f'\U0001f815 {js['ups']} | {js['num_comments']} comments | r/{js['subreddit']}')
+            embed.set_footer(text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}')
 
             if js.get('url_overridden_by_dest'):
                 embed.set_image(url=js['url_overridden_by_dest'])
