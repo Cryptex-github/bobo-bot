@@ -98,7 +98,7 @@ class AkinatorView(BaseView):
         value_per_block = 5
         progress = self.akinator.progression
 
-        return "▓" * int(progress / value_per_block) + "░" * int(
+        return '▓' * int(progress / value_per_block) + '░' * int(
             (total_value / value_per_block) - (progress / value_per_block)
         )
 
@@ -214,9 +214,9 @@ class Fun(Cog):
             js = js[0]['data']['children'][0]['data']
             
             embed = ctx.embed(title=js['title'], description=cutoff(js['selftext'], max_length=4000), url='https://www.reddit.com' + js['permalink'])
-            embed.set_author(name=js['author'])
+            embed.set_author(name='u/' + js['author'], url='https://www.reddit.com/user/' + js['author'])
 
-            embed.set_footer(text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments')
+            embed.set_footer(text=f'\U0001f815 {js['ups']} | {js['num_comments']} comments | r/{js['subreddit']}')
 
             if js.get('url_overridden_by_dest'):
                 embed.set_image(url=js['url_overridden_by_dest'])
