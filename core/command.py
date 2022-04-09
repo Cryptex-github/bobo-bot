@@ -76,7 +76,7 @@ async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
 
         elif isinstance(i, str):
             kwargs['content'] = i
-        
+
         elif isinstance(i, discord.ui.View):
             kwargs['view'] = i
 

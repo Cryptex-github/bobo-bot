@@ -182,54 +182,65 @@ class RedditCommentsView(BaseView):
 
         self.comments = comments
         self.index = 0
-    
+
     def handle_embed(self, embed: EmbedT) -> EmbedT:
-        embed.set_footer(text=f'{self.index + 1}/{len(self.comments)} {embed.footer or ""}' )
+        embed.set_footer(
+            text=f'{self.index + 1}/{len(self.comments)} {embed.footer or ""}'
+        )
 
         return embed
 
     @discord.ui.button(emoji='⏮️')
-    async def front(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def front(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index = 0
         embed = self.handle_embed(self.comments[0])
 
         await interaction.response.edit_message(embed=embed)
-    
+
     @discord.ui.button(emoji='◀️')
-    async def backward(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def backward(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index -= 1
 
         if self.index <= len(self.comments):
             self.index = 0
-        
+
         embed = self.handle_embed(self.comments[self.index])
 
         await interaction.response.edit_message(embed=embed)
-    
+
     @discord.ui.button(emoji='▶️')
-    async def forward(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def forward(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index += 1
 
         if self.index >= len(self.comments):
             self.index = len(self.comments) - 1
-        
+
         embed = self.handle_embed(self.comments[self.index])
 
         await interaction.response.edit_message(embed=embed)
 
     @discord.ui.button(emoji='⏭️')
-    async def back(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def back(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index = len(self.comments) - 1
         embed = self.handle_embed(self.comments[self.index])
 
         await interaction.response.edit_message(embed=embed)
+
 
 class RedditView(BaseView):
     def __init__(self, comments: list[Embed], user_id: int, timeout: int = 180) -> None:
         super().__init__(user_id, timeout)
 
         self._comments = comments
-    
+
     @discord.ui.button(label='Comments')
     async def comments(self, interaction: Interaction, button: Button) -> None:
         view = RedditCommentsView(self._comments, self.user_id)
@@ -269,30 +280,43 @@ class Fun(Cog):
     async def reddit(self, ctx: BoboContext, url: str | None = None) -> OUTPUT_TYPE:
         if not url:
             return await ctx.send_help(ctx.command)
-        
+
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
-        
+
         async with self.bot.session.get(url + '.json?raw_json=1') as resp:
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
-            
-            js = await resp.json()
-            
-            js = js[0]['data']['children'][0]['data']
-            
-            embed = ctx.embed(title=js['title'], description=cutoff(js['selftext'], max_length=4000), url='https://www.reddit.com' + js['permalink'])
-            embed.set_author(name='u/' + js['author'], url='https://www.reddit.com/user/' + js['author'])
 
-            embed.set_footer(text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}')
+            js = await resp.json()
+
+            js = js[0]['data']['children'][0]['data']
+
+            embed = ctx.embed(
+                title=js['title'],
+                description=cutoff(js['selftext'], max_length=4000),
+                url='https://www.reddit.com' + js['permalink'],
+            )
+            embed.set_author(
+                name='u/' + js['author'],
+                url='https://www.reddit.com/user/' + js['author'],
+            )
+
+            embed.set_footer(
+                text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
+            )
 
             if js.get('url_overridden_by_dest'):
                 embed.set_image(url=js['url_overridden_by_dest'])
-            
+
             if comments := js[1]['children']:
                 embeds = [
-                    ctx.embed(description=cutoff(c['data']['body'], max_length=4000), url='https://www.reddit.com' + c['data']['permalink'])
-                    .set_footer(text=f'\U0001f815 {c["data"]["ups"]} | {c["data"]["num_comments"]} comments | r/{c["data"]["subreddit"]}')
+                    ctx.embed(
+                        description=cutoff(c['data']['body'], max_length=4000),
+                        url='https://www.reddit.com' + c['data']['permalink'],
+                    ).set_footer(
+                        text=f'\U0001f815 {c["data"]["ups"]} | {c["data"]["num_comments"]} comments | r/{c["data"]["subreddit"]}'
+                    )
                     for c in comments
                 ]
 
@@ -301,5 +325,6 @@ class Fun(Cog):
                 return embed, view
 
             return embed
+
 
 setup = Fun.setup
