@@ -315,7 +315,7 @@ class Fun(Cog):
                         description=cutoff(c['data']['body'], max_length=4000),
                         url='https://www.reddit.com' + c['data']['permalink'],
                     ).set_footer(
-                        text=f'\U0001f815 {c["data"]["ups"]} | {c["data"]["num_comments"]} comments | r/{c["data"]["subreddit"]}'
+                        text=f'\U0001f815 {c["data"]["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
                     )
                     for c in comments
                 ]
