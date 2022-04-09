@@ -317,6 +317,7 @@ class Fun(Cog):
                     ).set_footer(
                         text=f'\U0001f815 {c["data"]["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
                     )
+                    .set_author(name='u/' + c['data']['author'], url='https://www.reddit.com/user/' + c['data']['author'])
                     for c in comments
                 ]
 
