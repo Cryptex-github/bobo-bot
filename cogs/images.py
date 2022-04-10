@@ -11,6 +11,8 @@ from discord.ext.commands import (
     command
 )
 
+from discord.ext.commands.core import get_signature_parameters, unwrap_function
+
 from core import Cog, Regexs
 from core import BoboContext
 
@@ -148,7 +150,8 @@ class Images(Cog):
                         await ctx.send(file=File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}'))
 
                     await ctx.send((await resp.json())['message'])
-            
+
+            image_endpoint_command.params = get_signature_parameters(image_endpoint_command, unwrap_function(image_endpoint_command).__globals__, skip_parameters=2)
             self.__cog_commands__ += image_endpoint_command,
 
 
