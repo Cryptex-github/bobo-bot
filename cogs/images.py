@@ -137,7 +137,7 @@ class Images(Cog):
                 description = (await resp.json())['doc']
 
             @command(name=endpoint, description=description)
-            async def image_endpoint_command(self, ctx, target: str | None = None) -> str | File:
+            async def image_endpoint_command(self, ctx, target: str | None = None) -> str | File | tuple[str, File]:
                 resolver = ImageResolver(ctx, False)
 
                 url = await resolver.get_image(target)
@@ -149,7 +149,7 @@ class Images(Cog):
                         else:
                             fmt = 'png'
 
-                        return File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}')
+                        return f'Process Time: {round(float(resp.headers["Process-Time"]), 3)}ms', File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}')
 
                     if resp.status == 400:
                         return (await resp.json())['message']
