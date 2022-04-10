@@ -151,7 +151,7 @@ class Images(Cog):
 
                     await ctx.send((await resp.json())['message'])
 
-            image_endpoint_command.params = get_signature_parameters(image_endpoint_command, unwrap_function(image_endpoint_command).__globals__, skip_parameters=2)
+            image_endpoint_command.params = get_signature_parameters(image_endpoint_command, unwrap_function(image_endpoint_command.callback).__globals__, skip_parameters=2)
             self.__cog_commands__ += image_endpoint_command,
 
 
