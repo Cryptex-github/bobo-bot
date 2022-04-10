@@ -12,10 +12,10 @@ from discord.ext.commands import (
 
 from core import Cog, Regexs
 from core.command import command
+from core import BoboContext
 
 if TYPE_CHECKING:
     from discord import Message, User, Member
-    from core import BoboContext
 
 
 class ImageResolver:
