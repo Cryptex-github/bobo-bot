@@ -12,11 +12,11 @@ from discord.ext.commands import (
     PartialEmojiConversionFailure,
     UserConverter,
     UserNotFound,
-    command
 )
 
 from core import Cog, Regexs
-from core import BoboContext
+from core.command import command
+from core.context import BoboContext
 
 if TYPE_CHECKING:
     from discord import Message, User, Member
@@ -137,7 +137,7 @@ class Images(Cog):
                 description = (await resp.json())['doc']
 
             @command(name=endpoint, description=description)
-            async def image_endpoint_command(self, ctx, target: str | None = None) -> None:
+            async def image_endpoint_command(self, ctx, target: str | None = None) -> str | File:
                 resolver = ImageResolver(ctx, False)
 
                 url = await resolver.get_image(target)
@@ -149,11 +149,12 @@ class Images(Cog):
                         else:
                             fmt = 'png'
 
-                        await ctx.send(file=File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}'))
+                        return File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}')
 
-                        return
-
-                    await ctx.send((await resp.json())['message'])
+                    if resp.status == 400:
+                        return (await resp.json())['message']
+                    
+                    return await resp.text()
 
             self.__cog_commands__ += image_endpoint_command,
 
