@@ -138,7 +138,7 @@ class Images(Cog):
 
                 url = await resolver.get_image(target)
 
-                async with self.bot.session.post(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+                async with self.bot.session.post(f'http://127.0.0.1:8085/images/{endpoint}', json={'url': url}) as resp:
                     if resp.status == 200:
                         if resp.headers['Content-Type'] == 'image/gif':
                             fmt = 'gif'
@@ -148,8 +148,9 @@ class Images(Cog):
                         return File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}')
                     
                     return (await resp.json())['message']
+
+            del image_endpoint_command.params[0]
             
-            image_endpoint_command.cog = self
             self.__cog_commands__ += image_endpoint_command,
 
 
