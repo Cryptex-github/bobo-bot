@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from io import BytesIO
 
-from discord import StickerFormatType, DeletedReferencedMessage, File
+from discord import StickerFormatType, DeletedReferencedMessage, File, utils
+
+utils.is_inside_class = lambda _: True # Hacky but is necessary for auto commands to work
+
 from discord.ext.commands import (
     PartialEmojiConverter,
     PartialEmojiConversionFailure,
@@ -11,7 +15,6 @@ from discord.ext.commands import (
     command
 )
 
-from discord.ext.commands.core import get_signature_parameters, unwrap_function
 
 from core import Cog, Regexs
 from core import BoboContext
@@ -147,7 +150,7 @@ class Images(Cog):
 
                         fmt = 'png'
 
-                        await ctx.send(file=File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}'))
+                        await ctx.send(file=File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}'))
 
                     await ctx.send((await resp.json())['message'])
 
