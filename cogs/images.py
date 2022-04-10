@@ -8,10 +8,10 @@ from discord.ext.commands import (
     PartialEmojiConversionFailure,
     UserConverter,
     UserNotFound,
+    command
 )
 
 from core import Cog, Regexs
-from core.command import command
 from core import BoboContext
 
 if TYPE_CHECKING:
@@ -133,7 +133,7 @@ class Images(Cog):
                 description = (await resp.json())['doc']
 
             @command(name=endpoint, description=description)
-            async def image_endpoint_command(ctx, target: str | None = None) -> str | File:
+            async def image_endpoint_command(self, ctx, target: str | None = None) -> None:
                 resolver = ImageResolver(ctx, False)
 
                 url = await resolver.get_image(target)
@@ -145,9 +145,9 @@ class Images(Cog):
 
                         fmt = 'png'
 
-                        return File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}')
-                    
-                    return (await resp.json())['message']
+                        await ctx.send(file=File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}'))
+
+                    await ctx.send((await resp.json())['message'])
             
             self.__cog_commands__ += image_endpoint_command,
 
