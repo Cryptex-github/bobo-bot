@@ -129,7 +129,10 @@ class Images(Cog):
         ]
 
         for endpoint in endpoint_list:
-            @command()
+            async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+                description = (await resp.json())['doc']
+
+            @command(name=endpoint, description=description)
             async def image_endpoint_command(self, ctx: BoboContext, target: str) -> str | File:
                 resolver = ImageResolver(ctx, False)
 
@@ -146,8 +149,7 @@ class Images(Cog):
                     
                     return (await resp.json())['message']
             
-            async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
-                image_endpoint_command.__doc__ = (await resp.json())['doc']
+
 
             self.__cog_commands__ += image_endpoint_command,
 
