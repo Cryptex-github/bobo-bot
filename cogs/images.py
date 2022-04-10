@@ -152,6 +152,8 @@ class Images(Cog):
 
                         await ctx.send(file=File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}'))
 
+                        return
+
                     await ctx.send((await resp.json())['message'])
 
             self.__cog_commands__ += image_endpoint_command,
