@@ -125,7 +125,7 @@ class ImageResolver:
 
 
 class Images(Cog):
-    def __init__(self) -> None:
+    def __init__(self, bot) -> None:
         endpoint_list = [
             'invert',
         ]
@@ -152,6 +152,8 @@ class Images(Cog):
                     await ctx.send((await resp.json())['message'])
 
             self.__cog_commands__ += image_endpoint_command,
+
+        super().__init__(bot)
 
 
 setup = Images.setup
