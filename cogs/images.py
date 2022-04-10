@@ -125,16 +125,16 @@ class ImageResolver:
 
 
 class Images(Cog):
-    async def cog_load(self) -> None:
+    def __init__(self) -> None:
         endpoint_list = [
             'invert',
         ]
 
         for endpoint in endpoint_list:
-            async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
-                description = (await resp.json())['doc']
+            # async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+            #     description = (await resp.json())['doc']
 
-            @command(name=endpoint, description=description)
+            @command(name=endpoint)
             async def image_endpoint_command(self, ctx, target: str | None = None) -> None:
                 resolver = ImageResolver(ctx, False)
 
@@ -151,7 +151,6 @@ class Images(Cog):
 
                     await ctx.send((await resp.json())['message'])
 
-            image_endpoint_command.params = get_signature_parameters(image_endpoint_command, image_endpoint_command.callback.__globals__, skip_parameters=2)
             self.__cog_commands__ += image_endpoint_command,
 
 
