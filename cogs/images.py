@@ -135,7 +135,7 @@ class Images(Cog):
                 description = (await resp.json())['doc']
 
             @command(name=endpoint, description=description)
-            async def image_endpoint_command(ctx, target: str | None = None) -> None:
+            async def image_endpoint_command(self, ctx, target: str | None = None) -> None:
                 resolver = ImageResolver(ctx, False)
 
                 url = await resolver.get_image(target)
