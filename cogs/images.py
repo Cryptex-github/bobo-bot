@@ -148,8 +148,6 @@ class Images(Cog):
                         return File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}')
                     
                     return (await resp.json())['message']
-
-            del image_endpoint_command.params[0]
             
             self.__cog_commands__ += image_endpoint_command,
 
