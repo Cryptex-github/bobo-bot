@@ -247,7 +247,9 @@ class RedditView(BaseView):
     async def comments(self, interaction: Interaction, button: Button) -> None:
         view = RedditCommentsView(self._comments, self.user_id)
 
-        await interaction.response.edit_message(embed=view.handle_embed(self._comments[0]), view=view)
+        await interaction.response.edit_message(
+            embed=view.handle_embed(self._comments[0]), view=view
+        )
 
 
 class Fun(Cog):
@@ -277,7 +279,7 @@ class Fun(Cog):
     async def http(self, ctx: BoboContext, code: int) -> discord.File:
         async with self.bot.session.get(f'https://http.cat/{code}') as resp:
             return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
-    
+
     @staticmethod
     def process_reddit_post(ctx, _js) -> OutputType:
         js = _js[0]['data']['children'][0]['data']
@@ -308,10 +310,14 @@ class Fun(Cog):
                 ctx.embed(
                     description=cutoff(c['data']['body'], max_length=4000),
                     url='https://www.reddit.com' + c['data']['permalink'],
-                ).set_footer(
+                )
+                .set_footer(
                     text=f'\U0001f815 {c["data"]["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
                 )
-                .set_author(name='u/' + c['data']['author'], url='https://www.reddit.com/user/' + c['data']['author'])
+                .set_author(
+                    name='u/' + c['data']['author'],
+                    url='https://www.reddit.com/user/' + c['data']['author'],
+                )
                 for c in comments
                 if c['data'].get('permalink')
             ]
@@ -339,14 +345,17 @@ class Fun(Cog):
     @reddit.command(name='random', aliases=['r'])
     async def reddit_random(self, ctx, subreddit: str) -> OutputType:
         while not self.bot.is_closed():
-            async with self.bot.session.get(f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1') as resp:
+            async with self.bot.session.get(
+                f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1'
+            ) as resp:
                 if resp.status != 200:
                     return 'Invalid subreddit'
-            
+
                 res = self.process_reddit_post(ctx, await resp.json())
                 if res == 'This post is NSFW and this is an non-NSFW channel.':
                     continue
 
                 return res
+
 
 setup = Fun.setup
