@@ -149,8 +149,7 @@ class Images(Cog):
                     
                     return (await resp.json())['message']
             
-
-
+            image_endpoint_command.cog = self
             self.__cog_commands__ += image_endpoint_command,
 
 
