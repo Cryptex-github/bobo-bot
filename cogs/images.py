@@ -133,7 +133,7 @@ class Images(Cog):
                 description = (await resp.json())['doc']
 
             @command(name=endpoint, description=description)
-            async def image_endpoint_command(self, ctx: BoboContext, target: str) -> str | File:
+            async def image_endpoint_command(self, ctx, target: str) -> str | File:
                 resolver = ImageResolver(ctx, False)
 
                 url = await resolver.get_image(target)
