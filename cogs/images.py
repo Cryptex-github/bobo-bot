@@ -15,7 +15,6 @@ from discord.ext.commands import (
     command
 )
 
-
 from core import Cog, Regexs
 from core import BoboContext
 
@@ -147,8 +146,8 @@ class Images(Cog):
                     if resp.status == 200:
                         if resp.headers['Content-Type'] == 'image/gif':
                             fmt = 'gif'
-
-                        fmt = 'png'
+                        else:
+                            fmt = 'png'
 
                         await ctx.send(file=File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}'))
 
