@@ -130,6 +130,8 @@ class Images(Cog):
     async def cog_load(self) -> None:
         endpoint_list = [
             'invert',
+            'flip',
+            'mirror'
         ]
 
         for endpoint in endpoint_list:
