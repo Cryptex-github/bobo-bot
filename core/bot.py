@@ -154,39 +154,45 @@ class BoboBot(commands.Bot):
             database=DbConnectionDetails.database,
         )
         
-        self.load_all_extensions()
+        await self.load_all_extensions()
     
-    def load_all_extensions(self):
+    async def load_all_extensions(self):
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
                 try:
-                    self.load_extension(f'cogs.{file[:-3]}')
+                    await self.load_extension(f'cogs.{file[:-3]}')
                 except Exception as e:
                     self.logger.critical(
                         f'Unable to load extension: {file}, ignoring. Exception: {e}'
                     )
-        self.load_extension('jishaku')
+        await self.load_extension('jishaku')
 
     async def get_context(self, message, *, cls=None):
         return await super().get_context(message, cls=self.context)
 
-    def unload_all_extensions(self):
+    async def unload_all_extensions(self):
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
                 try:
-                    self.unload_extension(f'cogs.{file[:-3]}')
+                    await self.unload_extension(f'cogs.{file[:-3]}')
                 except Exception as e:
                     self.logger.critical(
                         f'Unable to unload extension: {file}, ignoring. Exception: {e}'
                     )
-        self.unload_extension('jishaku')
+        
+        await self.unload_extension('jishaku')
     
     async def close(self):
-        self.unload_all_extensions()
-        await self.db.close()
-        await self.session.close()
-        await self.redis.close()
-        await self.html_session.close()
+        tasks = [
+            self.unload_all_extensions(),
+            self.db.close(),
+            self.session.close(),
+            self.redis.close(),
+            self.html_session.close()
+        ]
+
+
+        await asyncio.gather(*tasks)
         
         await super().close()
 

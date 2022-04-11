@@ -19,7 +19,7 @@ class TagManager:
 
 
 class Tag(Cog):
-    def init(self):
+    async def cog_load(self):
         self.tag_manager = TagManager(self.bot.db)
     
     @command()

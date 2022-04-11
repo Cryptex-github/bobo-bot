@@ -1,23 +1,42 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import discord
 
-__all__ = ('ConfirmView',)
+if TYPE_CHECKING:
+    from discord import Interaction
 
 
-class ConfirmView(discord.ui.View):
-    def __init__(self, timeout: int | None, user_id: int) -> None:
+__all__ = ('BaseView', 'ConfirmView')
+
+
+class BaseView(discord.ui.View):
+    def __init__(self, timeout: int = 180, user_id: int = None) -> None:
         super().__init__(timeout=timeout)
+
         self.user_id = user_id
-        self.value = None
+    
+    async def interaction_check(self, interaction: Interaction) -> bool:
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message('You are not allowed to use this view.')
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return interaction.user.id == self.user_id
-
-    async def disable_all(self, interaction: discord.Interaction) -> None:
+            return False
+        
+        return True
+    
+    async def disable_all(self, interaction: Interaction) -> None:
         for i in self.children:
             if isinstance(i, discord.ui.Button):
                 i.disabled = True
-        await interaction.message.edit(view=self)
 
+        await interaction.message.edit(view=self)
+    
+    async def on_timeout(self, interaction: Interaction) -> None:
+        await self.disable_all(interaction)
+
+
+class ConfirmView(BaseView):
     # When the confirm button is pressed, set the inner value to `True` and
     # stop the View from listening to more input.
     # We also send the user an ephemeral message that we're confirming their choice.
@@ -27,6 +46,7 @@ class ConfirmView(discord.ui.View):
     ) -> None:
         await interaction.response.send_message('Confirming', ephemeral=True)
         self.value = True
+
         await self.disable_all(interaction)
         self.stop()
 
@@ -35,5 +55,6 @@ class ConfirmView(discord.ui.View):
     async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         await interaction.response.send_message('Cancelling', ephemeral=True)
         self.value = False
+
         await self.disable_all(interaction)
         self.stop()

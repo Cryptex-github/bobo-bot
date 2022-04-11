@@ -1,7 +1,9 @@
+import asyncio
+import functools
 import time
 import re
 
-__all__ = ('Timer', 'finder')
+__all__ = ('Timer', 'finder', 'async_executor')
 
 class Timer:
     def __init__(self):
@@ -59,3 +61,14 @@ def finder(text, collection, *, key=None, lazy=True):
     if lazy:
         return (z for _, _, z in sorted(maybe, key=sort_))
     return [z for _, _, z in sorted(maybe, key=sort_)]
+
+
+def async_executor(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        partial = functools.partial(func, *args, **kwargs)
+
+        loop = asyncio.get_running_loop()
+        return loop.run_in_executor(None, partial)
+    
+    return wrapper

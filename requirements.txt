@@ -7,3 +7,4 @@ mystbin.py
 aioredis[hiredis]
 uvloop
 requests-html
+pytube
