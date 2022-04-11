@@ -94,4 +94,5 @@ class BoboBotCommand(commands.Command):
 def command(name=None, cls=BoboBotCommand, **attrs):
     return commands.command(name=name, cls=cls, **attrs)
 
+
 command.__doc__ = commands.command.__doc__

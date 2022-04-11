@@ -6,6 +6,7 @@ from .button import DeleteButton
 
 __all__ = ('BoboContext',)
 
+
 class BoboContext(commands.Context):
     async def confrim(self, content=None, timeout=60, **kwargs):
         view = ConfrimView(timeout=timeout, user_id=self.author.id)
@@ -31,7 +32,7 @@ class BoboContext(commands.Context):
             content = f'```{lang}\n' + str(content) + '\n```'
 
         return await super().send(content, **kwargs)
-    
+
     def embed(self, **kwargs):
         if 'color' not in kwargs:
             kwargs['color'] = self.bot.color

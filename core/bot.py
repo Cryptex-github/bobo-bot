@@ -1,3 +1,5 @@
+from config import DbConnectionDetails, token
+from .context import BoboContext
 from collections import Counter
 import inspect
 import logging
@@ -16,8 +18,6 @@ import jishaku
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 
-from .context import BoboContext
-from config import DbConnectionDetails, token
 
 __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
@@ -27,7 +27,7 @@ class BoboBot(commands.Bot):
     def __init__(self):
         self.connector = aiohttp.TCPConnector(limit=200)
         self.logger = __log__
-        
+
         intents = discord.Intents.all()
 
         super().__init__(
@@ -61,9 +61,10 @@ class BoboBot(commands.Bot):
             else:
                 self.dispatch('command_completion', ctx)
         elif ctx.invoked_with:
-            exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
+            exc = commands.CommandNotFound(
+                f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
-    
+
     async def process_output(self, ctx, output):
         if output is None:
             return
@@ -102,7 +103,7 @@ class BoboBot(commands.Bot):
     def initialize_libaries(self):
         self.context = BoboContext
         self.mystbin = mystbin.Client(session=self.session)
-    
+
     async def initialize_constants(self):
         self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
@@ -131,7 +132,7 @@ class BoboBot(commands.Bot):
             password=DbConnectionDetails.password,
             database=DbConnectionDetails.database,
         )
-    
+
     def load_all_extensions(self):
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
@@ -156,12 +157,12 @@ class BoboBot(commands.Bot):
                         f'Unable to unload extension: {file}, ignoring. Exception: {e}'
                     )
         self.unload_extension('jishaku')
-    
+
     async def close(self):
         self.unload_all_extensions()
         await self.db.close()
         await self.session.close()
-        
+
         await super().close()
 
     def run(self):
