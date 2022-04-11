@@ -72,7 +72,7 @@ class BoboBot(commands.Bot):
         elif ctx.invoked_with:
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
-
+    
     async def self_test(self) -> NamedTuple[float]:
         with Timer() as postgres_timer:
             await self.db.execute('SELECT 1')
