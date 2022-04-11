@@ -72,7 +72,7 @@ class BoboContext(commands.Context['BoboBot']):
 
                     return m
 
-                m = self.channel.get_partial_message(message)  # type: ignore
+                m = self.channel.get_partial_message(message[0])  # type: ignore
 
                 return await m.edit(content=content, **kwargs)
 

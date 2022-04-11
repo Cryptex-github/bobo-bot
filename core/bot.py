@@ -100,7 +100,7 @@ class BoboBot(commands.Bot):
 
         if not getattr(command._buckets, '_cooldown', None):
             command._buckets = commands.CooldownMapping.from_cooldown(
-                1, 3, commands.BucketType.user
+                1, 2, commands.BucketType.user
             )
 
         if (
@@ -108,7 +108,7 @@ class BoboBot(commands.Bot):
             and command.qualified_name not in ignore_list
         ):
             command._max_concurrency = MaxConcurrency(
-                1, per=commands.BucketType.user, wait=False
+                2, per=commands.BucketType.user, wait=False
             )
 
     async def _async_setup_hook(self):
