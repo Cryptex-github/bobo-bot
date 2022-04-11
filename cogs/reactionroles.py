@@ -1,15 +1,18 @@
 import asyncio
 from collections import defaultdict
+from typing import AsyncGenerator
 
 import discord
 from discord.ext import commands
 
 from core import Cog, ReactionRoleManager
+from core.command import group
 from core.context import BoboContext
+from core.paginator import EmbedListPageSource, ViewMenuPages
 
 
 class ReactionRoles(Cog):
-    async def cog_setup(self) -> None:
+    async def cog_load(self) -> None:
         self.cache = ReactionRoleManager(self.bot.redis)
         self.locks: defaultdict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
 
@@ -32,7 +35,7 @@ class ReactionRoles(Cog):
             return
 
         if emojis_to_roles := await self.cache.get_message(payload.message_id):
-            if role := emojis_to_roles.get(str(payload.emoji.id) or payload.emoji.name):
+            if role := emojis_to_roles.get(str(payload.emoji.id or payload.emoji.name)):
                 async with self.locks[payload.message_id]:
                     try:
                         await self.bot.http.add_role(
@@ -58,7 +61,7 @@ class ReactionRoles(Cog):
             return
 
         if emojis_to_roles := await self.cache.get_message(payload.message_id):
-            if role := emojis_to_roles.get(str(payload.emoji.id) or payload.emoji.name):
+            if role := emojis_to_roles.get(str(payload.emoji.id or payload.emoji.name)):
                 async with self.locks[payload.message_id]:
                     try:
                         await self.bot.http.remove_role(
@@ -78,11 +81,11 @@ class ReactionRoles(Cog):
 
     @reactionrole.command()
     @commands.guild_only()
-    async def add(self, ctx: BoboContext) -> None:
+    async def add(self, ctx: BoboContext) -> AsyncGenerator[str, None]:
         """
         Add a reaction role.
         """
-        await ctx.send('What channel is the reaction role message in?')
+        yield 'What channel is the reaction role message in?'
 
         channel = await self.bot.wait_for(
             'message',
@@ -93,7 +96,7 @@ class ReactionRoles(Cog):
                 ctx, channel.content
             )
         except commands.ChannelNotFound:
-            await ctx.send('That channel does not exist.')
+            yield 'That channel does not exist.'
 
             return
 
@@ -107,7 +110,7 @@ class ReactionRoles(Cog):
             message_id = int(message.content)
             message = await channel.fetch_message(message_id)
         except (ValueError, commands.MessageNotFound):
-            await ctx.send('That message does not exist.')
+            yield 'That message does not exist.'
 
             return
 
@@ -126,7 +129,7 @@ class ReactionRoles(Cog):
             await m.add_reaction(emoji)
             await m.delete()
         except discord.HTTPException:
-            await ctx.send('It seems like I do not have permission to add reactions to that message.')
+            yield 'It seems like I do not have permission to add reactions to that message.'
 
             return
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from collections import namedtuple
@@ -11,7 +12,6 @@ import asyncpg
 import discord
 import jishaku
 import mystbin
-import uvloop
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 from requests_html import AsyncHTMLSession
@@ -154,7 +154,7 @@ class BoboBot(commands.Bot):
         app.bot = self
 
         self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082))
-    
+
     async def load_all_extensions(self):
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
@@ -188,12 +188,12 @@ class BoboBot(commands.Bot):
             self.session.close(),
             self.redis.close(),
             self.html_session.close(),
-            self.web.shutdown()
+            self.web.shutdown(),
         ]
 
         await asyncio.gather(*tasks)
         await self.web_task
-        
+
         await super().close()
 
     def run(self):

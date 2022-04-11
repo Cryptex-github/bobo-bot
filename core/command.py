@@ -76,9 +76,6 @@ async def process_output(ctx: BoboContext, output: OutputType | None) -> None:
 
         elif isinstance(i, str):
             kwargs['content'] = i
-        
-        elif isinstance(i, discord.ui.View):
-            kwargs['view'] = i
 
         elif isinstance(i, discord.ui.View):
             kwargs['view'] = i
@@ -88,12 +85,15 @@ async def process_output(ctx: BoboContext, output: OutputType | None) -> None:
 
         elif isinstance(i, dict):
             kwargs.update(i)
-    
-    try:
-        if i is True: # type: ignore
+
+        elif i is REPLY:
             des = ctx.reply
-    except NameError:
-        pass
+
+        elif i is CAN_DELETE:
+            kwargs['can_delete'] = True
+
+        elif i is SAFE_SEND:
+            kwargs['safe_send'] = True
 
     await des(**kwargs)
 
@@ -105,7 +105,7 @@ async def _command_callback(
         async for ret in coro:
             await process_output(ctx, ret)
     else:
-        await process_output(ctx, await coro) # type: ignore
+        await process_output(ctx, await coro)  # type: ignore
 
 
 def command_callback(
@@ -119,8 +119,8 @@ def command_callback(
 
 
 @discord.utils.copy_doc(commands.command)
-def command(name=None, *, **attrs) -> Any:
-    command = commands.command(name=name, **attrs)
+def command(**attrs) -> Any:
+    command = commands.command(**attrs)
 
     def wrapper(func):
         return command(command_callback(func))  # type: ignore

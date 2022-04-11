@@ -1,7 +1,7 @@
 from __future__ import annotations
 from textwrap import indent
 
-from traceback import format_exc
+from traceback import TracebackException
 from typing import TYPE_CHECKING
 
 from discord.utils import escape_mentions

@@ -19,6 +19,9 @@ class Utility(Cog):
         """
         Get information about a user.
         """
+        if not user:
+            user = ctx.author
+
         user_avatar = user.display_avatar.with_static_format('png').url
 
         embed = ctx.embed()

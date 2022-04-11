@@ -1,21 +1,11 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from datetime import datetime
 
-from quart import _Quart
+from quart import Quart
 from quart_cors import cors
-
-if TYPE_CHECKING:
-    from core.bot import BoboBot
-
-class Quart(_Quart):
-    bot: BoboBot
 
 app = Quart(__name__)
 
-app.JSON_SORT_KEYS['JSON_SORT_KEYS'] = False
+app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
@@ -42,7 +32,7 @@ async def stats():
         - float(await app.bot.redis.get('events_start_time'))
     ) / 60
 
-    return jsonify({
+    return {
         'Servers': len(app.bot.guilds),
         'Users': len(app.bot.users),
         'Channels': len(list(app.bot.get_all_channels())),

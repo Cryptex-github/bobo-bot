@@ -5,7 +5,7 @@ import traceback
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from io import BytesIO
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
 import discord
 import import_expression
@@ -84,7 +84,7 @@ class Owner(Cog):
             env[lib] = importlib.import_module(lib)
 
         env.update(globals())
-        to_execute = f'async def _execute():\n{textwrap.indent(code, " " * 4)}'
+        _to_execute = f'async def _execute():\n{textwrap.indent(code, " " * 4)}'
 
         def wrap_exception(exc: str) -> str:
             return f'```py\nerror: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}\n```'
@@ -98,7 +98,7 @@ class Owner(Cog):
 
         async with ReactionProcedureTimer(ctx.message, self.bot.loop):
             try:
-                import_expression.exec(to_execute, env)
+                import_expression.exec(_to_execute, env)
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
@@ -107,15 +107,15 @@ class Owner(Cog):
 
             try:
                 if inspect.isasyncgenfunction(to_execute):
-                    async for res in to_execute(): # type: ignore
-                        yield res
+                    async for res in to_execute():
+                        yield safe_result(res), SAFE_SEND
 
                     return
 
-                result = await to_execute() # type: ignore
+                result = await to_execute()
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
-                yield wrap_exception(''.join(exc.format()))
+                yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
             else:
                 if result:
                     yield safe_result(result), SAFE_SEND, CAN_DELETE

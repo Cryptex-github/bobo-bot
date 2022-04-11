@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS commands_usage (
 
 CREATE TABLE IF NOT EXISTS reaction_roles (
     message_id BIGINT NOT NULL,
-    channel_id BIGINT NOT NULL,
+    guild_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
-    emoji TEXT NOT NULL
+    emoji TEXT NOT NULL,
+    PRIMARY KEY (message_id, guild_id, role_id)
 );

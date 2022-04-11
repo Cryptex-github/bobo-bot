@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from asyncpg.pool import Pool
     from discord import Interaction
 
-from core import BoboContext, Cog, command
 
 class BaseTagManager(ABC):
     def __init__(self, db: Pool):
@@ -50,17 +49,14 @@ class BaseTagManager(ABC):
         ) != 'DELETE 0'
 
     async def edit_tag(self, name: str, content: str, author_id: int) -> bool:
-        try:
+        return (
             await self.db.execute(
                 'UPDATE tags SET content = $1 WHERE name = $2 AND author_id = $3',
                 content,
                 name,
                 author_id,
             )
-
-            return True
-        except UndefinedColumnError:
-            return False
+        ) != 'UPDATE 0'
 
 
 class ContextBasedTagManager(BaseTagManager):
@@ -123,6 +119,7 @@ class Tag(Cog):
         return escape_mentions(content)
 
     @slash_group.command()
+    @app_commands.describe(name='The name of the tag.')
     async def show(self, interaction: Interaction, name: str) -> None:
         """Shows the content of a tag."""
         content = await self.slash_tag_manager.get_tag_content(name)
@@ -132,10 +129,6 @@ class Tag(Cog):
             return
 
         await interaction.response.send_message(escape_mentions(content))
-    
-    @show.autocomplete('name')
-    async def show_autocomplete(self, interaction: Interaction, current: str) -> list[Choice[str]]:
-        return [Choice(name=t, value=t) for t in await self.slash_tag_manager.get_similar_tags(current)]
 
     @tag.command(aliases=['create'])
     async def new(self, ctx: BoboContext, name: str, *, content: str) -> str:
