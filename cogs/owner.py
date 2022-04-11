@@ -1,7 +1,10 @@
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 
-from core import BoboContext, Cog, Regexs, command
+from core import BoboContext
+from core import Cog
+from core import command
+from core import Regexs
 
 
 class Owner(Cog):

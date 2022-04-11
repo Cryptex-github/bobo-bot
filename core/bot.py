@@ -8,13 +8,13 @@ import asyncpg
 import discord
 import jishaku
 import mystbin
-from config import DbConnectionDetails, token
+from config import DbConnectionDetails
+from config import token
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 
-from core.command import BoboBotCommand
-
 from .context import BoboContext
+from core.command import BoboBotCommand
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
