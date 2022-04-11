@@ -112,3 +112,28 @@ def command(name=None, *, **attrs) -> Any:
         return command(command_callback(func)) # type: ignore
     
     return wrapper
+
+class GroupCommand(commands.Group):
+    @discord.utils.copy_doc(commands.Group.command)
+    def command(self, *args: Any, **kwargs: Any) -> Callable[[Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]], Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]]:
+        def wrapper(func) -> commands.Command:
+            if 'parent' not in kwargs:
+                kwargs['parent'] = self
+            
+            command_ = command(*args, **kwargs)(func)
+            self.add_command(command_)
+
+            return command_
+ 
+        return wrapper
+
+def group(**attrs) -> Any:
+    if 'invoke_without_command' not in attrs:
+        attrs['invoke_without_command'] = True
+    
+    group = commands.group(cls=GroupCommand, **attrs)
+
+    def wrapper(func):
+        return group(command_callback(func)) # type: ignore
+    
+    return wrapper

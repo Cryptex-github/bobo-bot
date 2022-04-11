@@ -1,7 +1,6 @@
 from typing import List
 
 from abc import ABC
-from re import A
 from typing import TYPE_CHECKING, List, Literal, Dict
 
 if TYPE_CHECKING:
@@ -58,7 +57,7 @@ class ReactionRoleManager(RedisCacheManager):
         await self.redis.hset(f'reaction_roles:{message_id}', emoji, role_id)
     
     async def get_message(self, message_id: int) -> Dict[str, int]:
-        return {k: int(v) for k, v in (await self.redis.hget(f'reaction_roles:{message_id}'))}
+        return {k: int(v) for k, v in (await self.redis.hgetall(f'reaction_roles:{message_id}'))}
     
     async def delete(self, message_id: int) -> None:
         await self.redis.delete(f'reaction_roles:{message_id}')

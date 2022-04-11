@@ -11,5 +11,12 @@ CREATE INDEX IF NOT EXISTS idx_author_id ON tags(author_id);
 
 CREATE TABLE IF NOT EXISTS commands_usage (
     command TEXT PRIMARY KEY,
-    uses BIGINT NOT NULL DEFAULT 0
+    uses BIGINT NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS reaction_roles (
+    message_id BIGINT NOT NULL,
+    channel_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    emoji TEXT NOT NULL
 );

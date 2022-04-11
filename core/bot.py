@@ -86,7 +86,7 @@ class BoboBot(commands.Bot):
         self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
 
-        self.redis = aioredis.from_url('redis://localhost', decode_responses=True)
+        self.redis = aioredis.from_url('redis://127.0.0.1', decode_responses=True)
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
     def add_command(self, command):
