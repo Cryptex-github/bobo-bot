@@ -5,12 +5,12 @@ import inspect
 import discord
 from discord.ext import commands
 
-__all__ = ('BoboBotCommand', 'command')
+__all__ = ("BoboBotCommand", "command")
 
 
 def user_permissions_predicate(ctx):
     perms = {
-        'send_messages': True,
+        "send_messages": True,
     }
     permissions = ctx.channel.permissions_for(ctx.author)
 
@@ -26,9 +26,9 @@ def user_permissions_predicate(ctx):
 
 def bot_permissions_predicate(ctx):
     perms = {
-        'send_messages': True,
-        'attach_files': True,
-        'embed_links': True,
+        "send_messages": True,
+        "attach_files": True,
+        "embed_links": True,
     }
     guild = ctx.guild
     me = guild.me if guild is not None else ctx.bot.user

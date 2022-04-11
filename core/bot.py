@@ -19,8 +19,8 @@ jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 
 
-__log__ = logging.getLogger('BoboBot')
-__all__ = ('BoboBot',)
+__log__ = logging.getLogger("BoboBot")
+__all__ = ("BoboBot",)
 
 
 class BoboBot(commands.Bot):
@@ -32,9 +32,9 @@ class BoboBot(commands.Bot):
 
         super().__init__(
             connector=self.connector,
-            command_prefix='bobo ',
+            command_prefix="bobo ",
             intents=intents,
-            description='Bobo Bot, The Anime Bot but better.',
+            description="Bobo Bot, The Anime Bot but better.",
             chunk_guilds_at_startup=False,
             case_insensitive=True,
             allowed_mentions=discord.AllowedMentions.none(),
@@ -44,7 +44,7 @@ class BoboBot(commands.Bot):
     @discord.utils.copy_doc(commands.Bot.invoke)
     async def invoke(self, ctx):
         if ctx.command is not None:
-            self.dispatch('command', ctx)
+            self.dispatch("command", ctx)
             try:
                 if await self.can_run(ctx, call_once=True):
                     if isinstance(ctx.command, BoboBotCommand):
@@ -54,16 +54,17 @@ class BoboBot(commands.Bot):
                         await ctx.command.invoke(ctx)
                 else:
                     raise commands.CheckFailure(
-                        'The global check once functions failed.'
+                        "The global check once functions failed."
                     )
             except commands.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
-                self.dispatch('command_completion', ctx)
+                self.dispatch("command_completion", ctx)
         elif ctx.invoked_with:
             exc = commands.CommandNotFound(
-                f'Command "{ctx.invoked_with}" is not found')  # type: ignore
-            self.dispatch('command_error', ctx, exc)
+                f'Command "{ctx.invoked_with}" is not found'
+            )  # type: ignore
+            self.dispatch("command_error", ctx, exc)
 
     async def process_output(self, ctx, output):
         if output is None:
@@ -77,13 +78,13 @@ class BoboBot(commands.Bot):
 
         for i in output:
             if isinstance(i, discord.Embed):
-                kwargs['embed'] = i
+                kwargs["embed"] = i
 
             elif isinstance(i, str):
-                kwargs['content'] = i
+                kwargs["content"] = i
 
             elif isinstance(i, discord.File):
-                kwargs['file'] = i
+                kwargs["file"] = i
 
             elif isinstance(i, dict):
                 kwargs.update(i)
@@ -112,7 +113,7 @@ class BoboBot(commands.Bot):
         super().add_command(command)
         command.cooldown_after_parsing = True
 
-        if not getattr(command._buckets, '_cooldown', None):
+        if not getattr(command._buckets, "_cooldown", None):
             command._buckets = commands.CooldownMapping.from_cooldown(
                 1, 3, commands.BucketType.user
             )
@@ -134,29 +135,29 @@ class BoboBot(commands.Bot):
         )
 
     def load_all_extensions(self):
-        for file in os.listdir('./cogs'):
-            if file.endswith('.py'):
+        for file in os.listdir("./cogs"):
+            if file.endswith(".py"):
                 try:
-                    self.load_extension(f'cogs.{file[:-3]}')
+                    self.load_extension(f"cogs.{file[:-3]}")
                 except Exception as e:
                     self.logger.critical(
-                        f'Unable to load extension: {file}, ignoring. Exception: {e}'
+                        f"Unable to load extension: {file}, ignoring. Exception: {e}"
                     )
-        self.load_extension('jishaku')
+        self.load_extension("jishaku")
 
     async def get_context(self, message, *, cls=None):
         return await super().get_context(message, cls=self.context)
 
     def unload_all_extensions(self):
-        for file in os.listdir('./cogs'):
-            if file.endswith('.py'):
+        for file in os.listdir("./cogs"):
+            if file.endswith(".py"):
                 try:
-                    self.unload_extension(f'cogs.{file[:-3]}')
+                    self.unload_extension(f"cogs.{file[:-3]}")
                 except Exception as e:
                     self.logger.critical(
-                        f'Unable to unload extension: {file}, ignoring. Exception: {e}'
+                        f"Unable to unload extension: {file}, ignoring. Exception: {e}"
                     )
-        self.unload_extension('jishaku')
+        self.unload_extension("jishaku")
 
     async def close(self):
         self.unload_all_extensions()
