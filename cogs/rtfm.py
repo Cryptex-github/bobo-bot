@@ -10,7 +10,8 @@ from discord.ext import commands
 from discord.ext.menus import ListPageSource
 from discord.ext.menus.views import ViewMenuPages
 
-from core import Cog, Regexs, RTFMCacheManager
+from core import Cog, Regexs, RTFMCacheManager, finder
+from core.command import group
 from core.types import POSSIBLE_RTFM_SOURCES
 
 
@@ -130,7 +131,7 @@ class RTFM(Cog):
 
         await pages.start(ctx)
 
-    @commands.group(invoke_without_command=True)
+    @group()
     async def rtfm(self, ctx) -> None:
         """
         Query documentations.
@@ -166,16 +167,14 @@ class RTFM(Cog):
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
 
     @rtfm.command()
-    async def rust(self, ctx, *, query: str | None = None) -> None:
+    async def rust(self, ctx, *, query: str | None = None) -> str | None:
         """
         Search Rust standard library documentation.
         """
         base_url = 'https://doc.rust-lang.org/std/'
 
         if not query:
-            await ctx.send(base_url)
-
-            return
+            return base_url
 
         query = quote(query.lower())
 
@@ -196,9 +195,7 @@ class RTFM(Cog):
         try:
             a = resp.html.find('.search-results')[0].find('a')
         except IndexError:
-            await ctx.send('No results found for your query.')
-
-            return
+            return 'No results found for your query.'
 
         for element in a:
             try:
@@ -220,15 +217,19 @@ class RTFM(Cog):
 
         await pages.start(ctx)
 
-    @rtfm.command()
-    async def crates(self, ctx, crate: str, *, query: str | None = None) -> None:
+    @rtfm.command(aliases=['crate'])
+    async def crates(self, ctx, crate: str, *, query: str | None = None) -> str | None:
         """
         Search a crate's documentation.
         """
         if not query:
-            await ctx.send('https://docs.rs/' + crate)
+            crate_url = 'https://docs.rs/' + crate
 
-            return
+            async with self.bot.session.get(crate_url) as resp:
+                if resp.status != 200:
+                    return 'Crate not found.'
+
+            return crate_url
 
         if cached := await self.cache.get('crates', f'{crate}:{query}'):
             pages = ViewMenuPages(source=RTFMMenuSource(list(cached.items()), crate))
@@ -247,9 +248,7 @@ class RTFM(Cog):
         try:
             a = resp.html.find('.search-results')[0].find('a')
         except IndexError:
-            await ctx.send('No results found for your query.')
-
-            return
+            return 'No results found for your query.'
 
         results = {}
 
