@@ -10,3 +10,4 @@ uvloop
 requests-html
 pytube
 import-expression
+quart
