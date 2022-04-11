@@ -8,6 +8,7 @@ import asyncpg
 import discord
 import jishaku
 import mystbin
+import uvloop
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 
@@ -95,7 +96,8 @@ class BoboBot(commands.Bot):
         if i is True:
             des = ctx.reply
 
-        await des(**kwargs)
+        if c := kwargs.pop('content'):
+            await des(content=c, **kwargs)
 
     async def getch(self, /, id: int) -> discord.User:
         user = self.get_user(id)
@@ -173,6 +175,8 @@ class BoboBot(commands.Bot):
         await super().close()
 
     def run(self):
+        uvloop.install()
+
         self.loop.run_until_complete(self.setup())
         self.load_all_extensions()
         super().run(token=token)

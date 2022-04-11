@@ -1,5 +1,7 @@
 import time
 
+__all__ = ('Timer',)
+
 class Timer:
     def __init__(self):
         self._start = None
