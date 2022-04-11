@@ -65,6 +65,8 @@ class AkinatorOptionsView(BaseView):
 
         await interaction.response.defer()
 
+        self.stop()
+
 
 class AkinatorView(BaseView):
     controls = {
@@ -180,54 +182,67 @@ class RedditCommentsView(BaseView):
 
         self.comments = comments
         self.index = 0
-    
+
     def handle_embed(self, embed: EmbedT) -> EmbedT:
-        embed.set_footer(text=f'{self.index + 1}/{len(self.comments)} {embed.footer or ""}' )
+        page_number = f'{self.index + 1}/{len(self.comments)}'
+
+        embed.set_footer(
+            text=f'{page_number} {embed.footer.text.replace(page_number, "").strip() if embed.footer and embed.footer.text else ""}'
+        )
 
         return embed
 
     @discord.ui.button(emoji='⏮️')
-    async def front(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def front(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index = 0
         embed = self.handle_embed(self.comments[0])
 
         await interaction.response.edit_message(embed=embed)
-    
+
     @discord.ui.button(emoji='◀️')
-    async def backward(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def backward(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index -= 1
 
-        if self.index <= len(self.comments):
+        if self.index < 0:
             self.index = 0
-        
+
         embed = self.handle_embed(self.comments[self.index])
 
         await interaction.response.edit_message(embed=embed)
-    
+
     @discord.ui.button(emoji='▶️')
-    async def forward(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def forward(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index += 1
 
         if self.index >= len(self.comments):
             self.index = len(self.comments) - 1
-        
+
         embed = self.handle_embed(self.comments[self.index])
 
         await interaction.response.edit_message(embed=embed)
 
     @discord.ui.button(emoji='⏭️')
-    async def back(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def back(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.index = len(self.comments) - 1
         embed = self.handle_embed(self.comments[self.index])
 
         await interaction.response.edit_message(embed=embed)
+
 
 class RedditView(BaseView):
     def __init__(self, comments: list[Embed], user_id: int, timeout: int = 180) -> None:
         super().__init__(user_id, timeout)
 
         self._comments = comments
-    
+
     @discord.ui.button(label='Comments')
     async def comments(self, interaction: Interaction, button: Button) -> None:
         view = RedditCommentsView(self._comments, self.user_id)
@@ -269,6 +284,9 @@ class Fun(Cog):
     def process_reddit_post(ctx, _js) -> OutputType:
         js = _js[0]['data']['children'][0]['data']
 
+        if js['over_18'] and not ctx.channel.is_nsfw():
+            return 'This post is NSFW and this is an non-NSFW channel.'
+
         embed = ctx.embed(
             title=js['title'],
             description=cutoff(js['selftext'], max_length=4000),
@@ -283,8 +301,9 @@ class Fun(Cog):
             text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments | r/{js["subreddit"]}'
         )
 
-        if js.get('url_overridden_by_dest'):
-            embed.set_image(url=js['url_overridden_by_dest'])
+        if image_url := js.get('url_overridden_by_dest'):
+            if 'v.redd.it' not in image_url:
+                embed.set_image(url=image_url)
 
         if comments := _js[1]['data']['children']:
             embeds = [
@@ -300,6 +319,7 @@ class Fun(Cog):
                     url='https://www.reddit.com/user/' + c['data']['author'],
                 )
                 for c in comments
+                if c['data'].get('permalink')
             ]
 
             view = RedditView(embeds, ctx.author.id)
@@ -312,22 +332,15 @@ class Fun(Cog):
     async def reddit(self, ctx: BoboContext, url: str | None = None) -> OutputType:
         if not url:
             return await ctx.send_help(ctx.command)
-        
+
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
-        
-        async with self.bot.session.get(url + '.json') as resp:
+
+        async with self.bot.session.get(url + '.json?raw_json=1') as resp:
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
-            
-            js = await resp.json()
-            
-            js = js[0]['data']['children'][0]['data']
-            
-            embed = ctx.embed(title=js['title'], description=js['selftext'], url='https://www.reddit.com' + js['permalink'])
-            embed.set_author(name=js['author'])
 
-            embed.set_footer(text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments')
+            return self.process_reddit_post(ctx, await resp.json())
 
     @reddit.command(name='random', aliases=['r'])
     async def reddit_random(self, ctx, subreddit: str) -> OutputType:

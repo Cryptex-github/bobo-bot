@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 from abc import ABC
 from typing import TYPE_CHECKING, List, Dict
@@ -17,7 +17,7 @@ class CacheManager(ABC):
 class RedisCacheManager(CacheManager):
     __slots__ = ('redis',)
 
-    def __init__(self, redis: Client) -> None:
+    def __init__(self, redis: Redis) -> None:
         self.redis = redis
 
 

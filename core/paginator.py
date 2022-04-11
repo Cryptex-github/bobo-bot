@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, Any
 
 import discord
 
@@ -96,6 +96,8 @@ class ViewMenu(menus.Menu):
         )
         button.callback = _callback
 
+        view.add_item(button)
+
         self.view = view
         return view
 
@@ -180,8 +182,7 @@ class ViewMenu(menus.Menu):
             try:
                 if self.delete_message_after:
                     return await self.message.delete()
-
-                if self.clear_reactions_after:
+                elif self.clear_reactions_after:
                     return await self.message.edit(view=None)
                 elif self.view:
                     return await self.message.edit(view=self.view._disable_all())

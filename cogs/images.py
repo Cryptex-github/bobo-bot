@@ -7,25 +7,24 @@ from discord import StickerFormatType, DeletedReferencedMessage, File, utils
 
 utils.is_inside_class = lambda _: True # Hacky but is necessary for auto commands to work
 
-from discord import StickerFormatType, DeletedReferencedMessage, File
 from discord.ext.commands import (
     PartialEmojiConverter,
     PartialEmojiConversionFailure,
     UserConverter,
     UserNotFound,
-    command
 )
-
-from discord.ext.commands.core import get_signature_parameters, unwrap_function
 
 from core import Cog, Regexs
 from core.command import command
+from core.context import BoboContext
 
 if TYPE_CHECKING:
     from discord import Message, User, Member
 
 
 class ImageResolver:
+    __slots__ = ('ctx', 'static')
+
     def __init__(self, ctx: BoboContext, static: bool) -> None:
         self.ctx = ctx
         self.static = static
@@ -131,28 +130,33 @@ class Images(Cog):
     async def cog_load(self) -> None:
         endpoint_list = [
             'invert',
+            'flip',
+            'mirror'
         ]
 
         for endpoint in endpoint_list:
-            @command()
-            async def image_endpoint_command(self, ctx: BoboContext, target: str) -> str | File:
+            async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+                description = (await resp.json())['doc']
+
+            @command(name=endpoint, description=description)
+            async def image_endpoint_command(self, ctx, target: str | None = None) -> str | File | tuple[str, File]:
                 resolver = ImageResolver(ctx, False)
 
                 url = await resolver.get_image(target)
 
-                async with self.bot.session.post(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+                async with self.bot.session.post(f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}', json={'url': url}) as resp:
                     if resp.status == 200:
                         if resp.headers['Content-Type'] == 'image/gif':
                             fmt = 'gif'
+                        else:
+                            fmt = 'png'
+                        
+                        return f'Process Time: {round(float(resp.headers["Process-Time"]) * 1000, 3)}ms', File(BytesIO(await resp.read()), f'bobo_bot_{ctx.command.qualified_name}.{fmt}')
 
-                        fmt = 'png'
+                    if resp.status == 400:
+                        return (await resp.json())['message']
 
-                        return File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}')
-                    
-                    return (await resp.json())['message']
-            
-            async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
-                image_endpoint_command.__doc__ = (await resp.json())['doc']
+                    return await resp.text()
 
             self.__cog_commands__ += image_endpoint_command,
 

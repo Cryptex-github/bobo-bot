@@ -1,6 +1,4 @@
 from __future__ import annotations
-from ast import Bytes
-from turtle import title
 
 from typing import TYPE_CHECKING, Tuple
 from io import BytesIO
@@ -46,7 +44,7 @@ class YouTube:
         except IndexError:
             return None
 
-        stream.download_to_buffer(b)
+        stream.stream_to_buffer(b)
         b.seek(0)
 
         return b, stream.subtype
@@ -67,10 +65,10 @@ class YouTube:
         except IndexError:
             return None
 
-        stream.download_to_buffer(b)
+        stream.stream_to_buffer(b)
         b.seek(0)
 
-        return b, stream
+        return b, 'mp3'
 
 
 class VideoPrompt(BaseView):

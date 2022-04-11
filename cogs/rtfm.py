@@ -59,7 +59,7 @@ class RTFM(Cog):
 
         decompressor = zlib.decompressobj()
 
-        def yield_decompressed_bytes(self, data: BytesIO) -> Iterator[str]:
+        def yield_decompressed_bytes(data: BytesIO) -> Iterator[str]:
             while True:
                 chunk = data.read(16 * 1024)
                 if not chunk:
@@ -77,12 +77,18 @@ class RTFM(Cog):
             if not match:
                 continue
 
-            name, _, _, location, display = match.groups()
+            name, directive, _, location, display = match.groups()
+
+            domain, _, subdirective = directive.partition(':')
+
+            if directive == 'std:doc':
+                subdirective = 'label'
 
             if location.endswith('$'):
                 location = location[:-1] + name
 
             key = name if display == '-' else display
+            prefix = f'{subdirective}:' if domain == 'std' else ''
 
             data[f'{prefix}{key}'] = os.path.join(base_url, location)
 

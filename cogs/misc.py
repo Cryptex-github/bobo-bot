@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Misc(Cog):
     async def cog_load(self) -> None:
         with open('./events.lua', 'r') as f:
-            self.get_event_counts = self.redis.register_script(f.read())
+            self.get_event_counts = self.bot.redis.register_script(f.read())
 
     @command()
     async def ping(self, ctx: BoboContext) -> str:
@@ -31,7 +31,7 @@ class Misc(Cog):
 
     @command()
     async def events(self, ctx: BoboContext) -> str:
-        """Events"""
+        """Shows the number of events since the bot was started."""
         events_count = await self.get_event_counts()
 
         time_difference = (

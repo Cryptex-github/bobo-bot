@@ -1,5 +1,4 @@
 from __future__ import annotations
-from functools import _Descriptor
 
 from typing import TYPE_CHECKING, Any
 
@@ -15,7 +14,6 @@ from core.constants import INVITE_LINK, SUPPORT_SERVER
 if TYPE_CHECKING:
     from core.cog import Cog
     from core.view import BaseView
-    from core.context import BoboContext
 
     from discord import Interaction
     from discord.ext.commands import Command, Group
@@ -59,7 +57,6 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
             cog = self.cog_mapping[self.values[0]]
         except KeyError:
             embed, view = BoboHelpCommand.get_bot_help(self.ctx, self.mapping)
-            
             await interaction.response.edit_message(embed=embed, view=view)
 
             return
@@ -76,9 +73,10 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
 
             await pages.start(self.ctx)
 
+            await pages.edit_initial_message()
 
 
-class BoboHelpCommand(HelpCommand[Context]):
+class BoboHelpCommand(HelpCommand):
     async def send_bot_help(
         self, mapping: dict[Cog | None, list[Command[Cog, ..., Any]]]
     ):
@@ -99,11 +97,19 @@ class BoboHelpCommand(HelpCommand[Context]):
 
         view.add_item(BoboHelpSelect(ctx, mapping))
 
-        embed = ctx.embed( # type: ignore
+        embed = ctx.embed(  # type: ignore
             title='Help Command',
             description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n',
         )
-        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys() if getattr(cog, 'ignore', False) is False), inline=False)
+        embed.add_field(
+            name='Categories',
+            value='\n'.join(
+                '**' + cog.qualified_name + '**'
+                for cog in mapping.keys()
+                if getattr(cog, 'ignore', False) is False
+            ),
+            inline=False,
+        )
         embed.set_thumbnail(
             url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png'
         )
@@ -138,7 +144,7 @@ class BoboHelpCommand(HelpCommand[Context]):
         await pages.start(self.context)
 
     async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
-        embed = self.context.embed( # type: ignore
+        embed = self.context.embed(  # type: ignore
             title=f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
         )
         embed.description = (
@@ -161,7 +167,7 @@ class BoboHelpCommand(HelpCommand[Context]):
 
         embed.add_field(name='Useable by you', value=str(can_run))
         embed.add_field(
-            name='Usage', value=await self.context.get_command_usage(command) # type: ignore
+            name='Usage', value=await self.context.get_command_usage(command)  # type: ignore
         )
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 
