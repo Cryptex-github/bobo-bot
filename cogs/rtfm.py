@@ -34,7 +34,7 @@ class RTFMMenuSource(ListPageSource):
 class RTFM(Cog):
     def init(self):
         self.cache = RTFMCacheManager(self.bot.redis)
-    
+
     @staticmethod
     def fuzzy_finder(query: str, collection: Dict[str, str]) -> Dict[str, str]:
         results = []
