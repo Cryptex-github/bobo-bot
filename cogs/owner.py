@@ -7,6 +7,7 @@ from tabulate import tabulate # type: ignore
 
 from core import Cog, BoboContext, command, Regexs, Timer
 
+
 class Owner(Cog):
     async def cog_check(self, ctx: BoboContext) -> bool:
         return await self.bot.is_owner(ctx.author)
@@ -35,7 +36,7 @@ class Owner(Cog):
         embed.add_field(name='Reloaded Cog(s)', value=', '.join(cogs) if cogs else 'No Cog reloaded')
 
         return embed
-    
+
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):
         with Timer() as timer:
@@ -52,7 +53,6 @@ class Owner(Cog):
             return fmted, True
         
         return File(StringIO(fmted), filename='sql.txt'), True
-        
 
 
 setup = Owner.setup
