@@ -1,19 +1,20 @@
-from config import DbConnectionDetails, token
-from .context import BoboContext
-from collections import Counter
 import inspect
 import logging
 import os
+from collections import Counter
 
 import aiohttp
 import asyncpg
-from discord.ext.commands.cooldowns import MaxConcurrency
-from core.command import BoboBotCommand
-import mystbin
 import discord
-from discord.ext import commands
-
 import jishaku
+import mystbin
+from config import DbConnectionDetails, token
+from discord.ext import commands
+from discord.ext.commands.cooldowns import MaxConcurrency
+
+from core.command import BoboBotCommand
+
+from .context import BoboContext
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
