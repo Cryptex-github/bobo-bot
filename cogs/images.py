@@ -1,20 +1,28 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from io import BytesIO
 
-from discord import StickerFormatType, DeletedReferencedMessage
+from discord import StickerFormatType, DeletedReferencedMessage, File, utils
+
+utils.is_inside_class = lambda _: True # Hacky but is necessary for auto commands to work
+
+from discord import StickerFormatType, DeletedReferencedMessage, File
 from discord.ext.commands import (
     PartialEmojiConverter,
     PartialEmojiConversionFailure,
     UserConverter,
     UserNotFound,
+    command
 )
 
+from discord.ext.commands.core import get_signature_parameters, unwrap_function
+
 from core import Cog, Regexs
+from core.command import command
 
 if TYPE_CHECKING:
     from discord import Message, User, Member
-    from core import BoboContext
 
 
 class ImageResolver:
@@ -120,7 +128,33 @@ class ImageResolver:
 
 
 class Images(Cog):
-    ...
+    async def cog_load(self) -> None:
+        endpoint_list = [
+            'invert',
+        ]
+
+        for endpoint in endpoint_list:
+            @command()
+            async def image_endpoint_command(self, ctx: BoboContext, target: str) -> str | File:
+                resolver = ImageResolver(ctx, False)
+
+                url = await resolver.get_image(target)
+
+                async with self.bot.session.post(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+                    if resp.status == 200:
+                        if resp.headers['Content-Type'] == 'image/gif':
+                            fmt = 'gif'
+
+                        fmt = 'png'
+
+                        return File(await resp.read(), f'bobo_bot_{endpoint}.{fmt}')
+                    
+                    return (await resp.json())['message']
+            
+            async with self.bot.session.get(f'http://127.0.0.1:8085/images/{endpoint}') as resp:
+                image_endpoint_command.__doc__ = (await resp.json())['doc']
+
+            self.__cog_commands__ += image_endpoint_command,
 
 
 setup = Images.setup
