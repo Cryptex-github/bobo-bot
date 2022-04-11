@@ -1,7 +1,9 @@
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/Gorialis/jishaku
+git+https://github.com/oliver-ni/discord-ext-menus-views
 asyncpg
 psutil
 mystbin.py
 aioredis[hiredis]
-tabulate
+uvloop
+requests-html
