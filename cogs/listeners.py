@@ -7,6 +7,8 @@ from core import Cog
 from core.context import BoboContext
 
 class Listeners(Cog):
+    ignore = True
+
     async def cog_load(self):
         if not await self.redis.get('events_start_time'):
             await self.redis.set('events_start_time', datetime.now().timestamp())

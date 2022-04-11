@@ -153,6 +153,8 @@ class BoboBot(commands.Bot):
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
     def add_command(self, command):
+        ignore_list = ('help',)
+
         super().add_command(command)
         command.cooldown_after_parsing = True
 
@@ -161,7 +163,7 @@ class BoboBot(commands.Bot):
                 1, 3, commands.BucketType.user
             )
 
-        if command._max_concurrency is None:
+        if command._max_concurrency is None and command.qualified_name not in ignore_list:
             command._max_concurrency = MaxConcurrency(
                 1, per=commands.BucketType.user, wait=False
             )

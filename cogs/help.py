@@ -25,6 +25,7 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
     def __init__(self, ctx: BoboContext, mapping: dict[Cog, list[Command]]) -> None:
         options = [
             discord.SelectOption(label=cog.qualified_name, description=f'View help for {cog.qualified_name} category.') for cog in mapping.keys()
+            if getattr(cog, 'ignore', False) is False
         ]
 
         options.insert(0, discord.SelectOption(label='Home', description='Go back to the main help menu.'))
@@ -47,6 +48,8 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
 
             return
         else:
+            await interaction.response.defer()
+
             source = EmbedListPageSource(BoboHelpCommand.get_cog_help(self.ctx, cog), title=cog.qualified_name)
 
             pages = ViewMenuPages(source=source, extra_component=self, message=interaction.message)
@@ -69,8 +72,8 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
 
         view.add_item(BoboHelpSelect(self.context, mapping)) # type: ignore
         
-        embed = ctx.embed(title='Help Command', description='Invite | Support\n\n') # type: ignore
-        embed.add_field(name='Categories', value='\n'.join(cog.qualified_name for cog in mapping.keys()), inline=False) # type: ignore
+        embed = ctx.embed(title='Help Command', description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n') # type: ignore
+        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys() if getattr(cog, 'ignore', False) is False), inline=False) # type: ignore
         embed.set_thumbnail(url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png')
 
         return embed, view
@@ -139,4 +142,3 @@ async def setup(bot):
 
 async def teardown(bot):
     bot.help_command = DefaultHelpCommand()
-        
