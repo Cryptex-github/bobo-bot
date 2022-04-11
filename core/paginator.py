@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 class ViewMenu(menus.Menu):
     def __init__(self, *, auto_defer: bool = True, **kwargs):
+        self.extra_component = kwargs.pop('extra_component', None)
+
         super().__init__(**kwargs)
 
         self.auto_defer: bool = auto_defer
@@ -26,6 +28,12 @@ class ViewMenu(menus.Menu):
 
     def build_view(self) -> BaseView | None:
         if not self.should_add_reactions():
+            if self.extra_component:
+                view = BaseView(timeout=self.timeout, user_id=self._author_id)
+                view.add_item(self.extra_component)
+
+                return view
+
             return None
 
         def make_callback(button: menus.Button):
@@ -56,6 +64,9 @@ class ViewMenu(menus.Menu):
 
             item.callback = make_callback(button)
             view.add_item(item)
+        
+        if self.extra_component:
+            view.add_item(self.extra_component)
 
         self.view = view
         return view
@@ -182,6 +193,15 @@ class ViewMenu(menus.Menu):
 
     def send_with_view(self, messageable, *args, **kwargs):
         return messageable.send(*args, **kwargs, view=self.build_view())
+    
+    def edit_with_view(self, *args, **kwargs):
+        if message := self.message:
+            return message.edit(*args, **kwargs, view=self.build_view())
+        
+        async def dummy():
+            return
+        
+        return dummy()
 
     def stop(self):
         self._running = False
@@ -200,6 +220,11 @@ class ViewMenuPages(menus.MenuPages, ViewMenu):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
         return await self.send_with_view(channel, **kwargs)
+    
+    async def edit_initial_message(self):
+        page = await self._source.get_page(0)
+        kwargs = await self._get_kwargs_from_page(page)
+        return await self.edit_with_view(**kwargs)
 
     @discord.utils.copy_doc(menus.MenuPages.stop_pages)
     @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0fStop Paginator")
