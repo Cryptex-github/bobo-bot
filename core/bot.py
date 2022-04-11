@@ -34,7 +34,7 @@ class BoboBot(commands.Bot):
     def __init__(self):
         self.connector = aiohttp.TCPConnector(limit=200)
         self.logger = __log__
-        
+
         intents = discord.Intents.all()
 
         super().__init__(
