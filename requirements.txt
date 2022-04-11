@@ -9,3 +9,4 @@ aioredis[hiredis]
 uvloop
 requests-html
 pytube
+import-expression

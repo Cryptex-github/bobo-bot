@@ -37,6 +37,37 @@ class Tag(Cog):
     async def tag(self, ctx: BoboContext, name: str):
         content = await self.tag_manager.get_tag_content(name)
         if not content:
-            return 'Tag not found.'
+            await ctx.send('Tag not found.')
+
+            return
+        
+        await ctx.send(escape_mentions(content))
+    
+    @tag.command(aliases=['create'])
+    async def new(self, ctx: BoboContext, name: str, *, content: str) -> None:
+        """Creates a new tag."""
+        if len(name) > 200:
+            await ctx.send('Tag name is too long.')
+
+            return
+
+        try:
+            await self.tag_manager.new_tag(ctx, name, content)
+        except UniqueViolationError:
+            await ctx.send('Tag already exists.')
+
+            return
+
+        await ctx.send('Tag created.')
+    
+    @tag.command(aliases=['delete'])
+    async def remove(self, ctx: BoboContext, name: str) -> None:
+        """
+        Deletes a tag.
+        """
+        if not await self.tag_manager.remove_tag(ctx, name):
+            await ctx.send('Tag not found, are you sure you owns it?')
+
+            return
         
         return content

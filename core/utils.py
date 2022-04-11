@@ -94,3 +94,9 @@ def unique_list(seq: list[T]) -> list[T]:
             unique.append(item)
     
     return unique
+
+def cutoff(text: str, *, max_length: int = 2000) -> str:
+    if len(text) > max_length:
+        return text[:max_length - 1] + '…'
+
+    return text

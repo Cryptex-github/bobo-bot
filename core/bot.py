@@ -17,7 +17,6 @@ from discord.ext.commands.cooldowns import MaxConcurrency
 from requests_html import AsyncHTMLSession
 
 from core.cache_manager import DeleteMessageManager
-from core.command import BoboBotCommand
 from core.utils import Timer
 
 if TYPE_CHECKING:
@@ -35,12 +34,6 @@ __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
 
 
-# @discord.utils.copy_doc(commands.bot.BotBase)
-# class BotBase(commands.bot.GroupMixin[Cog]):
-#     ...
-
-
-# @discord.utils.copy_doc(commands.Bot)
 class BoboBot(commands.Bot):
     def __init__(self):
         self.logger = __log__
@@ -56,29 +49,6 @@ class BoboBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions.none(),
             strip_after_prefix=True,
         )
-
-    @discord.utils.copy_doc(commands.Bot.invoke)
-    async def invoke(self, ctx):
-        if ctx.command is not None:
-            self.dispatch('command', ctx)
-            try:
-                if await self.can_run(ctx, call_once=True):
-                    if isinstance(ctx.command, BoboBotCommand):
-                        async for m in ctx.command.invoke(ctx):  # type: ignore
-                            await self.process_output(ctx, m)  # type: ignore
-                    else:
-                        await self.process_output(ctx, await c)
-                else:
-                    raise commands.CheckFailure(
-                        'The global check once functions failed.'
-                    )
-            except commands.CommandError as exc:
-                await ctx.command.dispatch_error(ctx, exc)
-            else:
-                self.dispatch('command_completion', ctx)
-        elif ctx.invoked_with:
-            exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
-            self.dispatch('command_error', ctx, exc)
     
     async def self_test(self, ctx: BoboContext | None = None) -> NamedTuple:
         with Timer() as postgres_timer:
@@ -99,39 +69,6 @@ class BoboBot(commands.Bot):
         r = lambda x: round(x, 3)
 
         return res(r(float(postgres_timer) * 1000), r(float(redis_timer) * 1000), r(float(discord_rest_timer) * 1000), r(float(self.latency) * 1000))
-        
-
-    async def process_output(self, ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
-        if output is None:
-            return
-
-        kwargs = {}
-        des = ctx.send
-
-        if not isinstance(output, tuple):
-            output = (output,)
-
-        for i in output:
-            if isinstance(i, discord.Embed):
-                kwargs['embed'] = i
-
-            elif isinstance(i, str):
-                kwargs['content'] = i
-
-            elif isinstance(i, discord.File):
-                kwargs['file'] = i
-
-            elif isinstance(i, dict):
-                kwargs.update(i)
-        
-        try:
-            if i is True: # type: ignore
-                des = ctx.reply
-        except NameError:
-            pass
-
-        if c := kwargs.pop('content'):
-            await des(content=c, **kwargs)
 
     async def getch(self, /, id: int) -> discord.User:
         user = self.get_user(id)

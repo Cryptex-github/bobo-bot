@@ -1,11 +1,22 @@
 import importlib
+import inspect
+import textwrap
+import traceback
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from io import BytesIO
+from typing import AsyncGenerator
+
+import discord
+import import_expression
+from discord import File
+from discord.ext import commands
+from jishaku.codeblocks import codeblock_converter
+from jishaku.exception_handling import ReactionProcedureTimer
+from tabulate import tabulate  # type: ignore
 
 from core import BoboContext, Cog, Regexs, Timer, command, unique_list
-from discord import File
-from tabulate import tabulate  # type: ignore
+from core.types import OUTPUT_TYPE
 
 
 class Owner(Cog):
@@ -44,6 +55,57 @@ class Owner(Cog):
         embed.add_field(name='Reloaded File(s)', value=', '.join(files_to_reload) if files_to_reload else 'No File reloaded')
 
         return embed
+    
+    @command(alias=['exe', 'exec'])
+    async def execute(self, ctx: BoboContext, *, code: str) -> AsyncGenerator[OUTPUT_TYPE, None]:
+        _, code = codeblock_converter(code)
+
+        env = {
+            "bot": self.bot,
+            "ctx": ctx,
+            "discord": discord,
+            "commands": commands,
+            "message": ctx.message,
+            "channel": ctx.channel,
+            "guild": ctx.guild,
+            "author": ctx.author,
+            "BytesIO": BytesIO,
+            'inspect': inspect,
+            'getsource': inspect.getsource,
+        }
+
+        for lib in ('asyncio', 'aiohttp'):
+            env[lib] = importlib.import_module(lib)
+        
+        env.update(globals())
+        to_execute = f'async def _execute():\n{textwrap.indent(code, " " * 4)}'
+
+        def wrap_exception(exc: str) -> str:
+            return f'error: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}'
+
+        async with ReactionProcedureTimer(ctx.message, self.bot.loop):
+            try:
+                import_expression.exec(to_execute, env)
+            except Exception as e:
+                exc = traceback.TracebackException.from_exception(e)
+                yield wrap_exception(''.join(exc.format()))
+
+            try:
+                if inspect.isasyncgenfunction(to_execute):
+                    async for res in to_execute(): # type: ignore
+                        yield res
+
+                    return
+
+                result = await to_execute() # type: ignore
+            except Exception as e:
+                exc = traceback.TracebackException.from_exception(e)
+                yield wrap_exception(''.join(exc.format()))
+            else:
+                if not result or result == ' ':
+                    yield '\u200b'
+                
+                yield result
     
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):
