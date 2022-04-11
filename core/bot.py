@@ -72,7 +72,7 @@ class BoboBot(commands.Bot):
         elif ctx.invoked_with:
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
-    
+
     async def self_test(self) -> NamedTuple[float]:
         with Timer() as postgres_timer:
             await self.db.execute('SELECT 1')
@@ -88,7 +88,6 @@ class BoboBot(commands.Bot):
         r = lambda x: round(x, 3)
 
         return res(r(float(postgres_timer) * 1000), r(float(redis_timer) * 1000), r(float(discord_rest_timer) * 1000), r(float(self.latency) * 1000))
-        
 
     async def process_output(self, ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
         if output is None:
