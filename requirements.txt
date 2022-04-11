@@ -1,6 +1,7 @@
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/Gorialis/jishaku
 git+https://github.com/oliver-ni/discord-ext-menus-views
+akinator.py
 asyncpg
 psutil
 mystbin.py
