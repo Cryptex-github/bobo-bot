@@ -4,3 +4,4 @@ asyncpg
 psutil
 mystbin.py
 aioredis[hiredis]
+uvloop

@@ -1,7 +1,12 @@
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
+from io import StringIO
 
-from core import Cog, BoboContext, command, Regexs
+from discord import File
+from tabulate import tabulate
+
+from core import Cog, BoboContext, command, Regexs, Timer
+
 
 class Owner(Cog):
     async def cog_check(self, ctx: BoboContext) -> bool:
@@ -24,7 +29,6 @@ class Owner(Cog):
                     self.bot.reload_extension(cog_file)
                 else:
                     self.bot.load_extension(cog_file)
-
             except Exception as e:
                 res += f'\n{cog!r} failed to reload: {e}'
         
@@ -32,5 +36,22 @@ class Owner(Cog):
         embed.add_field(name='Reloaded Cog(s)', value=', '.join(cogs) if cogs else 'No Cog reloaded')
 
         return embed
+
+    @command()
+    async def sql(self, ctx: BoboContext, *, query: str):
+        with Timer() as timer:
+            res = await self.bot.db.fetch(query)
+        
+        fmted = '```sql\n'
+
+        if res:
+            fmted += tabulate(res, headers='keys', tablefmt='psql') + '\n```'
+        
+        fmted += f'\n\n{len(res)} result(s) in {float(timer):.2f} seconds'
+
+        if len(fmted) <= 2000:
+            return fmted, True
+        
+        return File(StringIO(fmted), filename='sql.txt'), True
 
 setup = Owner.setup

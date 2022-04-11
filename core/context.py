@@ -55,7 +55,7 @@ class BoboContext(commands.Context):
 
         return m
     
-    async def reply(self, content: str | None, **kwargs: Any) -> discord.Message:
+    async def reply(self, content: str | None = None, **kwargs: Any) -> discord.Message:
         kwargs['reference'] = self.message
 
         return await self.send(content, **kwargs)
