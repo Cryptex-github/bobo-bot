@@ -70,8 +70,9 @@ class VideoPrompt(BaseView):
     async def video(self, interaction: Interaction) -> None:
         self.result = 'video'
 
-        await interaction.response.send_message('Downloading video, please wait.')
-        await self.disable_all()
+        await self.disable_all(interaction)
+        await interaction.followup.send('Downloading video, please wait.')
+
         
         self.stop()
     
@@ -79,8 +80,9 @@ class VideoPrompt(BaseView):
     async def audio(self, interaction: Interaction) -> None:
         self.result = 'audio'
 
-        await interaction.response.send_message('Downloading audio, please wait.')
-        await self.disable_all()
+        await self.disable_all(interaction)
+        await interaction.followup.send('Downloading audio, please wait.')
+
         
         self.stop()
     
