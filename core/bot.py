@@ -46,16 +46,15 @@ class BoboBot(commands.Bot):
         if ctx.command is not None:
             self.dispatch('command', ctx)
             try:
-                if await self.can_run(ctx, call_once=True):
-                    if isinstance(ctx.command, BoboBotCommand):
-                        async for m in ctx.command.invoke(ctx):
-                            await self.process_output(ctx, m)
-                    else:
-                        await ctx.command.invoke(ctx)
-                else:
+                if not await self.can_run(ctx, call_once=True):
                     raise commands.CheckFailure(
                         'The global check once functions failed.'
                     )
+                if isinstance(ctx.command, BoboBotCommand):
+                    async for m in ctx.command.invoke(ctx):
+                        await self.process_output(ctx, m)
+                else:
+                    await ctx.command.invoke(ctx)
             except commands.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
@@ -85,7 +84,7 @@ class BoboBot(commands.Bot):
                 kwargs['file'] = i
 
             elif isinstance(i, dict):
-                kwargs.update(i)
+                kwargs |= i
 
         if i is True:
             des = ctx.reply
@@ -93,11 +92,7 @@ class BoboBot(commands.Bot):
         await des(**kwargs)
 
     async def getch(self, /, id: int) -> discord.User:
-        user = self.get_user(id)
-        if not user:
-            user = await self.fetch_user(id)
-
-        return user
+        return self.get_user(id) or await self.fetch_user(id)
 
     def initialize_libaries(self):
         self.context = BoboContext

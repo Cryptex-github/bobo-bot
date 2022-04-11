@@ -20,15 +20,13 @@ class BoboContext(commands.Context):
     async def send(self, content=None, **kwargs):
         codeblock = kwargs.pop('codeblock', False)
         lang = kwargs.pop('lang', 'py')
-        can_delete = kwargs.pop('can_delete', False)
-
-        if can_delete:
+        if can_delete := kwargs.pop('can_delete', False):
             view = kwargs.get('view', discord.ui.View())
             view.add_item(DeleteButton(self.user.id))
             kwargs['view'] = view
 
         if codeblock:
-            content = f'```{lang}\n' + str(content) + '\n```'
+            content = f'```{lang}\n{str(content)}' + '\n```'
 
         return await super().send(content, **kwargs)
     
