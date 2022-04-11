@@ -6,6 +6,7 @@ import os
 import aiohttp
 import asyncpg
 from discord.ext.commands.cooldowns import MaxConcurrency
+from core.command import BoboBotCommand
 import mystbin
 import discord
 from discord.ext import commands
@@ -40,17 +41,17 @@ class BoboBot(commands.Bot):
             strip_after_prefix=True,
         )
 
+    @discord.utils.copy_doc(commands.Bot.invoke)
     async def invoke(self, ctx):
         if ctx.command is not None:
             self.dispatch('command', ctx)
             try:
                 if await self.can_run(ctx, call_once=True):
-                    c = ctx.command.invoke
-                    if inspect.isasyncgenfunction(c):
-                        async for m in c(ctx):
+                    if isinstance(ctx.command, BoboBotCommand):
+                        async for m in ctx.command.invoke(ctx):
                             await self.process_output(ctx, m)
                     else:
-                        await self.process_output(ctx, await c(ctx))
+                        await ctx.command.invoke(ctx)
                 else:
                     raise commands.CheckFailure(
                         'The global check once functions failed.'
@@ -63,8 +64,6 @@ class BoboBot(commands.Bot):
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
     
-    invoke.__doc__ = commands.Bot.invoke.__doc__
-
     async def process_output(self, ctx, output):
         if output is None:
             return
@@ -72,7 +71,7 @@ class BoboBot(commands.Bot):
         kwargs = {}
         des = ctx.send
 
-        if not isinstance(i, tuple):
+        if not isinstance(output, tuple):
             output = (output,)
 
         for i in output:
@@ -132,7 +131,7 @@ class BoboBot(commands.Bot):
             password=DbConnectionDetails.password,
             database=DbConnectionDetails.database,
         )
-
+    
     def load_all_extensions(self):
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
@@ -157,6 +156,13 @@ class BoboBot(commands.Bot):
                         f'Unable to unload extension: {file}, ignoring. Exception: {e}'
                     )
         self.unload_extension('jishaku')
+    
+    async def close(self):
+        self.unload_all_extensions()
+        await self.db.close()
+        await self.session.close()
+        
+        await super().close()
 
     def run(self):
         self.load_all_extensions()

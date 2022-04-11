@@ -87,11 +87,8 @@ class BoboBotCommand(commands.Command):
         ctx.invoked_subcommand = None
         ctx.subcommand_passed = None
         injected = hooked_wrapped_callback(self, ctx, self.callback)
-        if inspect.isasyncgenfunction(injected):
-            async for item in injected(*ctx.args, **ctx.kwargs):
-                yield item
-        else:
-            yield await injected(*ctx.args, **ctx.kwargs)
+        async for item in injected(*ctx.args, **ctx.kwargs):
+            yield item
 
 
 def command(name=None, cls=BoboBotCommand, **attrs):
