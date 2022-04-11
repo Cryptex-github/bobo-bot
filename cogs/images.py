@@ -161,5 +161,6 @@ class Images(Cog):
 
             self.__cog_commands__ += image_endpoint_command,
 
+            del image_endpoint_command
 
 setup = Images.setup
