@@ -21,7 +21,8 @@ def user_permissions_predicate(ctx: BoboContext) -> bool:
     perms = {
         'send_messages': True,
     }
-    permissions = ctx.channel.permissions_for(ctx.author)
+
+    permissions = ctx.channel.permissions_for(ctx.author) #type: ignore
 
     missing = [
         perm for perm, value in perms.items() if getattr(permissions, perm) != value
@@ -41,7 +42,7 @@ def bot_permissions_predicate(ctx: BoboContext) -> bool:
     }
     guild = ctx.guild
     me = guild.me if guild is not None else ctx.bot.user
-    permissions = ctx.channel.permissions_for(me)
+    permissions = ctx.channel.permissions_for(me) #type: ignore
 
     missing = [
         perm for perm, value in perms.items() if getattr(permissions, perm) != value
@@ -53,9 +54,9 @@ def bot_permissions_predicate(ctx: BoboContext) -> bool:
     raise commands.BotMissingPermissions(missing)
 
 
-def hooked_wrapped_callback(command, ctx: BoboContext, coro: Callable[[Any], Any]) -> Callable[[Any, Any], AsyncGenerator[OUTPUT_TYPE]]:
+def hooked_wrapped_callback(command, ctx: BoboContext, coro: Callable[[Any], Any]) -> Callable[[Any, Any], AsyncGenerator[OUTPUT_TYPE, None]]:
     @functools.wraps(coro)
-    async def wrapped(*args: Any, **kwargs: Any) -> AsyncGenerator[OUTPUT_TYPE]:
+    async def wrapped(*args: Any, **kwargs: Any) -> AsyncGenerator[OUTPUT_TYPE, None]:
         try:
             if inspect.isasyncgenfunction(coro):
                 async for ret in coro(*args, **kwargs):
@@ -84,10 +85,10 @@ class BoboBotCommand(commands.Command):
     def __init__(self, func: Any, **kwargs: Any) -> None:
         super().__init__(func, **kwargs)
 
-        self.checks.append(bot_permissions_predicate)
-        self.checks.append(user_permissions_predicate)
+        self.checks.append(bot_permissions_predicate) #type: ignore
+        self.checks.append(user_permissions_predicate) #type: ignore
 
-    async def invoke(self, ctx: BoboContext) -> AsyncGenerator[OUTPUT_TYPE]:
+    async def invoke(self, ctx: BoboContext) -> AsyncGenerator[OUTPUT_TYPE, None]:
         await self.prepare(ctx)
 
         # terminate the invoked_subcommand chain.
@@ -95,11 +96,11 @@ class BoboBotCommand(commands.Command):
         # the invoked subcommand is None.
         ctx.invoked_subcommand = None
         ctx.subcommand_passed = None
-        injected = hooked_wrapped_callback(self, ctx, self.callback)
+        injected = hooked_wrapped_callback(self, ctx, self.callback) #type: ignore
         async for item in injected(*ctx.args, **ctx.kwargs):
             yield item
 
 
 @discord.utils.copy_doc(commands.command)
-def command(name=None, cls=BoboBotCommand, **attrs) -> BoboBotCommand:
+def command(name=None, cls=BoboBotCommand, **attrs) -> Any:
     return commands.command(name=name, cls=cls, **attrs)

@@ -1,13 +1,14 @@
 from typing import List
 
 from abc import ABC
+from re import A
 from typing import TYPE_CHECKING, List, Literal, Dict
 
 if TYPE_CHECKING:
     from aioredis import Redis
     from .types import POSSIBLE_RTFM_SOURCES
 
-__all__ = ('Cache', 'DeleteMessageManager', 'RTFMCacheManager')
+__all__ = ('DeleteMessageManager', 'RTFMCacheManager', 'ReactionRoleManager')
 
 
 class CacheManager(ABC):
@@ -49,3 +50,15 @@ class RTFMCacheManager(RedisCacheManager):
     
     async def get(self, source: POSSIBLE_RTFM_SOURCES, query: str) -> Dict[str, str] | None:
         return (await self.redis.hgetall(f'rtfm:{source}:{query}')) or None # If it returns empty Dict, returns None.
+
+class ReactionRoleManager(RedisCacheManager):
+    __slots__ = ()
+
+    async def add(self, message_id: int, role_id: int, emoji: str) -> None:
+        await self.redis.hset(f'reaction_roles:{message_id}', emoji, role_id)
+    
+    async def get_message(self, message_id: int) -> Dict[str, int]:
+        return {k: int(v) for k, v in (await self.redis.hget(f'reaction_roles:{message_id}'))}
+    
+    async def delete(self, message_id: int) -> None:
+        await self.redis.delete(f'reaction_roles:{message_id}')
