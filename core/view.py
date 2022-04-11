@@ -16,24 +16,31 @@ class BaseView(discord.ui.View):
         super().__init__(timeout=timeout)
 
         self.user_id = user_id
-    
+
     async def interaction_check(self, interaction: Interaction) -> bool:
         if interaction.user.id != self.user_id:
-            await interaction.response.send_message('You are not allowed to use this view.', ephemeral=True)
+            await interaction.response.send_message(
+                'You are not allowed to use this view.', ephemeral=True
+            )
 
             return False
-        
+
         return True
-    
+
     async def disable_all(self, interaction: Interaction) -> None:
         self._disable_all()
 
-        await interaction.edit_original_message(view=self)
+        if interaction.response.is_done():
+            await interaction.edit_original_message(view=self)
+
+            return
+
+        await interaction.response.edit_message(view=self)
 
     def _disable_all(self) -> None:
         for i in self.children:
             if hasattr(i, 'disabled'):
-                i.disabled = True # type: ignore
+                i.disabled = True  # type: ignore
 
 
 class ConfirmView(BaseView):
@@ -52,7 +59,9 @@ class ConfirmView(BaseView):
 
     # This one is similar to the confirmation button except sets the inner value to `False`
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
-    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ) -> None:
         await interaction.response.send_message('Cancelling', ephemeral=True)
         self.value = False
 

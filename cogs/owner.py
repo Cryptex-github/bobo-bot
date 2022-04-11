@@ -20,9 +20,9 @@ from core.types import OUTPUT_TYPE
 
 
 class Owner(Cog):
-    def cog_check(self, ctx: BoboContext) -> bool:
-        return ctx.author.id == self.bot.owner_id
-    
+    async def cog_check(self, ctx: BoboContext) -> bool:
+        return await self.bot.is_owner(ctx.author)
+
     @command()
     async def pull(self, ctx: BoboContext):
         proc = await create_subprocess_exec("git", "pull", stdout=PIPE, stderr=PIPE)
@@ -50,14 +50,19 @@ class Owner(Cog):
                 importlib.reload(lib)
             except Exception as e:
                 res += f'\n{mod!r} failed to reload: {e}'
-        
+
         embed = ctx.embed(title='Pulled from Github', description=res)
-        embed.add_field(name='Reloaded File(s)', value=', '.join(files_to_reload) if files_to_reload else 'No File reloaded')
+        embed.add_field(
+            name='Reloaded File(s)',
+            value=', '.join(files_to_reload) if files_to_reload else 'No File reloaded',
+        )
 
         return embed
-    
-    @command(alias=['exe', 'exec'])
-    async def execute(self, ctx: BoboContext, *, code: str) -> AsyncGenerator[OUTPUT_TYPE, None]:
+
+    @command(aliases=['exe', 'exec'])
+    async def execute(
+        self, ctx: BoboContext, *, code: str
+    ) -> AsyncGenerator[OUTPUT_TYPE, None]:
         _, code = codeblock_converter(code)
 
         env = {
@@ -76,19 +81,28 @@ class Owner(Cog):
 
         for lib in ('asyncio', 'aiohttp'):
             env[lib] = importlib.import_module(lib)
-        
+
         env.update(globals())
         to_execute = f'async def _execute():\n{textwrap.indent(code, " " * 4)}'
 
         def wrap_exception(exc: str) -> str:
-            return f'error: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}'
+            return f'```py\nerror: An error occured while executing\n --> execute\n{textwrap.indent(exc, "  | ")}\n```'
+
+        def safe_result(result: Any) -> str:
+            if isinstance(result, str):
+                if not result or result == ' ':
+                    return '\u200b'
+
+            return repr(result)
 
         async with ReactionProcedureTimer(ctx.message, self.bot.loop):
             try:
                 import_expression.exec(to_execute, env)
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
-                yield wrap_exception(''.join(exc.format()))
+                yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
+
+            to_execute = env['_execute']
 
             try:
                 if inspect.isasyncgenfunction(to_execute):
@@ -102,28 +116,25 @@ class Owner(Cog):
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format()))
             else:
-                if not result or result == ' ':
-                    yield '\u200b'
-                
-                yield result
-    
+                if result:
+                    yield safe_result(result), SAFE_SEND, CAN_DELETE
+
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):
         with Timer() as timer:
             res = await self.bot.db.fetch(query)
-        
+
         fmted = '```sql\n'
 
         if res:
             fmted += tabulate(res, headers='keys', tablefmt='psql') + '\n```'
-        
+
         fmted += f'\n\n{len(res)} result(s) in {float(timer):.2f} seconds'
-    
-        if res <= 2000:
-            return res, True
-        
+
+        if len(fmted) <= 2000:
+            return fmted, True
+
         return File(BytesIO(fmted.encode('utf-8')), filename='sql.txt'), True
-        
 
 
 setup = Owner.setup

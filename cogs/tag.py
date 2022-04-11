@@ -16,33 +16,52 @@ from core import BoboContext, Cog, command
 class TagManager:
     def __init__(self, db: Pool):
         self.db = db
-    
+
     async def new_tag(self, ctx: BoboContext, name: str, content: str):
         await self.db.execute(
-            'INSERT INTO tags (name, content, author_id, message_id) VALUES ($1, $2, $3)',
-            name, content, ctx.author.id, ctx.message.id
+            'INSERT INTO tags (name, content, author_id, message_id) VALUES ($1, $2, $3, $4)',
+            name,
+            content,
+            ctx.author.id,
+            ctx.message.id,
         )
-    
+
     async def get_tag_content(self, name: str) -> str | None:
-        return await self.db.fetchval(
-            'SELECT content FROM tags WHERE name = $1', name
+        return await self.db.fetchval('SELECT content FROM tags WHERE name = $1', name)
+
+    async def remove_tag(self, ctx, name: str) -> bool:
+        return (
+            await self.db.execute(
+                'DELETE FROM tags WHERE name = $1 AND author_id = $2',
+                name,
+                ctx.author.id,
+            )
+        ) != 'DELETE 0'
+
+    async def edit_tag(self, ctx: BoboContext, name: str, content: str):
+        await self.db.execute(
+            'UPDATE tags SET content = $1 WHERE name = $2 AND author_id = $3',
+            content,
+            name,
+            ctx.author.id,
         )
 
 
 class Tag(Cog):
     async def cog_load(self):
         self.tag_manager = TagManager(self.bot.db)
-    
-    @command()
-    async def tag(self, ctx: BoboContext, name: str):
+
+    @commands.group(invoke_without_command=True)
+    async def tag(self, ctx: BoboContext, *, name: str) -> None:
+        """Shows the content of a tag."""
         content = await self.tag_manager.get_tag_content(name)
         if not content:
             await ctx.send('Tag not found.')
 
             return
-        
+
         await ctx.send(escape_mentions(content))
-    
+
     @tag.command(aliases=['create'])
     async def new(self, ctx: BoboContext, name: str, *, content: str) -> None:
         """Creates a new tag."""
@@ -59,7 +78,7 @@ class Tag(Cog):
             return
 
         await ctx.send('Tag created.')
-    
+
     @tag.command(aliases=['delete'])
     async def remove(self, ctx: BoboContext, name: str) -> None:
         """
@@ -69,5 +88,22 @@ class Tag(Cog):
             await ctx.send('Tag not found, are you sure you owns it?')
 
             return
-        
-        return content
+
+        await ctx.send('Tag deleted.')
+
+    @tag.command()
+    async def edit(self, ctx: BoboContext, name: str, *, content: str) -> None:
+        """
+        Edits a tag.
+        """
+        try:
+            await self.tag_manager.edit_tag(ctx, name, content)
+        except UndefinedColumnError:
+            await ctx.send('Tag not found, are you sure you owns it?')
+
+            return
+
+        await ctx.send('Tag edited.')
+
+
+setup = Tag.setup

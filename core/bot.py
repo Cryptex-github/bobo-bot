@@ -37,7 +37,7 @@ __all__ = ('BoboBot',)
 class BoboBot(commands.Bot):
     def __init__(self):
         self.logger = __log__
-        
+
         intents = discord.Intents.all()
 
         super().__init__(
@@ -49,22 +49,27 @@ class BoboBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions.none(),
             strip_after_prefix=True,
         )
-    
+
     async def self_test(self) -> NamedTuple:
         with Timer() as postgres_timer:
             await self.db.execute('SELECT 1')
-        
+
         with Timer() as redis_timer:
             await self.redis.ping()
-        
+
         with Timer() as discord_rest_timer:
             await self.http.get_gateway()
-        
+
         res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
-        
+
         r = lambda x: round(x, 3)
 
-        return res(r(float(postgres_timer) * 1000), r(float(redis_timer) * 1000), r(float(discord_rest_timer) * 1000), r(float(self.latency) * 1000))
+        return res(
+            r(float(postgres_timer) * 1000),
+            r(float(redis_timer) * 1000),
+            r(float(discord_rest_timer) * 1000),
+            r(float(self.latency) * 1000),
+        )
 
     async def getch(self, object_: str, id_: int) -> discord.abc.Snowflake:
         get = getattr(self, f'get_{object_}')
@@ -81,7 +86,7 @@ class BoboBot(commands.Bot):
         self.context = BoboContext
         self.mystbin = mystbin.Client(session=self.session)
         self.html_session = AsyncHTMLSession()
-    
+
     async def initialize_constants(self):
         self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
@@ -102,35 +107,40 @@ class BoboBot(commands.Bot):
                 1, 3, commands.BucketType.user
             )
 
-        if command._max_concurrency is None and command.qualified_name not in ignore_list:
+        if (
+            command._max_concurrency is None
+            and command.qualified_name not in ignore_list
+        ):
             command._max_concurrency = MaxConcurrency(
                 1, per=commands.BucketType.user, wait=False
             )
-    
+
     async def _async_setup_hook(self):
         loop = asyncio.get_running_loop()
         self.connector = aiohttp.TCPConnector(limit=0, loop=loop)
         self.http.connector = self.connector
 
         await super()._async_setup_hook()
-    
+
     async def on_ready(self):
         if self.ready_once:
             return
-        
+
         self.ready_once = True
         self.dispatch('ready_once')
-    
+
     async def on_ready_once(self):
         chunk_tasks = []
 
         for guild in self.guilds:
             if not guild.chunked:
                 chunk_tasks.append(guild.chunk())
-        
+
         await asyncio.gather(*chunk_tasks)
 
     async def setup_hook(self):
+        from core.web import app
+
         await self.initialize_constants()
         self.initialize_libaries()
 
@@ -140,8 +150,14 @@ class BoboBot(commands.Bot):
             password=DbConnectionDetails.password,
             database=DbConnectionDetails.database,
         )
-        
+
         await self.load_all_extensions()
+
+        self.web = app
+
+        app.bot = self
+
+        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082))
     
     async def load_all_extensions(self):
         for file in os.listdir('./cogs'):
@@ -166,20 +182,21 @@ class BoboBot(commands.Bot):
                     self.logger.critical(
                         f'Unable to unload extension: {file}, ignoring. Exception: {e}'
                     )
-        
+
         await self.unload_extension('jishaku')
-    
+
     async def close(self):
         tasks = [
             self.unload_all_extensions(),
             self.db.close(),
             self.session.close(),
             self.redis.close(),
-            self.html_session.close()
+            self.html_session.close(),
+            self.web.shutdown()
         ]
 
-
         await asyncio.gather(*tasks)
+        await self.web_task
         
         await super().close()
 

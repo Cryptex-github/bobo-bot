@@ -28,7 +28,7 @@ def user_permissions_predicate(ctx: BoboContext) -> bool:
         'send_messages': True,
     }
 
-    permissions = ctx.channel.permissions_for(ctx.author) #type: ignore
+    permissions = ctx.channel.permissions_for(ctx.author)  # type: ignore
 
     missing = [
         perm for perm, value in perms.items() if getattr(permissions, perm) != value
@@ -48,7 +48,7 @@ def bot_permissions_predicate(ctx: BoboContext) -> bool:
     }
     guild = ctx.guild
     me = guild.me if guild is not None else ctx.bot.user
-    permissions = ctx.channel.permissions_for(me) #type: ignore
+    permissions = ctx.channel.permissions_for(me)  # type: ignore
 
     missing = [
         perm for perm, value in perms.items() if getattr(permissions, perm) != value
@@ -58,6 +58,7 @@ def bot_permissions_predicate(ctx: BoboContext) -> bool:
         return True
 
     raise commands.BotMissingPermissions(missing)
+
 
 async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
     if output is None:
@@ -90,50 +91,64 @@ async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
 
     await des(**kwargs)
 
-async def _command_callback(ctx: BoboContext, coro: AsyncGenerator[Any, None] | Awaitable[Any]) -> None:
-    if inspect.isasyncgenfunction(coro):
-        async for ret in coro: # type: ignore
+
+async def _command_callback(
+    ctx: BoboContext, coro: AsyncGenerator[Any, None] | Awaitable[Any]
+) -> None:
+    if inspect.isasyncgen(coro):
+        async for ret in coro:  # type: ignore
             await process_output(ctx, ret)
     else:
-        await process_output(ctx, await coro) # type: ignore
+        await process_output(ctx, await coro)  # type: ignore
 
-def command_callback(func: Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]) -> Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]:
+
+def command_callback(
+    func: Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]
+) -> Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]:
     @functools.wraps(func)
     async def wrapper(self: Cog, ctx: BoboContext, *args: Any, **kwargs: Any) -> None:
         await _command_callback(ctx, func(self, ctx, *args, **kwargs))
-    
+
     return wrapper
+
 
 @discord.utils.copy_doc(commands.command)
 def command(name=None, *, **attrs) -> Any:
     command = commands.command(name=name, **attrs)
 
     def wrapper(func):
-        return command(command_callback(func)) # type: ignore
-    
+        return command(command_callback(func))  # type: ignore
+
     return wrapper
+
 
 class GroupCommand(commands.Group):
     @discord.utils.copy_doc(commands.Group.command)
-    def command(self, *args: Any, **kwargs: Any) -> Callable[[Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]], Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]]:
+    def command(
+        self, *args: Any, **kwargs: Any
+    ) -> Callable[
+        [Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]],
+        Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]],
+    ]:
         def wrapper(func) -> commands.Command:
             if 'parent' not in kwargs:
                 kwargs['parent'] = self
-            
+
             command_ = command(*args, **kwargs)(func)
             self.add_command(command_)
 
             return command_
- 
+
         return wrapper
+
 
 def group(**attrs) -> Any:
     if 'invoke_without_command' not in attrs:
         attrs['invoke_without_command'] = True
-    
+
     group = commands.group(cls=GroupCommand, **attrs)
 
     def wrapper(func):
-        return group(command_callback(func)) # type: ignore
-    
+        return group(command_callback(func))  # type: ignore
+
     return wrapper

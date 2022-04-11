@@ -41,9 +41,14 @@ class ANSIBuilder:
         self.raw_text = initial_text
 
     @staticmethod
-    def get_ansi_code(color: ANSIColor | None = None, background: ANSIBackgroundColor | None = None, bold: bool = False, underline: bool = False) -> str:
+    def get_ansi_code(
+        color: ANSIColor | None = None,
+        background: ANSIBackgroundColor | None = None,
+        bold: bool = False,
+        underline: bool = False,
+    ) -> str:
         parts = []
-        
+
         if color:
             parts.append(str(color.value))
         if background:
@@ -52,12 +57,12 @@ class ANSIBuilder:
             parts.append(str(ANSIFormat.bold.value))
         if underline:
             parts.append(str(ANSIFormat.underline.value))
-        
+
         if not parts:
             return ''
-        
+
         return f'\u001b[{";".join(parts)}m'
-    
+
     @property
     def clear_code(self) -> str:
         return '\u001b[0m'
@@ -67,26 +72,26 @@ class ANSIBuilder:
 
         if kwargs.pop('clear'):
             parts += '\u001b[0m'
-        
+
         self.text += parts + text + self.clear_code
         self.raw_text += text
 
         return self
-    
+
     def color(self, color: ANSIColor, text: str) -> Self:
         return self.append(text, color=color)
-    
+
     def background_color(self, color: ANSIBackgroundColor, text: str) -> Self:
         return self.append(text, background=color)
-    
+
     def bold(self, text: str) -> Self:
         return self.append(text, bold=True)
-    
+
     def underline(self, text: str) -> Self:
         return self.append(text, underline=True)
-    
+
     def build(self) -> str:
         return f'```ansi\n{self.text}\n```'
-    
+
     def build_raw(self) -> str:
         return self.raw_text

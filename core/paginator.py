@@ -18,11 +18,14 @@ if TYPE_CHECKING:
 
 
 class JumpToPage(discord.ui.Modal, title='Jump To Page'):
-    page = discord.ui.TextInput(label='Page Number', placeholder='Enter page number here.')
+    page = discord.ui.TextInput(
+        label='Page Number', placeholder='Enter page number here.'
+    )
 
 
 class Button(discord.ui.Button[BaseView]):
     ...
+
 
 class ViewMenu(menus.Menu):
     def __init__(self, *, auto_defer: bool = True, **kwargs):
@@ -72,22 +75,25 @@ class ViewMenu(menus.Menu):
 
             item.callback = make_callback(button)
             view.add_item(item)
-        
+
         if self.extra_component:
             view.add_item(self.extra_component)
-        
+
         async def _callback(interaction: Interaction) -> None:
             modal = JumpToPage()
+
             async def on_submit(interaction) -> None:
                 try:
-                    await self.show_checked_page(int(modal.page)) # type: ignore
+                    await self.show_checked_page(int(modal.page.value) - 1)  # type: ignore
                 except ValueError:
                     pass
 
             modal.on_submit = on_submit
             await interaction.response.send_modal(modal)
 
-        button = discord.ui.Button(style=discord.ButtonStyle.primary, label='Jump', row=2)
+        button = discord.ui.Button(
+            style=discord.ButtonStyle.primary, label='Jump', row=2
+        )
         button.callback = _callback
 
         self.view = view
@@ -155,7 +161,7 @@ class ViewMenu(menus.Menu):
     async def _internal_loop(self):
         self.__timed_out = False
         try:
-            self.__timed_out = await self.view.wait() # type: ignore
+            self.__timed_out = await self.view.wait()  # type: ignore
         except Exception:
             pass
         finally:
@@ -178,7 +184,7 @@ class ViewMenu(menus.Menu):
                 if self.clear_reactions_after:
                     return await self.message.edit(view=None)
                 elif self.view:
-                        return await self.message.edit(view=self.view._disable_all())
+                    return await self.message.edit(view=self.view._disable_all())
             except Exception:
                 pass
 
@@ -214,14 +220,14 @@ class ViewMenu(menus.Menu):
 
     def send_with_view(self, messageable, *args, **kwargs):
         return messageable.send(*args, **kwargs, view=self.build_view())
-    
+
     def edit_with_view(self, *args, **kwargs):
         if message := self.message:
             return message.edit(*args, **kwargs, view=self.build_view())
-        
+
         async def dummy():
             return
-        
+
         return dummy()
 
     def stop(self):
@@ -241,13 +247,28 @@ class ViewMenuPages(menus.MenuPages, ViewMenu):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
         return await self.send_with_view(channel, **kwargs)
-    
+
     async def edit_initial_message(self):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
         return await self.edit_with_view(**kwargs)
 
-    @discord.utils.copy_doc(menus.MenuPages.stop_pages)
-    @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0fStop Paginator")
-    async def stop_pages(self, payload):
-        self.stop()
+
+class EmbedListPageSource(menus.ListPageSource):
+    def __init__(
+        self, entries: Iterable[Any], *, title: str = 'Paginator', per_page: int = 10
+    ) -> None:
+        super().__init__(entries, per_page=per_page)
+
+        self.title = title
+
+    async def format_page(self, menu, entries) -> dict[str, Embed]:
+        return {
+            'embed': menu.ctx.embed(title=self.title, description='\n'.join(entries))
+            .set_author(
+                name=str(menu.ctx.author), icon_url=str(menu.ctx.author.display_avatar)
+            )
+            .set_footer(
+                text=f'Page {menu.current_page + 1}/{self.get_max_pages()} Total Entries: {len(self.entries)}'
+            )
+        }
