@@ -96,10 +96,10 @@ async def _command_callback(
     ctx: BoboContext, coro: AsyncGenerator[Any, None] | Awaitable[Any]
 ) -> None:
     if inspect.isasyncgen(coro):
-        async for ret in coro:  # type: ignore
+        async for ret in coro:
             await process_output(ctx, ret)
     else:
-        await process_output(ctx, await coro)  # type: ignore
+        await process_output(ctx, await coro) # type: ignore
 
 
 def command_callback(

@@ -1,0 +1,7 @@
+{   
+    "include": ["cogs", "core"],
+    "reportUnnecessaryTypeIgnoreComment": "warning",
+    "reportUnusedImport": "warning",
+    "pythonVersion": "3.10",
+    "typeCheckingMode": "basic"
+}

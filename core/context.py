@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 __all__ = ('BoboContext',)
 
 
-class BoboContext(commands.Context['BoboBot']):  # type: ignore
+class BoboContext(commands.Context['BoboBot']):
     async def confirm(
         self, content: str | None = None, timeout: int = 60, **kwargs: Any
     ) -> bool:

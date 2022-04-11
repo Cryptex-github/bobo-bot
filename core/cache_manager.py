@@ -1,7 +1,7 @@
 from typing import List
 
 from abc import ABC
-from typing import TYPE_CHECKING, List, Literal, Dict
+from typing import TYPE_CHECKING, List, Dict
 
 if TYPE_CHECKING:
     from aioredis import Redis

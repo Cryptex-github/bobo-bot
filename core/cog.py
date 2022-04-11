@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-import discord
 from discord.ext import commands, tasks
 
 __all__ = ('Cog',)

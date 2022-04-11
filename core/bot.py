@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from collections import namedtuple
-from typing import TYPE_CHECKING, NamedTuple
+from typing import NamedTuple
 
 import aiohttp
 import aioredis
@@ -18,10 +18,6 @@ from requests_html import AsyncHTMLSession
 
 from core.cache_manager import DeleteMessageManager
 from core.utils import Timer
-
-if TYPE_CHECKING:
-    from core import OUTPUT_TYPE
-    from .cog import Cog
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True

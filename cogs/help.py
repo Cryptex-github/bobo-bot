@@ -5,12 +5,11 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 
-from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError
+from discord.ext.commands import HelpCommand, DefaultHelpCommand, CommandError, Context
 
 from core.view import BaseView
 from core.paginator import ViewMenuPages, EmbedListPageSource
 from core.constants import INVITE_LINK, SUPPORT_SERVER
-from core.context import BoboContext
 
 
 if TYPE_CHECKING:
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 
 class BoboHelpSelect(discord.ui.Select[BaseView]):
     def __init__(
-        self, ctx: BoboContext, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
+        self, ctx: Context, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
     ) -> None:
         options = [
             discord.SelectOption(
@@ -78,7 +77,8 @@ class BoboHelpSelect(discord.ui.Select[BaseView]):
             await pages.start(self.ctx)
 
 
-class BoboHelpCommand(HelpCommand[BoboContext]):
+
+class BoboHelpCommand(HelpCommand[Context]):
     async def send_bot_help(
         self, mapping: dict[Cog | None, list[Command[Cog, ..., Any]]]
     ):
@@ -93,25 +93,17 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
 
     @staticmethod
     def get_bot_help(
-        ctx: BoboContext, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
+        ctx: Context, mapping: dict[Cog, list[Command[Cog, ..., Any]]]
     ) -> tuple[discord.Embed, BaseView]:
         view = BaseView(user_id=ctx.author.id)
 
         view.add_item(BoboHelpSelect(ctx, mapping))
 
-        embed = ctx.embed(  # type: ignore
+        embed = ctx.embed( # type: ignore
             title='Help Command',
             description=f'[Invite]({INVITE_LINK}) | [Support]({SUPPORT_SERVER})\n\n',
         )
-        embed.add_field(
-            name='Categories',
-            value='\n'.join(
-                '**' + cog.qualified_name + '**'
-                for cog in mapping.keys()
-                if getattr(cog, 'ignore', False) is False
-            ),
-            inline=False,
-        )
+        embed.add_field(name='Categories', value='\n'.join('**' + cog.qualified_name + '**' for cog in mapping.keys() if getattr(cog, 'ignore', False) is False), inline=False)
         embed.set_thumbnail(
             url='https://raw.githubusercontent.com/Roo-Foundation/roo/main/roos/rooThink.png'
         )
@@ -119,7 +111,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
         return embed, view
 
     @staticmethod
-    def format_commands(ctx: BoboContext, commands: list[Command]) -> list[str]:
+    def format_commands(ctx: Context, commands: list[Command]) -> list[str]:
         formatted_commands = [
             f'**{ctx.clean_prefix}{command.qualified_name} {command.signature}**\n{command.description or command.short_doc or "No Help Provided"}\n\u200b'
             for command in commands
@@ -128,7 +120,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
         return formatted_commands
 
     @staticmethod
-    def get_cog_help(ctx: BoboContext, cog: Cog) -> list[str]:
+    def get_cog_help(ctx: Context, cog: Cog) -> list[str]:
         commands = cog.get_commands()
 
         res = [f'Total Commands in this Cog: {len(commands)}\n\u200b']
@@ -146,7 +138,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
         await pages.start(self.context)
 
     async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
-        embed = self.context.embed(  # type: ignore
+        embed = self.context.embed( # type: ignore
             title=f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
         )
         embed.description = (
@@ -169,7 +161,7 @@ class BoboHelpCommand(HelpCommand[BoboContext]):
 
         embed.add_field(name='Useable by you', value=str(can_run))
         embed.add_field(
-            name='Usage', value=await self.context.get_command_usage(command)  # type: ignore
+            name='Usage', value=await self.context.get_command_usage(command) # type: ignore
         )
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 
