@@ -52,7 +52,7 @@ def hooked_wrapped_callback(command, ctx, coro):
                 async for ret in coro(*args, **kwargs):
                     yield ret
             else:
-                yield await coro(*args, **kwargs)
+                return await coro(*args, **kwargs)
         except commands.CommandError:
             ctx.command_failed = True
             raise
@@ -91,7 +91,7 @@ class BoboBotCommand(commands.Command):
             async for item in injected(*ctx.args, **ctx.kwargs):
                 yield item
         else:
-            yield await injected(*ctx.args, **ctx.kwargs)
+            return await injected(*ctx.args, **ctx.kwargs)
 
 
 def command(name=None, cls=BoboBotCommand, **attrs):
