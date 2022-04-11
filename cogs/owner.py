@@ -1,11 +1,12 @@
+import importlib
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
 from io import StringIO
 
+from core import BoboContext, Cog, Regexs, Timer, command, unique_list
 from discord import File
-from tabulate import tabulate # type: ignore
+from tabulate import tabulate  # type: ignore
 
-from core import Cog, BoboContext, command, Regexs, Timer
 
 class Owner(Cog):
     def cog_check(self, ctx: BoboContext) -> bool:
@@ -20,19 +21,27 @@ class Owner(Cog):
         stdout, stderr = stdout.decode(), stderr.decode()
         res = f'```\n{stdout}\n\n{stderr}```'
 
-        cogs = Regexs.COG_REGEX.findall(res)
-        for cog in cogs:
+        files_to_reload = unique_list(Regexs.FILES_TO_RELOAD_REGEX.findall(res))
+
+        for file_to_reload in files_to_reload:
+            mod = file_to_reload.replace('/', '.').replace('.py', '')
+            if mod.startswith('cogs'):
+                try:
+                    if mod in self.bot.extensions:
+                        await self.bot.reload_extension(mod)
+                    else:
+                        await self.bot.load_extension(mod)
+                except Exception as e:
+                    res += f'\n{mod!r} failed to reload: {e}'
+
             try:
-                cog_file = cog.replace('/', '.').replace('.py', '')
-                if cog_file in self.bot.extensions:
-                    await self.bot.reload_extension(cog_file)
-                else:
-                    await self.bot.load_extension(cog_file)
+                lib = importlib.import_module(mod)
+                importlib.reload(lib)
             except Exception as e:
-                res += f'\n{cog!r} failed to reload: {e}'
+                res += f'\n{mod!r} failed to reload: {e}'
         
         embed = ctx.embed(title='Pulled from Github', description=res)
-        embed.add_field(named='Reloaded Cog(s)', value=', '.join(cogs) if cogs else 'No Cog reloaded')
+        embed.add_field(name='Reloaded File(s)', value=', '.join(files_to_reload) if files_to_reload else 'No File reloaded')
 
         return embed
     
