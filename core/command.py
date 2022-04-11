@@ -1,14 +1,24 @@
+from __future__ import annotations
+
 import asyncio
 import functools
 import inspect
 
+from typing import TYPE_CHECKING
+
 import discord
 from discord.ext import commands
 
-__all__ = ('BoboBotCommand', 'command')
+if TYPE_CHECKING:
+    from typing import Any, AsyncGenerator, Callable, Type
+    from core.context import BoboContext
+    from core.types import OUTPUT_TYPE
 
 
-def user_permissions_predicate(ctx):
+__all__ = ('BoboBotCommand', 'command', 'group')
+
+
+def user_permissions_predicate(ctx: BoboContext) -> bool:
     perms = {
         'send_messages': True,
     }
@@ -24,7 +34,7 @@ def user_permissions_predicate(ctx):
     raise commands.MissingPermissions(missing)
 
 
-def bot_permissions_predicate(ctx):
+def bot_permissions_predicate(ctx: BoboContext) -> bool:
     perms = {
         'send_messages': True,
         'attach_files': True,
@@ -44,9 +54,9 @@ def bot_permissions_predicate(ctx):
     raise commands.BotMissingPermissions(missing)
 
 
-def hooked_wrapped_callback(command, ctx, coro):
+def hooked_wrapped_callback(command, ctx: BoboContext, coro: Callable[[Any], Any]) -> Callable[[Any, Any], AsyncGenerator[OUTPUT_TYPE]]:
     @functools.wraps(coro)
-    async def wrapped(*args, **kwargs):
+    async def wrapped(*args: Any, **kwargs: Any) -> AsyncGenerator[OUTPUT_TYPE]:
         try:
             if inspect.isasyncgenfunction(coro):
                 async for ret in coro(*args, **kwargs):
@@ -72,13 +82,13 @@ def hooked_wrapped_callback(command, ctx, coro):
 
 
 class BoboBotCommand(commands.Command):
-    def __init__(self, func, **kwargs):
+    def __init__(self, func: Any, **kwargs: Any) -> None:
         super().__init__(func, **kwargs)
 
         self.checks.append(bot_permissions_predicate)
         self.checks.append(user_permissions_predicate)
 
-    async def invoke(self, ctx):
+    async def invoke(self, ctx: BoboContext) -> AsyncGenerator[OUTPUT_TYPE]:
         await self.prepare(ctx)
 
         # terminate the invoked_subcommand chain.
@@ -91,7 +101,21 @@ class BoboBotCommand(commands.Command):
             yield item
 
 
-def command(name=None, cls=BoboBotCommand, **attrs):
+class Group(commands.Group):
+    def command(self, *args: Any, **kwargs: Any) -> Any:
+        if 'cls' not in kwargs:
+            kwargs['cls'] = BoboBotCommand
+        
+        return super().command(*args, **kwargs)
+
+
+@discord.utils.copy_doc(commands.command)
+def command(name=None, cls=BoboBotCommand, **attrs) -> BoboBotCommand:
     return commands.command(name=name, cls=cls, **attrs)
 
-command.__doc__ = commands.command.__doc__
+@discord.utils.copy_doc(commands.group)
+def group(name: str | None = None, cls: Type[commands.Group] | None = None, **attrs: Any) -> Any:
+    if not cls:
+        cls = Group
+    
+    return command(name=name, cls=cls, **attrs)

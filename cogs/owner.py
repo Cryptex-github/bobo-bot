@@ -5,7 +5,7 @@ from core import Cog, BoboContext, command, Regexs
 
 class Owner(Cog):
     async def cog_check(self, ctx: BoboContext) -> bool:
-        return not ctx.author.id == self.bot.owner_id
+        return await self.bot.is_owner(ctx.author)
     
     @command()
     async def pull(self, ctx: BoboContext):
@@ -19,7 +19,12 @@ class Owner(Cog):
         cogs = Regexs.COG_REGEX.findall(res)
         for cog in cogs:
             try:
-                self.bot.reload_extension(cog.replace('/', '.').replace('.py', ''))
+                cog_file = cog.replace('/', '.').replace('.py', '')
+                if cog_file in self.bot.extensions:
+                    self.bot.reload_extension(cog_file)
+                else:
+                    self.bot.load_extension(cog_file)
+
             except Exception as e:
                 res += f'\n{cog!r} failed to reload: {e}'
         
@@ -27,7 +32,5 @@ class Owner(Cog):
         embed.add_field(name='Reloaded Cog(s)', value=', '.join(cogs) if cogs else 'No Cog reloaded')
 
         return embed
-
-
 
 setup = Owner.setup

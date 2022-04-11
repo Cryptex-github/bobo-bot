@@ -1,23 +1,30 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import discord
 from discord.ext import commands
 
-from .view import ConfrimView
+from .view import ConfirmView
 from .button import DeleteButton
+
+if TYPE_CHECKING:
+    from typing import Any
 
 __all__ = ('BoboContext',)
 
 class BoboContext(commands.Context):
-    async def confrim(self, content=None, timeout=60, **kwargs):
-        view = ConfrimView(timeout=timeout, user_id=self.author.id)
+    async def confirm(self, content: str | None = None, timeout: int | None = 60, **kwargs: Any) -> bool:
+        view = ConfirmView(timeout=timeout, user_id=self.author.id)
         await self.send(content, view=view, **kwargs)
         await view.wait()
 
         return bool(view.value)
 
-    async def paste(self, content):
+    async def paste(self, content: Any) -> str:
         return str(await self.bot.mystbin.post(str(content)))
 
-    async def send(self, content=None, **kwargs):
+    async def send(self, content: str | None = None, **kwargs: Any) -> discord.Message:
         codeblock = kwargs.pop('codeblock', False)
         lang = kwargs.pop('lang', 'py')
         can_delete = kwargs.pop('can_delete', False)
@@ -29,10 +36,31 @@ class BoboContext(commands.Context):
 
         if codeblock:
             content = f'```{lang}\n' + str(content) + '\n```'
+        
+        if self.message.edited_at:
+            if message := await self.bot.delete_message_manager.get_messages(self.message.id, True):
+                if 'file' in kwargs or 'files' in kwargs:
+                    # Can't edit message to send file, so send a new message.
+                    m = await super().send(content, **kwargs)
+                    await self.bot.delete_message_manager.add_message(self.message.id, m.id)
 
-        return await super().send(content, **kwargs)
+                    return m
+                
+                m = self.channel.get_partial_message(message)
+
+                return await m.edit(content=content, **kwargs)
+
+        m = await super().send(content, **kwargs)
+        await self.bot.delete_message_manager.add_message(self.message.id, m.id)
+
+        return m
     
-    def embed(self, **kwargs):
+    async def reply(self, content: str | None, **kwargs: Any) -> discord.Message:
+        kwargs['reference'] = self.message
+
+        return await self.send(content, **kwargs)
+    
+    def embed(self, **kwargs) -> discord.Embed:
         if 'color' not in kwargs:
             kwargs['color'] = self.bot.color
 
