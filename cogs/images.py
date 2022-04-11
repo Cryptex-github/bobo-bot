@@ -150,12 +150,13 @@ class Images(Cog):
                             fmt = 'gif'
                         else:
                             fmt = 'png'
-
+                        
+                        await ctx.send(endpoint)
                         return f'Process Time: {round(float(resp.headers["Process-Time"]) * 1000, 3)}ms', File(BytesIO(await resp.read()), f'bobo_bot_{endpoint}.{fmt}')
 
                     if resp.status == 400:
                         return (await resp.json())['message']
-                    
+
                     return await resp.text()
 
             self.__cog_commands__ += image_endpoint_command,
