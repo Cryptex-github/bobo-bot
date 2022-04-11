@@ -70,7 +70,7 @@ class BoboBot(commands.Bot):
         elif ctx.invoked_with:
             exc = commands.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch('command_error', ctx, exc)
-    
+
     async def process_output(self, ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
         if output is None:
             return

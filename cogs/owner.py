@@ -24,6 +24,7 @@ class Owner(Cog):
                     self.bot.reload_extension(cog_file)
                 else:
                     self.bot.load_extension(cog_file)
+
             except Exception as e:
                 res += f'\n{cog!r} failed to reload: {e}'
         
