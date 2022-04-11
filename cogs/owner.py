@@ -1,7 +1,7 @@
 import importlib
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
-from io import StringIO
+from io import BytesIO
 
 from core import BoboContext, Cog, Regexs, Timer, command, unique_list
 from discord import File
@@ -60,7 +60,7 @@ class Owner(Cog):
         if res <= 2000:
             return res, True
         
-        return File(StringIO(fmted), filename='sql.txt'), True
+        return File(BytesIO(fmted.encode('utf-8')), filename='sql.txt'), True
         
 
 

@@ -5,17 +5,18 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-from .view import ConfirmView
+from .view import ConfirmView, BaseView
 from .button import DeleteButton
 
 if TYPE_CHECKING:
     from typing import Any
     from core.command import BoboBotCommand
+    from core.bot import BoboBot
 
 __all__ = ('BoboContext',)
 
-class BoboContext(commands.Context):
-    async def confirm(self, content: str | None = None, timeout: int | None = 60, **kwargs: Any) -> bool:
+class BoboContext(commands.Context[BoboBot]): # type: ignore
+    async def confirm(self, content: str | None = None, timeout: int = 60, **kwargs: Any) -> bool:
         view = ConfirmView(timeout=timeout, user_id=self.author.id)
         await self.send(content, view=view, **kwargs)
         await view.wait()
@@ -37,8 +38,8 @@ class BoboContext(commands.Context):
         can_delete = kwargs.pop('can_delete', False)
 
         if can_delete:
-            view = kwargs.get('view', discord.ui.View())
-            view.add_item(DeleteButton(self.user.id))
+            view = kwargs.get('view', BaseView(self.author.id))
+            view.add_item(DeleteButton(self.author.id))
             kwargs['view'] = view
 
         if codeblock:
@@ -53,7 +54,7 @@ class BoboContext(commands.Context):
 
                     return m
                 
-                m = self.channel.get_partial_message(message)
+                m = self.channel.get_partial_message(message)  # type: ignore
 
                 return await m.edit(content=content, **kwargs)
 

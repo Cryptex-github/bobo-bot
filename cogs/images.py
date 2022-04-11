@@ -26,6 +26,9 @@ class ImageResolver:
                         return url
                     if url := embed.thumbnail.url:
                         return url
+                elif embed.type == 'article':
+                    if url := embed.thumbnail.url:
+                        return url
 
         if attachments := message.attachments:
             for attachment in attachments:

@@ -22,11 +22,11 @@ class MetaTask(commands.CogMeta):
             if issubclass(value.__class__, tasks.Loop):
                 _inner_tasks.append(value)
 
-        new_cls.__tasks__ = _inner_tasks
+        new_cls.__tasks__ = _inner_tasks  # type: ignore
         return new_cls
 
     def _unload_tasks(cls):
-        for task in cls.__tasks__:
+        for task in cls.__tasks__:  # type: ignore
             coro = task.__dict__.get('coro')
             __log__.info(
                 f'Stopping task {coro.__name__} after {task.current_loop} intervals.'
@@ -36,10 +36,10 @@ class MetaTask(commands.CogMeta):
             if task.is_running():
                 task.cancel()
                 _tasks.append(task._task)
-            loop.create_task(asyncio.gather(*_tasks))
+            loop.create_task(asyncio.gather(*_tasks))  # type: ignore
 
     def _load_tasks(cls, self):
-        for task in cls.__tasks__:
+        for task in cls.__tasks__:  # type: ignore
             coro = task.__dict__.get('coro')
             __log__.info(
                 f'Stopping task {coro.__name__} after {task.current_loop} intervals.'
@@ -52,6 +52,9 @@ class Cog(commands.Cog, metaclass=MetaTask):
     def __init__(self, bot):
         self.bot = bot
         self.__class__._load_tasks(self)
+    
+    async def unload(self):
+        ...
 
     async def cog_unload(self):
         self.__class__._unload_tasks()

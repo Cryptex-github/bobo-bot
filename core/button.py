@@ -1,3 +1,4 @@
+from operator import truediv
 import discord
 
 from config import Emojis
@@ -14,8 +15,8 @@ class DeleteButton(discord.ui.Button):
         )
 
     async def interaction_check(self, interaction) -> bool:
-        if interaction.user.id != self.user_id:
-            return
+        return interaction.user.id == self.user_id
 
     async def callback(self, interaction) -> None:
-        await interaction.message.delete()
+        if interaction.message:
+            await interaction.message.delete()

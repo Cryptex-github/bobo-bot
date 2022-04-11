@@ -24,6 +24,11 @@ class BaseView(discord.ui.View):
             return False
         
         return True
+    
+    async def disable_all(self, interaction: Interaction) -> None:
+        self._disable_all()
+
+        await interaction.response.edit_message(view=self)
 
     def _disable_all(self) -> None:
         for i in self.children:
