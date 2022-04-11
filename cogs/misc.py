@@ -17,7 +17,7 @@ class Misc(Cog):
     @command()
     async def ping(self, ctx: BoboContext) -> str:
         """Pong!"""
-        res = await self.bot.self_test(ctx)
+        res = await self.bot.self_test()
 
         return dedent(f"""
             PostgreSQL latency: {res.postgres}ms
