@@ -16,6 +16,10 @@ if TYPE_CHECKING:
     from asyncio import Task
 
 
+class JumpToPage(discord.ui.Modal, title='Jump To Page'):
+    page = discord.ui.TextInput(label='Page Number', placeholder='Enter page number here.')
+
+
 class ViewMenu(menus.Menu):
     def __init__(self, *, auto_defer: bool = True, **kwargs):
         self.extra_component = kwargs.pop('extra_component', None)
@@ -67,6 +71,20 @@ class ViewMenu(menus.Menu):
         
         if self.extra_component:
             view.add_item(self.extra_component)
+        
+        async def _callback(interaction: Interaction) -> None:
+            modal = JumpToPage()
+            async def on_submit(interaction) -> None:
+                try:
+                    await self.show_checked_page(int(modal.page)) # type: ignore
+                except ValueError:
+                    pass
+
+            modal.on_submit = on_submit
+            await interaction.response.send_modal(modal)
+
+        button = discord.ui.Button(style=discord.ButtonStyle.primary, label='Jump', row=2)
+        button.callback = _callback
 
         self.view = view
         return view

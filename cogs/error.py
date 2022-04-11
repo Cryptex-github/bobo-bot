@@ -23,6 +23,9 @@ class ErrorHandler(Cog):
                 content = f'error: {content}\n --> {command}'
 
             await ctx.send(f'```py\n{content}\nerror: Aborting due to previous error.\n```')
+        
+        if isinstance(error, commands.CommandNotFound):
+            return
 
         if isinstance(error, commands.CommandOnCooldown):
             await send(f'You are on cooldown, try again in {error.retry_after:.2f} seconds.')
