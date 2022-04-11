@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from discord import StickerFormatType
+from discord import StickerFormatType, DeletedReferencedMessage
 from discord.ext.commands import PartialEmojiConverter, PartialEmojiConversionFailure, UserConverter, UserNotFound
 
-from core import Regexs
+from core import Cog, Regexs
 
 if TYPE_CHECKING:
-    from discord import Message, User
+    from discord import Message, User, Member
     from core import BoboContext
 
 class ImageResolver:
@@ -45,11 +47,11 @@ class ImageResolver:
 
         return None
     
-    def to_avatar(self, author: User) -> str:
+    def to_avatar(self, author: User | Member) -> str:
         if self.static:
-            return author.display_avatar.with_format('png')
+            return author.display_avatar.with_format('png').url
         
-        return author.display_avatar.with_static_format('png')
+        return author.display_avatar.with_static_format('png').url
     
     async def parse_content(self, content: str) -> str | None:
         ctx = self.ctx
@@ -86,18 +88,31 @@ class ImageResolver:
         return None
 
 
-    async def get_image(self, arg: str = None) -> str:
+    async def get_image(self, arg: str | None = None) -> str:
         if ref := self.ctx.message.reference:
-            if res := self.check_attachments(ref.resolved):
-                return res
+            message = ref.resolved
+
+            if isinstance(message, DeletedReferencedMessage) and ref.message_id:
+                message = await self.ctx.channel.fetch_message(ref.message_id)
+            
+            if message and not isinstance(message, DeletedReferencedMessage):
+                if res := await self.check_attachments(message):
+                    return res
         
-        if res := self.check_attachments(self.ctx.message):
+        if res := await self.check_attachments(self.ctx.message):
             return res
         
         if not arg:
-            return self.fallback_to_avatar(self.ctx.author)
+            return self.to_avatar(self.ctx.author)
         
         if res := await self.parse_content(arg):
             return res
         
         return self.to_avatar(self.ctx.author)
+
+
+class Images(Cog):
+    ...
+
+
+setup = Images.setup
