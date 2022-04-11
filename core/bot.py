@@ -19,12 +19,12 @@ from core.command import BoboBotCommand
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 
-
 __log__ = logging.getLogger("BoboBot")
-__all__ = ("BoboBot",)
+__all__ = ("BoboBot", )
 
 
 class BoboBot(commands.Bot):
+
     def __init__(self):
         self.connector = aiohttp.TCPConnector(limit=200)
         self.logger = __log__
@@ -55,16 +55,14 @@ class BoboBot(commands.Bot):
                         await ctx.command.invoke(ctx)
                 else:
                     raise commands.CheckFailure(
-                        "The global check once functions failed."
-                    )
+                        "The global check once functions failed.")
             except commands.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
                 self.dispatch("command_completion", ctx)
         elif ctx.invoked_with:
             exc = commands.CommandNotFound(
-                f'Command "{ctx.invoked_with}" is not found'
-            )  # type: ignore
+                f'Command "{ctx.invoked_with}" is not found')  # type: ignore
             self.dispatch("command_error", ctx, exc)
 
     async def process_output(self, ctx, output):
@@ -75,7 +73,7 @@ class BoboBot(commands.Bot):
         des = ctx.send
 
         if not isinstance(output, tuple):
-            output = (output,)
+            output = (output, )
 
         for i in output:
             if isinstance(i, discord.Embed):
@@ -116,13 +114,11 @@ class BoboBot(commands.Bot):
 
         if not getattr(command._buckets, "_cooldown", None):
             command._buckets = commands.CooldownMapping.from_cooldown(
-                1, 3, commands.BucketType.user
-            )
+                1, 3, commands.BucketType.user)
 
         if command._max_concurrency is None:
             command._max_concurrency = MaxConcurrency(
-                1, per=commands.BucketType.user, wait=False
-            )
+                1, per=commands.BucketType.user, wait=False)
 
     async def setup(self):
         await self.initialize_constants()

@@ -15,7 +15,8 @@ def user_permissions_predicate(ctx):
     permissions = ctx.channel.permissions_for(ctx.author)
 
     missing = [
-        perm for perm, value in perms.items() if getattr(permissions, perm) != value
+        perm for perm, value in perms.items()
+        if getattr(permissions, perm) != value
     ]
 
     if not missing:
@@ -35,7 +36,8 @@ def bot_permissions_predicate(ctx):
     permissions = ctx.channel.permissions_for(me)
 
     missing = [
-        perm for perm, value in perms.items() if getattr(permissions, perm) != value
+        perm for perm, value in perms.items()
+        if getattr(permissions, perm) != value
     ]
 
     if not missing:
@@ -45,6 +47,7 @@ def bot_permissions_predicate(ctx):
 
 
 def hooked_wrapped_callback(command, ctx, coro):
+
     @functools.wraps(coro)
     async def wrapped(*args, **kwargs):
         try:
@@ -72,6 +75,7 @@ def hooked_wrapped_callback(command, ctx, coro):
 
 
 class BoboBotCommand(commands.Command):
+
     def __init__(self, func, **kwargs):
         super().__init__(func, **kwargs)
 

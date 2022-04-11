@@ -4,10 +4,11 @@ from discord.ext import commands
 from .button import DeleteButton
 from .view import ConfrimView
 
-__all__ = ("BoboContext",)
+__all__ = ("BoboContext", )
 
 
 class BoboContext(commands.Context):
+
     async def confrim(self, content=None, timeout=60, **kwargs):
         view = ConfrimView(timeout=timeout, user_id=self.author.id)
         await self.send(content, view=view, **kwargs)
