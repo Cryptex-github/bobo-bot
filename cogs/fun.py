@@ -14,7 +14,14 @@ from core.utils import cutoff
 
 if TYPE_CHECKING:
     from core.context import BoboContext
-    from discord import Embed
+    from discord import Embed, Interaction
+    from discord.ui import Button
+
+    from core.types import OutputType
+
+    from typing import TypeVar
+
+    EmbedT = TypeVar('EmbedT', bound=Embed)
 
 
 class AkinatorOptionsView(BaseView):
@@ -257,7 +264,7 @@ class Fun(Cog):
             return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
     
     @staticmethod
-    def process_reddit_post(ctx, _js) -> OUTPUT_TYPE:
+    def process_reddit_post(ctx, _js) -> OutputType:
         js = _js[0]['data']['children'][0]['data']
 
         embed = ctx.embed(
@@ -296,7 +303,7 @@ class Fun(Cog):
         return embed
 
     @group(aliases=['r'])
-    async def reddit(self, ctx: BoboContext, url: str | None = None) -> str | Embed | None:
+    async def reddit(self, ctx: BoboContext, url: str | None = None) -> OutputType:
         if not url:
             return await ctx.send_help(ctx.command)
         
@@ -316,18 +323,17 @@ class Fun(Cog):
 
             embed.set_footer(text=f'\U0001f815 {js["ups"]} | {js["num_comments"]} comments')
 
-            if js.get('url_overridden_by_dest'):
-                embed.set_image(url=js['url_overridden_by_dest'])
+    @reddit.command(name='random', aliases=['r'])
+    async def reddit_random(self, ctx, subreddit: str) -> OutputType:
+        while not self.bot.is_closed():
+            async with self.bot.session.get(f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1') as resp:
+                if resp.status != 200:
+                    return 'Invalid subreddit'
             
-            return embed
+                res = self.process_reddit_post(ctx, await resp.json())
+                if res == 'This post is NSFW and this is an non-NSFW channel.':
+                    continue
 
-
-
-
-
-        
-        
-
-
+                return res
 
 setup = Fun.setup

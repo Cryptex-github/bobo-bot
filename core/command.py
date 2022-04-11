@@ -13,7 +13,7 @@ from core.constants import REPLY, CAN_DELETE, SAFE_SEND
 if TYPE_CHECKING:
     from typing import Any, AsyncGenerator, Callable, TypeVar, ParamSpec
     from core.context import BoboContext
-    from core.types import OUTPUT_TYPE
+    from core.types import OutputType
     from core.cog import Cog
 
     P = ParamSpec('P')
@@ -60,7 +60,7 @@ def bot_permissions_predicate(ctx: BoboContext) -> bool:
     raise commands.BotMissingPermissions(missing)
 
 
-async def process_output(ctx: BoboContext, output: OUTPUT_TYPE | None) -> None:
+async def process_output(ctx: BoboContext, output: OutputType | None) -> None:
     if output is None:
         return
 
@@ -109,8 +109,8 @@ async def _command_callback(
 
 
 def command_callback(
-    func: Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]
-) -> Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]:
+    func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]
+) -> Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]:
     @functools.wraps(func)
     async def wrapper(self: Cog, ctx: BoboContext, *args: Any, **kwargs: Any) -> None:
         await _command_callback(ctx, func(self, ctx, *args, **kwargs))
@@ -133,8 +133,8 @@ class GroupCommand(commands.Group):
     def command(
         self, *args: Any, **kwargs: Any
     ) -> Callable[
-        [Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]]],
-        Callable[..., Awaitable[OUTPUT_TYPE] | AsyncGenerator[OUTPUT_TYPE, Any]],
+        [Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]],
+        Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]],
     ]:
         def wrapper(func) -> commands.Command:
             if 'parent' not in kwargs:

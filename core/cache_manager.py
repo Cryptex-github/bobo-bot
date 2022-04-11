@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, Dict
 
 if TYPE_CHECKING:
     from aioredis import Redis
-    from .types import POSSIBLE_RTFM_SOURCES
+    from .types import PossibleRTFMSources
 
 __all__ = ('DeleteMessageManager', 'RTFMCacheManager', 'ReactionRoleManager')
 
@@ -50,14 +50,14 @@ class RTFMCacheManager(RedisCacheManager):
     __slots__ = ()
 
     async def add(
-        self, source: POSSIBLE_RTFM_SOURCES, query: str, nodes: Dict[str, str]
+        self, source: PossibleRTFMSources, query: str, nodes: Dict[str, str]
     ) -> None:
         await self.redis.hmset(f'rtfm:{source}:{query}', nodes)
 
         await self.redis.expire(f'rtfm:{source}:{query}', 86400)
 
     async def get(
-        self, source: POSSIBLE_RTFM_SOURCES, query: str
+        self, source: PossibleRTFMSources, query: str
     ) -> Dict[str, str] | None:
         return (
             await self.redis.hgetall(f'rtfm:{source}:{query}')
