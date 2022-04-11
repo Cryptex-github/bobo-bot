@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import logging
 import os
-from typing import TYPE_CHECKING
+from collections import namedtuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import aiohttp
 import aioredis
@@ -11,8 +14,11 @@ import mystbin
 import uvloop
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
+from requests_html import AsyncHTMLSession
 
-from core import BoboBotCommand, DeleteMessageManager
+from core.cache_manager import DeleteMessageManager
+from core.command import BoboBotCommand
+from core.utils import Timer
 
 if TYPE_CHECKING:
     from core import OUTPUT_TYPE
@@ -109,6 +115,7 @@ class BoboBot(commands.Bot):
     def initialize_libaries(self):
         self.context = BoboContext
         self.mystbin = mystbin.Client(session=self.session)
+        self.html_session = AsyncHTMLSession()
     
     async def initialize_constants(self):
         self.color = 0xFF4500
@@ -171,6 +178,8 @@ class BoboBot(commands.Bot):
         self.unload_all_extensions()
         await self.db.close()
         await self.session.close()
+        await self.redis.close()
+        await self.html_session.close()
         
         await super().close()
 
