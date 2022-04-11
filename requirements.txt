@@ -3,3 +3,4 @@ git+https://github.com/Gorialis/jishaku
 asyncpg
 psutil
 mystbin.py
+aioredis[hiredis]
