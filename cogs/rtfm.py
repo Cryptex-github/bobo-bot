@@ -6,7 +6,6 @@ from io import BytesIO
 from typing import Dict, Iterator, List, Tuple
 
 import discord
-from discord.ext import commands
 from discord.ext.menus import ListPageSource
 from discord.ext.menus.views import ViewMenuPages
 
