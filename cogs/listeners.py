@@ -1,9 +1,15 @@
+from datetime import datetime
+
 import discord
 from discord.ext import commands
 
 from core import Cog
 
 class Listeners(Cog):
+    async def cog_load(self):
+        if not await self.redis.get('events_start_time'):
+            await self.redis.set('events_start_time', datetime.now().timestamp())
+
     @Cog.listener()
     async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent) -> None:
         if messages := self.bot.delete_message_manager.get_messages(payload.message_id):
@@ -14,5 +20,9 @@ class Listeners(Cog):
                     await self.bot.http.delete_message(payload.channel_id, m)
             
             await self.bot.delete_message_manager.delete_messages(payload.message_id)
+
+    @Cog.listener()
+    async def on_socket_event_type(self, event: str) -> None:
+        await self.bot.redis.incr(f'events:{event}')
 
 setup = Listeners.setup
