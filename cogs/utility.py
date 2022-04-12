@@ -114,6 +114,12 @@ class Utility(Cog):
 
         return_code_map = {137: 'SIGKILL', 255: 'Fatal Error'}
 
+        if language in ('python3', 'py', 'python'):
+            with open('./assets/code_eval_prepend.py', 'r') as f:
+                code_to_prepend = f.read()
+
+                code_ = code_to_prepend.replace('# code to evaluate', code_)
+
         async with self.bot.session.post(
             'https://eval.bobobot.cf/eval', json={'input': code_}
         ) as resp:
