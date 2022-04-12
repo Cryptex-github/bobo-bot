@@ -122,8 +122,8 @@ class Utility(Cog):
             ```{language}
             {json['stdout']}
 
-
             Return code: {return_code} {"(" + return_code_map[return_code] + ")" if return_code != 0 else ''}
+            ```
             """
             )
 
