@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import discord
 from textwrap import dedent
+from jishaku.codeblocks import codeblock_converter
 
 from core import Cog, command
 
@@ -94,6 +95,37 @@ class Utility(Cog):
         embed.add_field(name='Guild Informations', value=guild_field)
 
         return embed
+
+    @command(aliases=['eval', 'run'])
+    async def evaluate(self, ctx, code: str) -> str:
+        """
+        Evaluate code.
+
+        Currently, the only supported language is `python3`
+        """
+        language, code = codeblock_converter(code)
+
+        if language not in ('python3', 'py', 'python'):
+            return f'Language `{language}` is not supported.'
+
+        return_code_map = {137: 'SIGKILL', 255: 'Fatal Error'}
+
+        async with self.bot.session.post(
+            'https://eval.bobobot.cf/eval', json={'input': code}
+        ) as resp:
+            json = await resp.json()
+
+            return_code = json['returncode']
+
+            return dedent(
+                f"""
+            ```{language}
+            {json['output']}
+
+
+            Return code: {return_code} {"(" + return_code_map[return_code] + ")" if return_code != 0 else ''}
+            """
+            )
 
 
 setup = Utility.setup
