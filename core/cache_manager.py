@@ -25,14 +25,11 @@ class DeleteMessageManager(RedisCacheManager):
     __slots__ = ()
 
     async def get_messages(self, message_id: int, one_only: bool = False) -> List[int]:
-        return list(
-            map(
-                int,
-                await self.redis.lrange(
-                    f'delete_messages:{message_id}', 0, 0 if one_only else -1
-                ),
+        return [
+            int(i) for i in await self.redis.lrange(
+                f'delete_messages:{message_id}', 0, 0 if one_only else -1
             )
-        )
+        ]
 
     async def add_message(self, message_id: int, message_maybe_delete: int) -> None:
         await self.redis.lpush(f'delete_messages:{message_id}', message_maybe_delete)
