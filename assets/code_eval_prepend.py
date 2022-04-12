@@ -7,12 +7,12 @@ class User:
     
 author = User()
 
-class HttpClient:
+class HTTPClient:
     token = 'why art thou suspicious'
 
 class Bot:
     user = author
-    http = HttpClient()
+    http = HTTPClient()
 
 bot = Bot()
 
