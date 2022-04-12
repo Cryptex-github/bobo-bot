@@ -14,5 +14,6 @@ class Bot:
     user = author
     http = HttpClient()
 
+bot = Bot()
 
 # code to evaluate
