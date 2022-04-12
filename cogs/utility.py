@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from discord.ext.commands import param
 from textwrap import dedent
 from jishaku.codeblocks import codeblock_converter
 
@@ -97,13 +98,13 @@ class Utility(Cog):
         return embed
 
     @command(aliases=['eval', 'run'])
-    async def evaluate(self, ctx, code: str) -> str:
+    async def evaluate(self, ctx, *, code: tuple[str, str] = param(converter=codeblock_converter)) -> str:
         """
         Evaluate code.
 
         Currently, the only supported language is `python3`
         """
-        language, code = codeblock_converter(code)
+        language, code_ = code
 
         if language not in ('python3', 'py', 'python'):
             return f'Language `{language}` is not supported.'
@@ -111,14 +112,15 @@ class Utility(Cog):
         return_code_map = {137: 'SIGKILL', 255: 'Fatal Error'}
 
         async with self.bot.session.post(
-            'https://eval.bobobot.cf/eval', json={'input': code}
+            'https://eval.bobobot.cf/eval', json={'input': code_}
         ) as resp:
             json = await resp.json()
 
             return_code = json['returncode']
 
             return dedent(
-                f"""```{language}
+                f"""
+            ```{language}
             {json['stdout']}
 
             Return code: {return_code} {"(" + return_code_map[return_code] + ")" if return_code != 0 else ''}
