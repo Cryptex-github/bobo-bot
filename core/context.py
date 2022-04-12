@@ -36,7 +36,7 @@ class BoboContext(commands.Context['BoboBot']):
         )
 
         if res:
-            return res.url
+            return res.paste_url
 
         return str(await self.bot.mystbin.post(content))
 

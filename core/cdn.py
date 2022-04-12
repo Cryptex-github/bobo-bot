@@ -35,6 +35,10 @@ class CDNEntry(NamedTuple):
     def url(self) -> str:
         return BASE_URL + '/uploads' + self.path
 
+    @property
+    def paste_url(self) -> str:
+        return BASE_URL + '/pastes' + self.path
+
     def __str__(self) -> str:
         return self.url
 
