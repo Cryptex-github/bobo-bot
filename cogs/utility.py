@@ -117,9 +117,8 @@ class Utility(Cog):
 
             return_code = json['returncode']
 
-            return (
-                f"""
-            ```{language}
+            return dedent(
+                f"""```{language}
             {json['stdout']}
 
             Return code: {return_code} {"(" + return_code_map[return_code] + ")" if return_code != 0 else ''}
