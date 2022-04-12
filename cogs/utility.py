@@ -8,6 +8,7 @@ from textwrap import dedent
 from jishaku.codeblocks import codeblock_converter
 
 from core import Cog, command
+from core.constants import SAFE_SEND, Constant
 
 if TYPE_CHECKING:
     from core.context import BoboContext
@@ -98,7 +99,9 @@ class Utility(Cog):
         return embed
 
     @command(aliases=['eval', 'run'])
-    async def evaluate(self, ctx, *, code: tuple[str, str] = param(converter=codeblock_converter)) -> str:
+    async def evaluate(
+        self, ctx, *, code: tuple[str, str] = param(converter=codeblock_converter)
+    ) -> str | tuple[str, Constant]:
         """
         Evaluate code.
 
@@ -118,13 +121,15 @@ class Utility(Cog):
 
             return_code = json['returncode']
 
-            return dedent(
-                f"""
+            return (
+                dedent(
+                    f"""
             ```{language}
             {json['stdout']}
             Return code: {return_code} {"(" + return_code_map.get(return_code, 'Unknown') + ")" if return_code != 0 else ''}
             ```
             """
+                ), SAFE_SEND
             )
 
 

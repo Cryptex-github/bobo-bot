@@ -18,6 +18,7 @@ from requests_html import AsyncHTMLSession
 
 from core.cache_manager import DeleteMessageManager
 from core.utils import Timer
+from core.cdn import CDNClient
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
@@ -82,6 +83,7 @@ class BoboBot(commands.Bot):
         self.context = BoboContext
         self.mystbin = mystbin.Client(session=self.session)
         self.html_session = AsyncHTMLSession()
+        self.cdn = CDNClient(self)
 
     async def initialize_constants(self):
         self.color = 0xFF4500

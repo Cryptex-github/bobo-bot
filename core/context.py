@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from io import BytesIO
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import Command
@@ -27,7 +29,16 @@ class BoboContext(commands.Context['BoboBot']):
         return bool(view.value)
 
     async def paste(self, content: Any) -> str:
-        return str(await self.bot.mystbin.post(str(content)))
+        content = str(content)
+
+        res = await self.bot.cdn.safe_upload(
+            BytesIO(content.encode('utf-8')), extension='txt', directory='bobo_paste'
+        )
+
+        if res:
+            return res.url
+
+        return str(await self.bot.mystbin.post(content))
 
     async def get_command_usage(self, command: Command) -> int:
         return await self.bot.db.fetchval(
