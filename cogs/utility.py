@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
-from discord.ext.commands import param
+from discord.ext.commands import param, Author
 from textwrap import dedent
 from jishaku.codeblocks import codeblock_converter
 
@@ -17,14 +17,11 @@ if TYPE_CHECKING:
 class Utility(Cog):
     @command(aliases=['ui'])
     async def userinfo(
-        self, ctx: BoboContext, user: discord.Member | discord.User | None = None
+        self, ctx: BoboContext, user: discord.Member | discord.User = Author
     ) -> discord.Embed:
         """
         Get information about a user.
         """
-        if not user:
-            user = ctx.author
-
         user_avatar = user.display_avatar.with_static_format('png').url
 
         embed = ctx.embed()
