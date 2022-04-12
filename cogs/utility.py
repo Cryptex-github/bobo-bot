@@ -3,9 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import discord
+from discord.ext.commands import param
 from textwrap import dedent
+from jishaku.codeblocks import codeblock_converter
 
 from core import Cog, command
+from core.constants import SAFE_SEND, Constant
 
 if TYPE_CHECKING:
     from core.context import BoboContext
@@ -94,6 +97,46 @@ class Utility(Cog):
         embed.add_field(name='Guild Informations', value=guild_field)
 
         return embed
+
+    @command(aliases=['eval', 'run'])
+    async def evaluate(
+        self, ctx, *, code: tuple[str, str] = param(converter=codeblock_converter)
+    ) -> str | tuple[str, Constant]:
+        """
+        Evaluate code.
+
+        Currently, the only supported language is `python3`
+        """
+        language, code_ = code
+
+        if language not in ('python3', 'py', 'python'):
+            return f'Language `{language}` is not supported.'
+
+        return_code_map = {137: 'SIGKILL', 255: 'Fatal Error'}
+
+        if language in ('python3', 'py', 'python'):
+            with open('./assets/code_eval_prepend.py', 'r') as f:
+                code_to_prepend = f.read()
+
+                code_ = code_to_prepend.replace('# code to evaluate', code_)
+
+        async with self.bot.session.post(
+            'https://eval.bobobot.cf/eval', json={'input': code_}
+        ) as resp:
+            json = await resp.json()
+
+            return_code = json['returncode']
+
+            return (
+                dedent(
+                    f"""
+            ```{language}
+            {json['stdout']}
+            Return code: {return_code} {"(" + return_code_map.get(return_code, 'Unknown') + ")" if return_code != 0 else ''}
+            ```
+            """
+                ), SAFE_SEND
+            )
 
 
 setup = Utility.setup
