@@ -117,7 +117,7 @@ class Utility(Cog):
 
             return_code = json['returncode']
 
-            return dedent(
+            return (
                 f"""
             ```{language}
             {json['stdout']}
