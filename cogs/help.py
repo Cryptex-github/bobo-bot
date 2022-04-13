@@ -167,7 +167,7 @@ class BoboHelpCommand(HelpCommand):
 
         embed.add_field(name='Useable by you', value=str(can_run))
         embed.add_field(
-            name='Usage', value=await self.context.get_command_usage(command)  # type: ignore
+            name='Usage', value=await self.context.get_command_usage(command.qualified_name)  # type: ignore
         )
         embed.add_field(name='Aliases', value='\n'.join(command.aliases) or 'None')
 
