@@ -346,7 +346,7 @@ class Fun(Cog):
             return self.process_reddit_post(ctx, await resp.json())
     
     @reddit.command()
-    async def show(self, ctx: BoboContext, url: str | None = None) -> None:
+    async def show(self, ctx: BoboContext, url: str) -> None:
         """
         Shows a reddit post.
         """
