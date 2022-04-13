@@ -127,6 +127,15 @@ def command(**attrs) -> Any:
 
     return wrapper
 
+@discord.utils.copy_doc(commands.hybrid_command)
+def hybrid_command(**attrs) -> Any:
+    hybrid_command = commands.hybrid_command(**attrs)
+
+    def wrapper(func):
+        return hybrid_command(command_callback(func)) # type: ignore
+    
+    return wrapper
+
 
 class GroupCommand(commands.Group):
     @discord.utils.copy_doc(commands.Group.command)
@@ -137,10 +146,26 @@ class GroupCommand(commands.Group):
         Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]],
     ]:
         def wrapper(func) -> commands.Command:
-            if 'parent' not in kwargs:
-                kwargs['parent'] = self
-
+            kwargs.setdefault('parent', self)
             command_ = command(*args, **kwargs)(func)
+            self.add_command(command_)
+
+            return command_
+
+        return wrapper
+
+
+class HybridGroup(commands.HybridGroup):
+    @discord.utils.copy_doc(commands.HybridGroup.command)
+    def command(
+        self, *args: Any, **kwargs: Any
+    ) -> Callable[
+        [Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]],
+        Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]],
+    ]:
+        def wrapper(func) -> commands.Command:
+            kwargs.setdefault('parent', self)
+            command_ = hybrid_command(*args, **kwargs)(func)
             self.add_command(command_)
 
             return command_
@@ -153,6 +178,18 @@ def group(**attrs) -> Any:
         attrs['invoke_without_command'] = True
 
     group = commands.group(cls=GroupCommand, **attrs)
+
+    def wrapper(func):
+        return group(command_callback(func))  # type: ignore
+
+    return wrapper
+
+
+def hybrid_group(**attrs) -> Any:
+    if 'invoke_without_command' not in attrs:
+        attrs['invoke_without_command'] = True
+
+    group = commands.group(cls=HybridGroup, **attrs)
 
     def wrapper(func):
         return group(command_callback(func))  # type: ignore
