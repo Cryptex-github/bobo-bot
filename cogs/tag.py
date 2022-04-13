@@ -84,30 +84,9 @@ class ContextBasedTagManager(BaseTagManager):
         return await super().edit_tag(name, content, ctx.author.id)
 
 
-# class SlashBasedTagManager(BaseTagManager):
-#     async def new_tag(self, interaction: Interaction, name: str, content: str) -> bool:
-#         return await super().new_tag(
-#             name,
-#             content,
-#             interaction.user.id,
-#             interaction.message.id if interaction.message else 0,
-#         )
-
-#     async def remove_tag(self, interaction: Interaction, name: str) -> bool:
-#         return await super().remove_tag(name, interaction.user.id)
-
-#     async def edit_tag(self, interaction: Interaction, name: str, content: str) -> bool:
-#         return await super().edit_tag(name, content, interaction.user.id)
-
-
 class Tag(Cog):
     async def cog_load(self):
         self.ctx_tag_manager = ContextBasedTagManager(self.bot.db)
-    #     self.slash_tag_manager = SlashBasedTagManager(self.bot.db)
-
-    # slash_group = app_commands.Group(
-    #     name='tag', description='Commands to access and manage tags.'
-    # )
 
     @hybrid_group()
     async def tag(self, ctx: BoboContext, *, name: str) -> str:
@@ -120,13 +99,9 @@ class Tag(Cog):
 
     @tag.command()
     @app_commands.describe(name='The name of the tag.')
-    async def show(self, ctx: BoboContext, name: str) -> str:
+    async def show(self, ctx: BoboContext, name: str) -> None:
         """Shows the content of a tag."""
-        content = await self.ctx_tag_manager.get_tag_content(name)
-        if not content:
-            return 'Tag not found.'
-
-        return escape_mentions(content)
+        await self.tag(ctx, name=name)
 
     @tag.command(aliases=['create'])
     @app_commands.describe(
