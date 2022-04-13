@@ -68,7 +68,7 @@ class CDNEntry(NamedTuple):
 
 
 class CDNClient:
-    """An interface for requests to Lambda's CDN, cdn.lambdabot.cf."""
+    """An interface for requests to BoboBot's CDN, cdn.bobobot.cf."""
 
     def __init__(self, bot: BoboBot) -> None:
         self._session: ClientSession = (
@@ -104,7 +104,7 @@ class CDNClient:
             params['safe'] = 'true'
 
         async with self._session.post(
-            'https://cdn.lambdabot.cf/upload', data=form, headers=HEADERS, params=params
+            BASE_URL + '/upload', data=form, headers=HEADERS, params=params
         ) as resp:
             resp.raise_for_status()
             data = await resp.json()
