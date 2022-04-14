@@ -6,7 +6,6 @@ from io import BytesIO
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Command
 
 from .view import ConfirmView, BaseView
 from .button import DeleteButton
