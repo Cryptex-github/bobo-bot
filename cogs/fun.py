@@ -338,6 +338,9 @@ class Fun(Cog):
 
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
+        
+        if '?' in url:
+            url = url.split('?')[0]
 
         async with self.bot.session.get(url + '.json?raw_json=1') as resp:
             if resp.status != 200:
