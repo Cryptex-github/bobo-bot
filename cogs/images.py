@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from io import BytesIO
 
+from aiohttp import ClientTimeout
+
 from discord import StickerFormatType, DeletedReferencedMessage, File, utils
 
 utils.is_inside_class = (
@@ -150,6 +152,7 @@ class Images(Cog):
                     async with self.bot.session.post(
                         f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}',
                         json={'url': url},
+                        timeout=ClientTimeout(total=600)
                     ) as resp:
                         if resp.status == 200:
                             if resp.headers['Content-Type'] == 'image/gif':
