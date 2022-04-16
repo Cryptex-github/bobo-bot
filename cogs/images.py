@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from io import BytesIO
 
+from aiohttp import ClientTimeout
+
 from discord import StickerFormatType, DeletedReferencedMessage, File, utils
 
 utils.is_inside_class = (
@@ -130,7 +132,7 @@ class ImageResolver:
 
 class Images(Cog):
     async def cog_load(self) -> None:
-        endpoint_list = ['invert', 'flip', 'mirror']
+        endpoint_list = ['invert', 'flip', 'mirror', 'floor', 'roo']
 
         for endpoint in endpoint_list:
             async with self.bot.session.get(
@@ -142,32 +144,34 @@ class Images(Cog):
             async def image_endpoint_command(
                 self, ctx, target: str | None = None
             ) -> str | File | tuple[str, File]:
-                resolver = ImageResolver(ctx, False)
+                async with ctx.typing():
+                    resolver = ImageResolver(ctx, False)
 
-                url = await resolver.get_image(target)
+                    url = await resolver.get_image(target)
 
-                async with self.bot.session.post(
-                    f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}',
-                    json={'url': url},
-                ) as resp:
-                    if resp.status == 200:
-                        if resp.headers['Content-Type'] == 'image/gif':
-                            fmt = 'gif'
-                        else:
-                            fmt = 'png'
+                    async with self.bot.session.post(
+                        f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}',
+                        json={'url': url},
+                        timeout=ClientTimeout(total=600)
+                    ) as resp:
+                        if resp.status == 200:
+                            if resp.headers['Content-Type'] == 'image/gif':
+                                fmt = 'gif'
+                            else:
+                                fmt = 'png'
 
-                        return (
-                            f'Process Time: {round(float(resp.headers["Process-Time"]) * 1000, 3)}ms',
-                            File(
-                                BytesIO(await resp.read()),
-                                f'bobo_bot_{ctx.command.qualified_name}.{fmt}',
-                            ),
-                        )
+                            return (
+                                f'Process Time: {round(float(resp.headers["Process-Time"]) * 1000, 3)}ms',
+                                File(
+                                    BytesIO(await resp.read()),
+                                    f'bobo_bot_{ctx.command.qualified_name}.{fmt}',
+                                ),
+                            )
 
-                    if resp.status == 400:
-                        return (await resp.json())['message']
+                        if resp.status == 400:
+                            return (await resp.json())['message']
 
-                    return await resp.text()
+                        return await resp.text()
 
             self.__cog_commands__ += (image_endpoint_command,)
 

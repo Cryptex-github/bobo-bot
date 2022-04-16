@@ -57,8 +57,8 @@ class Listeners(Cog):
 
     @Cog.listener()
     async def on_command_completion(self, ctx: BoboContext):
-        if ctx.command:
-            await ctx.inicrease_command_usage(ctx.command)
+        if ctx.invoked_with:
+            await ctx.inicrease_command_usage(ctx.invoked_with)
 
 
 setup = Listeners.setup

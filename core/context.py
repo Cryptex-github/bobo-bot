@@ -6,7 +6,6 @@ from io import BytesIO
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Command
 
 from .view import ConfirmView, BaseView
 from .button import DeleteButton
@@ -40,16 +39,16 @@ class BoboContext(commands.Context['BoboBot']):
 
         return str(await self.bot.mystbin.post(content))
 
-    async def get_command_usage(self, command: Command) -> int:
+    async def get_command_usage(self, command_name: str) -> int:
         return await self.bot.db.fetchval(
             'SELECT uses FROM commands_usage WHERE command = $1;',
-            command.qualified_name,
+            command_name,
         )
 
-    async def inicrease_command_usage(self, command: Command) -> int:
+    async def inicrease_command_usage(self, command_name: str) -> int:
         return await self.bot.db.fetchval(
             'INSERT INTO commands_usage VALUES ($1) ON CONFLICT (command) DO UPDATE SET uses = commands_usage.uses + 1 RETURNING uses;',
-            command.qualified_name,
+            command_name,
         )
 
     async def send(self, content: str | None = None, **kwargs: Any) -> discord.Message:

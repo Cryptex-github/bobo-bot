@@ -8,7 +8,7 @@ from akinator import CantGoBackAnyFurther
 import discord
 
 from core import Cog
-from core.command import command, group
+from core.command import command, hybrid_group
 from core.view import BaseView
 from core.utils import cutoff
 
@@ -328,22 +328,38 @@ class Fun(Cog):
 
         return embed
 
-    @group(aliases=['r'])
+    @hybrid_group(aliases=['r'])
     async def reddit(self, ctx: BoboContext, url: str | None = None) -> OutputType:
+        """
+        Shows a reddit post.
+        """
         if not url:
             return await ctx.send_help(ctx.command)
 
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
+        
+        if '?' in url:
+            url = url.split('?')[0]
 
         async with self.bot.session.get(url + '.json?raw_json=1') as resp:
             if resp.status != 200:
                 return 'Invalid Reddit URL or Reddit is down'
 
             return self.process_reddit_post(ctx, await resp.json())
+    
+    @reddit.command()
+    async def show(self, ctx: BoboContext, url: str) -> None:
+        """
+        Shows a reddit post.
+        """
+        await self.reddit(ctx, url)
 
     @reddit.command(name='random', aliases=['r'])
     async def reddit_random(self, ctx, subreddit: str) -> OutputType:
+        """
+        Shows a random post from a subreddit.
+        """
         while not self.bot.is_closed():
             async with self.bot.session.get(
                 f'https://www.reddit.com/r/{subreddit}/random.json?raw_json=1'
