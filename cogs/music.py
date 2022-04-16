@@ -32,8 +32,11 @@ class Music(Cog):
         """Joins a voice channel."""
         author = cast(Member, ctx.author)
 
-        if not channel and not (author.voice and author.voice.channel):
-            return 'You are not currently in a voice channel, nor did you provide a voice channel to join.'
+        if not channel:
+            if not (author.voice and author.voice.channel):
+                return 'You are not currently in a voice channel, nor did you provide a voice channel to join.'
+            
+            channel = author.voice.channel
 
         player = self.node.get_player(ctx.guild)
 
