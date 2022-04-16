@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class Music(Cog):
     async def cog_load(self) -> None:
         if not hasattr(self.bot, 'magmatic_node'):
-            self.bot.magmatic_node = self.node = magmatic.start_node(
+            self.bot.magmatic_node = self.node = await magmatic.start_node(
                 bot=self.bot,
                 host=LavalinkConnectionDetails.host,
                 port=LavalinkConnectionDetails.port,
