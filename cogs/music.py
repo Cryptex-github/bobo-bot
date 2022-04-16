@@ -28,7 +28,7 @@ class Music(Cog):
     
     @command()
     @guild_only()
-    async def join(self, ctx: BoboContext, *, channel: VoiceChannel | StageChannel) -> str:
+    async def join(self, ctx: BoboContext, *, channel: VoiceChannel | StageChannel | None = None) -> str:
         """Joins a voice channel."""
         author = cast(Member, ctx.author)
 
