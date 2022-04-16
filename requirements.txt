@@ -2,6 +2,7 @@ git+https://github.com/Rapptz/discord.py
 git+https://github.com/Gorialis/jishaku
 git+https://github.com/rapptz/discord-ext-menus
 git+https://github.com/oliver-ni/discord-ext-menus-views
+git+https://github.com/jay3332/magmatic
 akinator.py
 asyncpg
 psutil
