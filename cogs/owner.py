@@ -21,6 +21,8 @@ from core.types import OutputType
 
 
 class Owner(Cog):
+    ignore = True
+
     async def cog_check(self, ctx: BoboContext) -> bool:
         return await self.bot.is_owner(ctx.author)
 
