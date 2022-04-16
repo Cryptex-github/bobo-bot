@@ -55,3 +55,5 @@ class Music(Cog):
         await player.disconnect()
 
         return f'Left {channel.mention}'
+
+setup = Music.setup
