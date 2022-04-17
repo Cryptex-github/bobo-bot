@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import magmatic
 
@@ -30,13 +30,14 @@ class Music(Cog):
     @guild_only()
     async def join(self, ctx: BoboContext, *, channel: VoiceChannel | StageChannel | None = None) -> str:
         """Joins a voice channel."""
-        author = cast(Member, ctx.author)
+        assert isinstance(ctx.author, Member)
+        assert ctx.guild is not None
 
         if not channel:
-            if not (author.voice and author.voice.channel):
+            if not (ctx.author.voice and ctx.author.voice.channel):
                 return 'You are not currently in a voice channel, nor did you provide a voice channel to join.'
             
-            channel = author.voice.channel
+            channel = ctx.author.voice.channel
 
         player = self.node.get_player(ctx.guild)
 
@@ -48,6 +49,8 @@ class Music(Cog):
     @guild_only()
     async def leave(self, ctx: BoboContext) -> str:
         """Leaves the current voice channel."""
+        assert ctx.guild is not None
+
         player = self.node.get_player(ctx.guild)
 
         if not player.is_connected():
