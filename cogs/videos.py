@@ -125,14 +125,14 @@ class Videos(Cog):
             filesize_limit = 8388608
 
         if prompt.result == 'video':
-            try:
-                b, file_type = await tube.get_best_video(filesize_limit)  # type: ignore
-            except TypeError:
+            if video := await tube.get_best_video(filesize_limit):
+                b, file_type = video
+            else:
                 return 'Video is too large.'
         else:
-            try:
-                b, file_type = await tube.get_best_audio(filesize_limit)  # type: ignore
-            except TypeError:
+            if audio := await tube.get_best_audio(filesize_limit):
+                b, file_type = audio
+            else:
                 return 'Audio is too large.'
 
         return discord.File(b, filename=f'bobo-bot-youtube-download.{file_type}')

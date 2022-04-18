@@ -147,10 +147,7 @@ class ReactionRoles(Cog):
 
             return
 
-        if not ctx.guild:  # Useless check just for the type checker
-            raise RuntimeError(
-                'Guild not found'
-            )  # Not possible since we have guild_only check
+        assert ctx.guild is not None
 
         await self.bot.db.execute(
             'INSERT INTO reaction_roles VALUES ($1, $2, $3, $4)',
@@ -174,8 +171,7 @@ class ReactionRoles(Cog):
         """
         List all reaction roles.
         """
-        if not ctx.guild:
-            raise RuntimeError('Guild not found')
+        assert ctx.guild is not None
 
         reaction_roles = await self.bot.db.fetch(
             "SELECT * FROM reaction_roles WHERE guild_id = $1", ctx.guild.id
@@ -183,7 +179,24 @@ class ReactionRoles(Cog):
 
         if not reaction_roles:
             return 'There are no reaction roles in this server.'
-        formatted = [f'Message ID: {message_id} and emoji: {emoji if not emoji.isnumeric() else str(self.bot.get_emoji(emoji))} for role: {ctx.guild.get_role(role).mention if ctx.guild.get_role(role) else "Role not found"}\n' for _, message_id, emoji, role in reaction_roles]  # type: ignore
+
+        def get_role_mention(_role: int) -> str:
+            assert ctx.guild is not None
+
+            role = ctx.guild.get_role(_role)
+
+            if not role:
+                return 'Role not found'
+            
+            return role.mention
+
+        formatted = [
+            (
+                f'Message ID: {message_id} and emoji: {emoji if not emoji.isnumeric() else str(self.bot.get_emoji(emoji))}'
+                f' for role: {get_role_mention(role)}\n'
+            )
+            for _, message_id, emoji, role in reaction_roles
+        ]
 
         source = EmbedListPageSource(formatted, title='Reaction Roles in this server.')
         pages = ViewMenuPages(source=source)

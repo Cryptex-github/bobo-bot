@@ -6,6 +6,7 @@ import inspect
 from typing import TYPE_CHECKING, Awaitable
 
 import discord
+from discord import Member, PartialMessageable
 from discord.ext import commands
 
 from core.constants import REPLY, CAN_DELETE, SAFE_SEND
@@ -24,11 +25,17 @@ __all__ = ('user_permissions_predicate', 'bot_permissions_predicate', 'command')
 
 
 def user_permissions_predicate(ctx: BoboContext) -> bool:
+    if not ctx.guild:
+        return True
+
+    assert isinstance(ctx.author, Member)
+    assert not isinstance(ctx.channel, PartialMessageable)
+
     perms = {
         'send_messages': True,
     }
 
-    permissions = ctx.channel.permissions_for(ctx.author)  # type: ignore
+    permissions = ctx.channel.permissions_for(ctx.author)
 
     missing = [
         perm for perm, value in perms.items() if getattr(permissions, perm) != value
@@ -41,14 +48,18 @@ def user_permissions_predicate(ctx: BoboContext) -> bool:
 
 
 def bot_permissions_predicate(ctx: BoboContext) -> bool:
+    if not ctx.guild:
+        return True
+
     perms = {
         'send_messages': True,
         'attach_files': True,
         'embed_links': True,
     }
-    guild = ctx.guild
-    me = guild.me if guild is not None else ctx.bot.user
-    permissions = ctx.channel.permissions_for(me)  # type: ignore
+
+    assert not isinstance(ctx.channel, PartialMessageable)
+
+    permissions = ctx.channel.permissions_for(ctx.guild.me)
 
     missing = [
         perm for perm, value in perms.items() if getattr(permissions, perm) != value

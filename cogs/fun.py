@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 from io import BytesIO
 
 from akinator.async_aki import Akinator
@@ -69,7 +69,7 @@ class AkinatorOptionsView(BaseView):
 
 
 class AkinatorView(BaseView):
-    controls = {
+    controls: Final[dict[str, str]] = {
         '\U00002705': 'yes',
         '\U0000274c': 'no',
         '\U00002753': 'idk',
@@ -164,11 +164,19 @@ class AkinatorView(BaseView):
         self.akinator = Akinator()
         self.embed = ctx.embed
 
+        nsfw = getattr(ctx.channel, 'nsfw', False)
+
         if ctx.guild:
-            question = await self.akinator.start_game(language=selected, client_session=ctx.bot.session, child_mode=not ctx.channel.is_nsfw())  # type: ignore
+            question = await self.akinator.start_game(
+                language=selected, 
+                client_session=ctx.bot.session, 
+                child_mode=not nsfw
+            )
         else:
             question = await self.akinator.start_game(
-                language=selected, client_session=ctx.bot.session, child_mode=False
+                language=selected, 
+                lient_session=ctx.bot.session, 
+                child_mode=False
             )
 
         embed = self.make_embed(question)
@@ -269,7 +277,10 @@ class Fun(Cog):
         await m.edit(view=view._disable_all())
 
         akinator_view = AkinatorView(user_id=ctx.author.id)
-        embed = await akinator_view.start(ctx, view.selected)  # type: ignore
+
+        assert view.selected is not None
+
+        embed = await akinator_view.start(ctx, view.selected)
 
         await m.edit(embed=embed, view=akinator_view)
 

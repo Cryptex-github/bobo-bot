@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import TYPE_CHECKING
 
 from discord.ext import commands, tasks
 
@@ -7,12 +8,15 @@ __all__ = ('Cog',)
 __log__ = logging.getLogger('BoboBot')
 
 
-class MetaTask(commands.CogMeta):
+class CogMeta(commands.CogMeta):
+    if TYPE_CHECKING:
+        __tasks__: list[tasks.Loop]
+
+class MetaTask(CogMeta):
     """
     A simple Metclass that can be used to get all tasks.Loop from the class,
     to start and cancel them easily.
     """
-
     def __new__(cls, name, bases, attrs, **kwargs):
         new_cls = super().__new__(cls, name, bases, attrs)
         _inner_tasks = []
@@ -22,27 +26,39 @@ class MetaTask(commands.CogMeta):
                 _inner_tasks.append(value)
 
         new_cls.__tasks__ = _inner_tasks  # type: ignore
+
         return new_cls
 
     def _unload_tasks(cls):
-        for task in cls.__tasks__:  # type: ignore
+        for task in cls.__tasks__:
             coro = task.__dict__.get('coro')
+            if not coro:
+                continue
+
             __log__.info(
                 f'Stopping task {coro.__name__} after {task.current_loop} intervals.'
             )
+
             loop = asyncio.get_running_loop()
             _tasks = []
+
             if task.is_running():
                 task.cancel()
                 _tasks.append(task._task)
-            loop.create_task(asyncio.gather(*_tasks))  # type: ignore
+
+            loop.create_task(asyncio.gather(*_tasks)) # type: ignore
 
     def _load_tasks(cls, self):
-        for task in cls.__tasks__:  # type: ignore
+        for task in cls.__tasks__:
             coro = task.__dict__.get('coro')
+
+            if not coro:
+                continue
+
             __log__.info(
                 f'Stopping task {coro.__name__} after {task.current_loop} intervals.'
             )
+
             if not task.is_running():
                 task.start(self)
 
