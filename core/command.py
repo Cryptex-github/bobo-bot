@@ -140,7 +140,9 @@ def command(
 ]:
     command = commands.command(**attrs)
 
-    def wrapper(func):
+    def wrapper(
+        func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
+    ) -> Command:
         return command(command_callback(func))  # type: ignore
 
     return wrapper
@@ -155,7 +157,9 @@ def hybrid_command(
 ]:
     hybrid_command = commands.hybrid_command(**attrs)
 
-    def wrapper(func):
+    def wrapper(
+        func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
+    ) -> HybridCommand:
         return hybrid_command(command_callback(func))  # type: ignore
 
     return wrapper
@@ -169,7 +173,9 @@ class GroupCommand(commands.Group):
         [Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]],
         Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]],
     ]:
-        def wrapper(func) -> commands.Command:
+        def wrapper(
+            func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]
+        ) -> commands.Command:
             kwargs.setdefault('parent', self)
             command_ = command(*args, **kwargs)(func)
             self.add_command(command_)
@@ -187,7 +193,9 @@ class HybridGroup(commands.HybridGroup):
         [Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]],
         Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]],
     ]:
-        def wrapper(func) -> commands.Command:
+        def wrapper(
+            func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]
+        ) -> commands.Command:
             kwargs.setdefault('parent', self)
             command_ = hybrid_command(*args, **kwargs)(func)
             self.add_command(command_)
@@ -208,7 +216,9 @@ def group(
 
     group = commands.group(cls=GroupCommand, **attrs)
 
-    def wrapper(func):
+    def wrapper(
+        func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
+    ) -> GroupCommand:
         return group(command_callback(func))  # type: ignore
 
     return wrapper
@@ -225,7 +235,9 @@ def hybrid_group(
 
     group = commands.group(cls=HybridGroup, **attrs)
 
-    def wrapper(func):
+    def wrapper(
+        func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
+    ) -> HybridGroup:
         return group(command_callback(func))  # type: ignore
 
     return wrapper

@@ -3,13 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeAlias, Type, cast
 
 import magmatic
-from magmatic import (
-    Source, 
-    Playlist, 
-    Track as _Track, 
-    Player as _Player, 
-    Node as _Node
-)
+from magmatic import Source, Playlist, Track as _Track, Player as _Player, Node as _Node
 
 from discord import VoiceChannel, StageChannel, Member
 from discord.utils import MISSING
