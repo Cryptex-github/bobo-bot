@@ -217,7 +217,7 @@ class Music(Cog):
         if not ctx.guild:
             return False
 
-        if ctx.invoked_with in ('join', 'leave'):
+        if ctx.invoked_with in ('join', 'leave', 'play'):
             return True
 
         player = self.node.get_player(ctx.guild)
