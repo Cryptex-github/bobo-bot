@@ -52,7 +52,7 @@ class Misc(Cog):
                 return 'Failed to run speedtest.'
 
             embed = ctx.embed(
-                title='Speedtest', url=json_['result']['url'], inline=True
+                title='Speedtest', url=json_['result']['url']
             )
 
             embed.add_field(
