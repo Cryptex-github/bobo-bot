@@ -87,19 +87,19 @@ class Queue:
         track = self.current
 
         try:
-            hours, remainder = divmod(int(track.duration), 3600)
+            hours, remainder = divmod(track.duration, 3600)
             minutes, seconds = divmod(remainder, 60)
 
             duration = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
-        except Exception as e:
-            duration = e
+        except:
+            duration = 'Duration too long.'
 
         try:
-            hours, remainder = divmod(int(track.position), 3600)
+            hours, remainder = divmod(track.position, 3600)
             minutes, seconds = divmod(remainder, 60)
             position = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
-        except Exception as e:
-            position = e
+        except:
+            position = 'Position too long.'
 
         try:
             percentage = 100 / track.duration * track.position
@@ -116,11 +116,11 @@ class Queue:
         embed = self.ctx.embed(
             title='Current Track', 
             description=(
-            f'**{track.title}** By: **{track.author}**'
+            f'**{self.current.title}** By: **{self.current.author}**'
             f'\n{bar}\n\n{position}/{duration}'
             )
         )
-        embed.add_field(name='Requested By', value=f'{track.metadata.requestor.mention}')
+        embed.add_field(name='Requested By', value=f'{self.current.metadata.requestor.mention}')
 
         return embed
 
