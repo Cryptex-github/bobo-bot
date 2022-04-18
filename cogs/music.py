@@ -22,6 +22,7 @@ class Music(Cog):
                 host=LavalinkConnectionDetails.host,
                 port=LavalinkConnectionDetails.port,
                 password=LavalinkConnectionDetails.password,
+                resume=False,
                 identifier='BoboBot Lavalink Node',
                 session=self.bot.session,
             )
@@ -56,7 +57,7 @@ class Music(Cog):
 
         player = self.node.get_player(ctx.guild)
 
-        await player.connect(channel, reconnect=True)
+        await player.connect(channel)
 
         return f'Joined {channel.mention}'
 
@@ -74,7 +75,6 @@ class Music(Cog):
         if isinstance(track, Playlist):
             actual_tracks = track.tracks
 
-            ...
 
             return f'Playing playlist: `{track.name}` with {len(actual_tracks)} tracks.'
 

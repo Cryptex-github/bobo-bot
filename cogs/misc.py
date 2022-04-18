@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import json
+from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from datetime import datetime
-from typing import TYPE_CHECKING
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 from core import Cog, command
 
 if TYPE_CHECKING:
     from core import BoboContext
+    from discord import Embed
 
 
 class Misc(Cog):
@@ -28,6 +31,33 @@ class Misc(Cog):
             Discord WS latency: {res.discord_ws}ms
         """
         )
+
+    @command()
+    async def speedtest(self, ctx: BoboContext) -> Embed | str:
+        """Runs a speedtest."""
+        proc = await create_subprocess_exec('speedtest', '--format', 'json', stdout=PIPE, stderr=DEVNULL)
+
+        stdout, _ = await proc.communicate()
+
+        if proc.returncode != 0:
+            return 'Failed to run speedtest.'
+
+        stdout = stdout.decode()
+        json_ = json.loads(stdout)
+
+        if json_['type'] != 'result':
+            return 'Failed to run speedtest.'
+
+        embed = ctx.embed(title='Speedtest', url=json_['result']['url'])
+        embed.add_field(name='Ping', value=f'Latency: {json_["ping"]["latency"] * 1000}ms | Jitter: {json_["ping"]["jitter"] * 1000}ms')
+        embed.add_field(name='Download', value=f'{round((((json_["download"]["bytes"] / json_["download"]["elapsed"])) * 8.0) / 1000, 2)}Mbps')
+        embed.add_field(name='Upload', value=f'{round((((json_["upload"]["bytes"] / json_["upload"]["elapsed"])) * 8.0) / 1000, 2)}Mbps')
+        embed.add_field(name='Server', value=f'{json_["server"]["name"]} (ID: {json_["server"]["id"]})')
+        embed.add_field(name='Packet Lost', value=f'{json_["packetLoss"]}%')
+
+        embed.set_footer(text=f'Test ID: {json_["result"]["id"]}')
+
+        return embed
 
     @command()
     async def events(self, ctx: BoboContext) -> str:
