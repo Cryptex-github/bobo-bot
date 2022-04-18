@@ -189,6 +189,7 @@ class Music(Cog):
 
     @command()
     async def play(self, ctx: BoboContext, *, query: str) -> str:
+        """Plays a track."""
         assert ctx.guild is not None
         assert isinstance(ctx.author, Member)
 
