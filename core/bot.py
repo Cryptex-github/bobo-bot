@@ -6,6 +6,7 @@ import os
 from typing import TYPE_CHECKING, NamedTuple, Type
 
 import aiohttp
+from redis import asyncio as aioredis
 import asyncpg
 import discord
 import jishaku
@@ -102,8 +103,6 @@ class BoboBot(commands.Bot):
     async def initialize_constants(self) -> None:
         self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
-
-        from redis import asyncio as aioredis
 
         self.redis = aioredis.from_url('redis://127.0.0.1', decode_responses=True)
         self.delete_message_manager = DeleteMessageManager(self.redis)
