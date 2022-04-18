@@ -4,7 +4,7 @@ from abc import ABC
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from aioredis import Redis
+    from redis.asyncio.client import Redis
     from discord.types.snowflake import SnowflakeList
 
     from .types import PossibleRTFMSources

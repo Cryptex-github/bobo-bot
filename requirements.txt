@@ -7,7 +7,7 @@ akinator.py
 asyncpg
 psutil
 mystbin.py
-aioredis[hiredis]
+redis[hiredis]
 uvloop
 requests-html
 pytube

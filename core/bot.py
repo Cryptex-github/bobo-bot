@@ -6,7 +6,7 @@ import os
 from typing import TYPE_CHECKING, NamedTuple, Type
 
 import aiohttp
-import aioredis
+from redis import asyncio as aioredis
 import asyncpg
 import discord
 import jishaku
