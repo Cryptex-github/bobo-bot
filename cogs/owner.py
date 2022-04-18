@@ -9,7 +9,7 @@ from typing import Any, AsyncGenerator
 
 import discord
 import import_expression
-from discord import File
+from discord import Embed, File, View
 from discord.ext import commands
 from jishaku.codeblocks import codeblock_converter
 from jishaku.exception_handling import ReactionProcedureTimer
@@ -96,6 +96,9 @@ class Owner(Cog):
                 if not result or result == ' ':
                     return '\u200b'
 
+            if isinstance(result, (Embed, str, View, File)):
+                return result
+
             return repr(result)
 
         async with ReactionProcedureTimer(ctx.message, self.bot.loop):
@@ -104,6 +107,8 @@ class Owner(Cog):
             except Exception as e:
                 exc = traceback.TracebackException.from_exception(e)
                 yield wrap_exception(''.join(exc.format())), SAFE_SEND, CAN_DELETE
+
+                return
 
             to_execute = env['_execute']
 
