@@ -9,7 +9,8 @@ from typing import Any, AsyncGenerator
 
 import discord
 import import_expression
-from discord import Embed, File, View
+from discord import Embed, File
+from discord.ui import View
 from discord.ext import commands
 from jishaku.codeblocks import codeblock_converter
 from jishaku.exception_handling import ReactionProcedureTimer
