@@ -57,7 +57,7 @@ class Misc(Cog):
 
             embed.add_field(
                 name='Ping',
-                value=f'Latency: {json_["ping"]["latency"] * 1000}ms | Jitter: {json_["ping"]["jitter"] * 1000}ms',
+                value=f'Latency: {json_["ping"]["latency"]}ms | Jitter: {json_["ping"]["jitter"]}ms',
                 inline=True,
             )
 
