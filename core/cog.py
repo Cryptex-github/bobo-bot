@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from typing import TYPE_CHECKING, Any
 from discord.ext import commands, tasks
 
-from typing_extensions import Self
-
 
 if TYPE_CHECKING:
-    from core.bot import BoboBot
+    from typing_extensions import Self
     from discord.ext.commands import Cog
+
+    from core.bot import BoboBot
 
 
 __all__ = ('Cog',)
