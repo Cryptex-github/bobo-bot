@@ -147,6 +147,9 @@ class Queue:
     def ctx(self) -> BoboContext:
         return self._ctx
 
+    def __len__(self) -> int:
+        return len(self.queue)
+
     def _make_embed(self) -> Embed:
         track = self.current
 
@@ -285,7 +288,8 @@ class Music(Cog):
             for track in actual_tracks:
                 track.metadata = MetaData(ctx.author)
 
-            await player.play(player.queue.current)
+            if len(player.queue) == 1:
+                await player.play(player.queue.current)
 
             return f'Added playlist: `{track.name}` with {len(actual_tracks)} tracks.'
 
@@ -297,7 +301,8 @@ class Music(Cog):
 
         player.queue.append_track(track)
 
-        await player.play(player.queue.current)
+        if len(player.queue) == 1:
+            await player.play(player.queue.current)
 
         return f'Added track: `{track.title}`.'
 
