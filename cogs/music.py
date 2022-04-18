@@ -14,6 +14,7 @@ from core import Cog, command
 if TYPE_CHECKING:
     from core.context import BoboContext
 
+
 class Music(Cog):
     async def cog_load(self) -> None:
         if not hasattr(self.bot, 'magmatic_node'):
@@ -33,7 +34,7 @@ class Music(Cog):
 
         if ctx.invoked_with in ('join', 'leave'):
             return True
-        
+
         player = self.node.get_player(ctx.guild)
 
         if not player.is_connected():
@@ -44,7 +45,9 @@ class Music(Cog):
         return True
 
     @command(aliases=['connect'])
-    async def join(self, ctx: BoboContext, *, channel: VoiceChannel | StageChannel | None = None) -> str:
+    async def join(
+        self, ctx: BoboContext, *, channel: VoiceChannel | StageChannel | None = None
+    ) -> str:
         """Joins a voice channel."""
         assert isinstance(ctx.author, Member)
         assert ctx.guild is not None
@@ -52,7 +55,7 @@ class Music(Cog):
         if not channel:
             if not (ctx.author.voice and ctx.author.voice.channel):
                 return 'You are not currently in a voice channel, nor did you provide a voice channel to join.'
-            
+
             channel = ctx.author.voice.channel
 
         player = self.node.get_player(ctx.guild)
@@ -70,11 +73,12 @@ class Music(Cog):
         if not player.is_connected():
             await self.join(ctx)
 
-        track = await self.node.get_track(query, source=Source.youtube, prefer_selected_track=False)
+        track = await self.node.get_track(
+            query, source=Source.youtube, prefer_selected_track=False
+        )
 
         if isinstance(track, Playlist):
             actual_tracks = track.tracks
-
 
             return f'Playing playlist: `{track.name}` with {len(actual_tracks)} tracks.'
 
@@ -97,5 +101,6 @@ class Music(Cog):
         await player.disconnect()
 
         return f'Left {channel.mention}'
+
 
 setup = Music.setup

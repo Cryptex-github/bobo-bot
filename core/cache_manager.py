@@ -26,7 +26,8 @@ class DeleteMessageManager(RedisCacheManager):
 
     async def get_messages(self, message_id: int, one_only: bool = False) -> List[int]:
         return [
-            int(i) for i in await self.redis.lrange(
+            int(i)
+            for i in await self.redis.lrange(
                 f'delete_messages:{message_id}', 0, 0 if one_only else -1
             )
         ]

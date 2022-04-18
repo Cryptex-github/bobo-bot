@@ -35,8 +35,10 @@ class Misc(Cog):
     @command()
     async def speedtest(self, ctx: BoboContext) -> Embed | str:
         """Runs a speedtest."""
-        async with ctx.typing()
-            proc = await create_subprocess_exec('speedtest', '--format', 'json', stdout=PIPE, stderr=DEVNULL)
+        async with ctx.typing():
+            proc = await create_subprocess_exec(
+                'speedtest', '--format', 'json', stdout=PIPE, stderr=DEVNULL
+            )
 
             stdout, _ = await proc.communicate()
 
@@ -49,31 +51,35 @@ class Misc(Cog):
             if json_['type'] != 'result':
                 return 'Failed to run speedtest.'
 
-            embed = ctx.embed(title='Speedtest', url=json_['result']['url'], inline=True)
-
-            embed.add_field(
-                name='Ping', 
-                value=f'Latency: {json_["ping"]["latency"] * 1000}ms | Jitter: {json_["ping"]["jitter"] * 1000}ms', 
-                inline=True
+            embed = ctx.embed(
+                title='Speedtest', url=json_['result']['url'], inline=True
             )
 
             embed.add_field(
-                name='Download', 
-                value=f'{round((((json_["download"]["bytes"] / json_["download"]["elapsed"])) * 8.0) / 1000, 2)}Mbps', 
-                inline=True
-            )
-            embed.add_field(
-                name='Upload', 
-                value=f'{round((((json_["upload"]["bytes"] / json_["upload"]["elapsed"])) * 8.0) / 1000, 2)}Mbps', 
-                inline=True
+                name='Ping',
+                value=f'Latency: {json_["ping"]["latency"] * 1000}ms | Jitter: {json_["ping"]["jitter"] * 1000}ms',
+                inline=True,
             )
 
             embed.add_field(
-                name='Server', 
-                value=f'{json_["server"]["name"]} (ID: {json_["server"]["id"]})', 
-                inline=True
+                name='Download',
+                value=f'{round((((json_["download"]["bytes"] / json_["download"]["elapsed"])) * 8.0) / 1000, 2)}Mbps',
+                inline=True,
             )
-            embed.add_field(name='Packet Lost', value=f'{json_["packetLoss"]}%', inline=True)
+            embed.add_field(
+                name='Upload',
+                value=f'{round((((json_["upload"]["bytes"] / json_["upload"]["elapsed"])) * 8.0) / 1000, 2)}Mbps',
+                inline=True,
+            )
+
+            embed.add_field(
+                name='Server',
+                value=f'{json_["server"]["name"]} (ID: {json_["server"]["id"]})',
+                inline=True,
+            )
+            embed.add_field(
+                name='Packet Lost', value=f'{json_["packetLoss"]}%', inline=True
+            )
 
             embed.set_footer(text=f'Test ID: {json_["result"]["id"]}')
 

@@ -138,13 +138,14 @@ def command(**attrs) -> Any:
 
     return wrapper
 
+
 @discord.utils.copy_doc(commands.hybrid_command)
 def hybrid_command(**attrs) -> Any:
     hybrid_command = commands.hybrid_command(**attrs)
 
     def wrapper(func):
-        return hybrid_command(command_callback(func)) # type: ignore
-    
+        return hybrid_command(command_callback(func))  # type: ignore
+
     return wrapper
 
 

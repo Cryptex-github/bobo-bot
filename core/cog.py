@@ -12,11 +12,13 @@ class CogMeta(commands.CogMeta):
     if TYPE_CHECKING:
         __tasks__: list[tasks.Loop]
 
+
 class MetaTask(CogMeta):
     """
     A simple Metclass that can be used to get all tasks.Loop from the class,
     to start and cancel them easily.
     """
+
     def __new__(cls, name, bases, attrs, **kwargs):
         new_cls = super().__new__(cls, name, bases, attrs)
         _inner_tasks = []
@@ -46,7 +48,7 @@ class MetaTask(CogMeta):
                 task.cancel()
                 _tasks.append(task._task)
 
-            loop.create_task(asyncio.gather(*_tasks)) # type: ignore
+            loop.create_task(asyncio.gather(*_tasks))  # type: ignore
 
     def _load_tasks(cls, self):
         for task in cls.__tasks__:

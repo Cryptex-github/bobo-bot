@@ -168,15 +168,11 @@ class AkinatorView(BaseView):
 
         if ctx.guild:
             question = await self.akinator.start_game(
-                language=selected, 
-                client_session=ctx.bot.session, 
-                child_mode=not nsfw
+                language=selected, client_session=ctx.bot.session, child_mode=not nsfw
             )
         else:
             question = await self.akinator.start_game(
-                language=selected, 
-                lient_session=ctx.bot.session, 
-                child_mode=False
+                language=selected, lient_session=ctx.bot.session, child_mode=False
             )
 
         embed = self.make_embed(question)
@@ -349,7 +345,7 @@ class Fun(Cog):
 
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
-        
+
         if '?' in url:
             url = url.split('?')[0]
 
@@ -358,7 +354,7 @@ class Fun(Cog):
                 return 'Invalid Reddit URL or Reddit is down'
 
             return self.process_reddit_post(ctx, await resp.json())
-    
+
     @reddit.command()
     async def show(self, ctx: BoboContext, url: str) -> None:
         """

@@ -152,7 +152,7 @@ class Images(Cog):
                     async with self.bot.session.post(
                         f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}',
                         json={'url': url},
-                        timeout=ClientTimeout(total=600)
+                        timeout=ClientTimeout(total=600),
                     ) as resp:
                         if resp.status == 200:
                             if resp.headers['Content-Type'] == 'image/gif':

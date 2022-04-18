@@ -187,7 +187,7 @@ class ReactionRoles(Cog):
 
             if not role:
                 return 'Role not found'
-            
+
             return role.mention
 
         formatted = [
