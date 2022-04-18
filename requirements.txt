@@ -15,3 +15,4 @@ import-expression
 quart
 Quart-CORS
 tabulate
+typing-extensions

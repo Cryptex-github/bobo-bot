@@ -3,12 +3,13 @@ import logging
 from typing import TYPE_CHECKING, Any
 from discord.ext import commands, tasks
 
+from typing_extensions import Self
+
 
 if TYPE_CHECKING:
     from core.bot import BoboBot
     from discord.ext.commands import Cog
 
-    from typing_extensions import Self
 
 __all__ = ('Cog',)
 __log__ = logging.getLogger('BoboBot')
