@@ -30,7 +30,6 @@ class Queue:
 
     def __init__(self, ctx: BoboContext) -> None:
         self._queue: list[Track] = []
-        self._current: Track | None = None
         self._position: int = 0
         self.loop: bool = False
 
@@ -70,7 +69,7 @@ class Queue:
 
     @property
     def current(self) -> Track:
-        return self._current
+        return self.queue[self.position]
 
     @property
     def queue(self) -> list[Track]:
