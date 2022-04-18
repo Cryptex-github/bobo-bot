@@ -58,27 +58,27 @@ class Misc(Cog):
             embed.add_field(
                 name='Ping',
                 value=f'Latency: {json_["ping"]["latency"]}ms | Jitter: {json_["ping"]["jitter"]}ms',
-                inline=True,
+                inline=False,
             )
 
             embed.add_field(
                 name='Download',
                 value=f'{round((((json_["download"]["bytes"] / json_["download"]["elapsed"])) * 8.0) / 1000, 2)}Mbps',
-                inline=True,
+                inline=False,
             )
             embed.add_field(
                 name='Upload',
                 value=f'{round((((json_["upload"]["bytes"] / json_["upload"]["elapsed"])) * 8.0) / 1000, 2)}Mbps',
-                inline=True,
+                inline=False,
             )
 
             embed.add_field(
                 name='Server',
                 value=f'{json_["server"]["name"]} (ID: {json_["server"]["id"]})',
-                inline=True,
+                inline=False,
             )
             embed.add_field(
-                name='Packet Lost', value=f'{json_["packetLoss"]}%', inline=True
+                name='Packet Lost', value=f'{json_["packetLoss"]}%', inline=False
             )
 
             embed.set_footer(text=f'Test ID: {json_["result"]["id"]}')
