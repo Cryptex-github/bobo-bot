@@ -279,10 +279,8 @@ class Music(Cog):
         if isinstance(track, Playlist):
             actual_tracks = track.tracks
 
-            if queue := getattr(player, 'queue', None):
-                queue.append_tracks(actual_tracks)
-            else:
-                player.queue = Queue.with_tracks(ctx, player, actual_tracks)
+            player.queue.append_tracks(actual_tracks)
+
 
             for track in actual_tracks:
                 track.metadata = MetaData(ctx.author)
@@ -296,10 +294,9 @@ class Music(Cog):
 
         track = cast(Track, track)
 
-        if queue := getattr(player, 'queue', None):
-            queue.append_track(track)
-        else:
-            player.queue = Queue.with_tracks(ctx, player, [track])
+        player.queue._ctx = ctx
+
+        player.queue.append_track(track)
 
         await player.play(player.queue.current)
         await player.queue.send_embed()
