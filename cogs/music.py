@@ -189,7 +189,7 @@ class Music(Cog):
         if not player.is_connected():
             await self.join(ctx)
 
-        track = await self.node.get_track(
+        track = await self.node.search_track(
             query, source=Source.youtube, prefer_selected_track=False
         )
 
