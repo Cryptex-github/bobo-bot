@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from discord.channel import VocalGuildChannel
     from discord.abc import Snowflake
 
-    from magmatic.events import TrackStartEvent, TrackStuckEvent
+    from magmatic.events import TrackEndEvent, TrackStuckEvent
 
     from core.context import BoboContext
     from core.bot import BoboBot
@@ -58,7 +58,7 @@ class Player(_Player['BoboBot']):
         await self.play(track)
         await self.queue.send_embed()
 
-    async def on_track_start(self, event: TrackStartEvent) -> None:
+    async def on_track_end(self, event: TrackEndEvent) -> None:
         await self.do_next()
 
     async def on_track_stuck(self, event: TrackStuckEvent) -> None:
@@ -286,9 +286,8 @@ class Music(Cog):
                 track.metadata = MetaData(ctx.author)
 
             await player.play(player.queue.current)
-            await player.queue.send_embed()
 
-            return f'Playing playlist: `{track.name}` with {len(actual_tracks)} tracks.'
+            return f'Added playlist: `{track.name}` with {len(actual_tracks)} tracks.'
 
         track.metadata = MetaData(ctx.author)
 
@@ -299,9 +298,8 @@ class Music(Cog):
         player.queue.append_track(track)
 
         await player.play(player.queue.current)
-        await player.queue.send_embed()
 
-        return f'Playing track: `{track.title}`.'
+        return f'Added track: `{track.title}`.'
 
     @command(aliases=['disconnect'])
     async def leave(self, ctx: BoboContext) -> str:
