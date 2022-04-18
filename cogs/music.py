@@ -124,7 +124,6 @@ class Queue:
 
         return embed
 
-
     async def send_embed(self, player: Player) -> None:
         await self.ctx.send(embed=self._make_embed(player))
 
@@ -177,6 +176,16 @@ class Music(Cog):
         await player.connect(channel)
 
         return f'Joined {channel.mention}'
+
+    @command()
+    async def now(self, ctx: BoboContext) -> str | None:
+        """Shows the currently playing track."""
+        player = self.node.get_player(ctx.guild)
+
+        if not hasattr(player, 'queue'):
+            return 'No track is currently playing.'
+
+        await player.queue.send_embed(player)
 
     @command()
     async def play(self, ctx: BoboContext, *, query: str) -> str:
