@@ -27,7 +27,7 @@ class ReactionRoles(Cog):
     ) -> None:
         if not self.bot.is_ready():
             return
-        
+
         assert self.bot.user is not None
 
         if payload.user_id == self.bot.user.id:

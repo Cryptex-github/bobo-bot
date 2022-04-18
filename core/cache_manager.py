@@ -26,7 +26,9 @@ class RedisCacheManager(CacheManager):
 class DeleteMessageManager(RedisCacheManager):
     __slots__ = ()
 
-    async def get_messages(self, message_id: int, one_only: bool = False) -> SnowflakeList:
+    async def get_messages(
+        self, message_id: int, one_only: bool = False
+    ) -> SnowflakeList:
         return [
             int(i)
             for i in await self.redis.lrange(

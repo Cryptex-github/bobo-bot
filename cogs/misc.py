@@ -51,9 +51,7 @@ class Misc(Cog):
             if json_['type'] != 'result':
                 return 'Failed to run speedtest.'
 
-            embed = ctx.embed(
-                title='Speedtest', url=json_['result']['url']
-            )
+            embed = ctx.embed(title='Speedtest', url=json_['result']['url'])
 
             embed.add_field(
                 name='Ping',

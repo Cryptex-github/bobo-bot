@@ -8,15 +8,20 @@ __all__ = ('Regexs',)
 
 RePattern: TypeAlias = Final[Pattern[str]]
 
+
 class Regexs:
     FILES_TO_RELOAD_REGEX: RePattern = re.compile(r'\w+/[a-z_]+\.py')
-    SPHINX_ENTRY_REGEX: RePattern = re.compile(r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)")
+    SPHINX_ENTRY_REGEX: RePattern = re.compile(
+        r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)"
+    )
     URL_REGEX: RePattern = re.compile(
         r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     )
 
 
-INVITE_LINK: Final[str] = r'https://discord.com/api/oauth2/authorize?client_id=808485782067216434&permissions=448827607232&scope=bot%20applications.commands'
+INVITE_LINK: Final[
+    str
+] = r'https://discord.com/api/oauth2/authorize?client_id=808485782067216434&permissions=448827607232&scope=bot%20applications.commands'
 SUPPORT_SERVER: Final[str] = 'https://discord.gg/AHYTRPr8hZ'
 
 

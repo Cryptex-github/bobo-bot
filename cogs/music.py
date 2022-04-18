@@ -3,7 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeAlias, Type, cast
 
 import magmatic
-from magmatic import Source, Playlist, Track as _Track, Player as _Player, Node as _Node
+from magmatic import (
+    Source, 
+    Playlist, 
+    Track as _Track, 
+    Player as _Player, 
+    Node as _Node
+)
 
 from discord import VoiceChannel, StageChannel, Member
 from discord.utils import MISSING
@@ -35,13 +41,13 @@ Track: TypeAlias = _Track[MetaData]
 
 class Player(_Player['BoboBot']):
     def __init__(
-        self, 
-        client: BoboBot = MISSING, 
-        channel: VocalGuildChannel = MISSING, 
-        /, 
-        *, 
-        node: Node = MISSING, 
-        guild: Snowflake = MISSING
+        self,
+        client: BoboBot = MISSING,
+        channel: VocalGuildChannel = MISSING,
+        /,
+        *,
+        node: Node = MISSING,
+        guild: Snowflake = MISSING,
     ) -> None:
         super().__init__(client, channel, node=node, guild=guild)
 
@@ -54,7 +60,7 @@ class Player(_Player['BoboBot']):
             track = self.queue.current
         except IndexError:
             return
-        
+
         await self.play(track)
         await self.queue.send_embed()
 
@@ -66,8 +72,16 @@ class Player(_Player['BoboBot']):
 
 
 class Node(_Node['BoboBot']):
-    def get_player(self, guild: Snowflake, *, cls: Type[Player] = Player, fail_if_not_exists: bool = False) -> Player:
-        return super().get_player(guild, cls=Player, fail_if_not_exists=fail_if_not_exists)
+    def get_player(
+        self,
+        guild: Snowflake,
+        *,
+        cls: Type[Player] = Player,
+        fail_if_not_exists: bool = False,
+    ) -> Player:
+        return super().get_player(
+            guild, cls=Player, fail_if_not_exists=fail_if_not_exists
+        )
 
 
 class Queue:
@@ -84,7 +98,9 @@ class Queue:
         self._player: Player = player
 
     @classmethod
-    def with_tracks(cls, ctx: BoboContext, player: Player, tracks: list[Track]) -> Queue:
+    def with_tracks(
+        cls, ctx: BoboContext, player: Player, tracks: list[Track]
+    ) -> Queue:
         queue = cls(player)
         queue.append_tracks(tracks)
 
@@ -114,7 +130,7 @@ class Queue:
         self._cleanup()
 
     def _cleanup(self) -> None:
-        self._queue = self._queue[:self._position]
+        self._queue = self._queue[: self._position]
         self._position = 0
 
     @property
@@ -168,13 +184,15 @@ class Queue:
             bar = ''
 
         embed = self.ctx.embed(
-            title='Current Track', 
+            title='Current Track',
             description=(
-            f'**{self.current.title}** By: **{self.current.author}**'
-            f'\n{bar}\n\n{position}/{duration}'
-            )
+                f'**{self.current.title}** By: **{self.current.author}**'
+                f'\n{bar}\n\n{position}/{duration}'
+            ),
         )
-        embed.add_field(name='Requested By', value=f'{self.current.metadata.requestor.mention}')
+        embed.add_field(
+            name='Requested By', value=f'{self.current.metadata.requestor.mention}'
+        )
 
         return embed
 
@@ -275,7 +293,7 @@ class Music(Cog):
             for track in actual_tracks:
                 track.metadata = MetaData(ctx.author)
 
-            await player.play(player.queue.current)            
+            await player.play(player.queue.current)
             await player.queue.send_embed()
 
             return f'Playing playlist: `{track.name}` with {len(actual_tracks)} tracks.'

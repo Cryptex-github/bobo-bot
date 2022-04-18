@@ -183,7 +183,9 @@ class BoboBot(commands.Bot):
                     )
         await self.load_extension('jishaku')
 
-    async def get_context(self, origin: Message | Interaction, *, cls: Type[ContextT] = MISSING):
+    async def get_context(
+        self, origin: Message | Interaction, *, cls: Type[ContextT] = MISSING
+    ):
         return await super().get_context(origin, cls=self.context)
 
     async def unload_all_extensions(self):
