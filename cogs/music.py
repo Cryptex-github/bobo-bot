@@ -120,7 +120,7 @@ class Queue:
             f'\n{bar}\n\n{position}/{duration}'
             )
         )
-        embed.add_field(name='Requested By', value=f'{self.current.metadata.requester.mention}')
+        embed.add_field(name='Requested By', value=f'{self.current.metadata.requestor.mention}')
 
         return embed
 
