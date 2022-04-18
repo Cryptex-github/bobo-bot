@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING, List, Dict
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from aioredis import Redis
+    from discord.types.snowflake import SnowflakeList
+
     from .types import PossibleRTFMSources
 
 __all__ = ('DeleteMessageManager', 'RTFMCacheManager', 'ReactionRoleManager')
@@ -24,7 +26,7 @@ class RedisCacheManager(CacheManager):
 class DeleteMessageManager(RedisCacheManager):
     __slots__ = ()
 
-    async def get_messages(self, message_id: int, one_only: bool = False) -> List[int]:
+    async def get_messages(self, message_id: int, one_only: bool = False) -> SnowflakeList:
         return [
             int(i)
             for i in await self.redis.lrange(
@@ -48,7 +50,7 @@ class RTFMCacheManager(RedisCacheManager):
     __slots__ = ()
 
     async def add(
-        self, source: PossibleRTFMSources, query: str, nodes: Dict[str, str]
+        self, source: PossibleRTFMSources, query: str, nodes: dict[str, str]
     ) -> None:
         await self.redis.hmset(f'rtfm:{source}:{query}', nodes)
 
@@ -56,7 +58,7 @@ class RTFMCacheManager(RedisCacheManager):
 
     async def get(
         self, source: PossibleRTFMSources, query: str
-    ) -> Dict[str, str] | None:
+    ) -> dict[str, str] | None:
         return (
             await self.redis.hgetall(f'rtfm:{source}:{query}')
         ) or None  # If it returns empty Dict, returns None.
@@ -68,7 +70,7 @@ class ReactionRoleManager(RedisCacheManager):
     async def add(self, message_id: int, role_id: int, emoji: str) -> None:
         await self.redis.hset(f'reaction_roles:{message_id}', emoji, role_id)
 
-    async def get_message(self, message_id: int) -> Dict[str, int]:
+    async def get_message(self, message_id: int) -> dict[str, int]:
         return {
             k: int(v)
             for k, v in (

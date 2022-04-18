@@ -25,6 +25,11 @@ class ReactionRoles(Cog):
     async def on_raw_reaction_add(
         self, payload: discord.RawReactionActionEvent
     ) -> None:
+        if not self.bot.is_ready():
+            return
+        
+        assert self.bot.user is not None
+
         if payload.user_id == self.bot.user.id:
             return
 
@@ -51,6 +56,11 @@ class ReactionRoles(Cog):
     async def on_raw_reaction_remove(
         self, payload: discord.RawReactionActionEvent
     ) -> None:
+        if not self.bot.is_ready():
+            return
+
+        assert self.bot.user is not None
+
         if payload.user_id == self.bot.user.id:
             return
 
