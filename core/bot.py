@@ -109,6 +109,12 @@ class BoboBot(commands.Bot):
 
         self.ready_once = False
 
+    def get_cooldown(self, message: Message) -> commands.Cooldown | None:
+        if message.author.id == self.owner_id:
+            return
+
+        return commands.Cooldown(1, 2)
+
     def add_command(self, command: Command) -> None:
         ignore_list = ('help',)
 
@@ -116,8 +122,9 @@ class BoboBot(commands.Bot):
         command.cooldown_after_parsing = True
 
         if not getattr(command._buckets, '_cooldown', None):
-            command._buckets = commands.CooldownMapping.from_cooldown(
-                1, 2, commands.BucketType.user
+            command._buckets = commands.DynamicCooldownMapping(
+                self.get_cooldown, 
+                commands.BucketType.user
             )
 
         if (
