@@ -110,7 +110,7 @@ class BoboBot(commands.Bot):
         self.ready_once = False
 
     def get_cooldown(self, message: Message) -> commands.Cooldown | None:
-        if message.author.id == self.owner_id:
+        if message.author.id == 590323594744168494:
             return
 
         return commands.Cooldown(1, 2)
