@@ -10,7 +10,6 @@ mystbin.py
 redis[hiredis]
 uvloop
 requests-html
-pytube
 import-expression
 quart
 Quart-CORS
