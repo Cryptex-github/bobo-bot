@@ -86,7 +86,7 @@ class Player(_Player['BoboBot']):
             position = 'Position too long.'
 
         try:
-            percentage = 100 / (track.duration or 0) * (track.position or 0)
+            percentage = 100 / (track.duration or 0) * (self.position or 0)
 
             bar = (
                 '`'
