@@ -71,7 +71,7 @@ class Player(_Player['BoboBot']):
 
     def _make_embed(self, track: Track) -> Embed:
         try:
-            hours, remainder = divmod(track.duration, 3600)
+            hours, remainder = divmod(int(track.duration), 3600)
             minutes, seconds = divmod(remainder, 60)
 
             duration = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
@@ -79,7 +79,7 @@ class Player(_Player['BoboBot']):
             duration = 'Duration too long.'
 
         try:
-            hours, remainder = divmod(track.position or 0, 3600)
+            hours, remainder = divmod(int(track.position or 0), 3600)
             minutes, seconds = divmod(remainder, 60)
             position = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
         except:
