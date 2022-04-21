@@ -122,7 +122,8 @@ class Videos(Cog):
 
         yt = YoutubeDownloader(url, max_filesize=filesize_limit, audio_only=prompt.result == 'audio')
 
-        b, file_type = await yt.download()
+        async with ctx.typing():
+            b, file_type = await yt.download()
 
         return discord.File(b, filename=f'bobo-bot-youtube-download.{file_type}')
 
