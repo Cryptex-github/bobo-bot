@@ -44,19 +44,14 @@ class Player(_Player['BoboBot']):
         self,
         client: BoboBot = MISSING,
         channel: VocalGuildChannel = MISSING,
-        channel_id: int = MISSING,
         /,
         *,
         node: Node = MISSING,
         guild: Snowflake = MISSING,
     ) -> None:
-        if channel_id is MISSING:
-            raise TypeError('channel_id is required.')
-
         super().__init__(client, channel, node=node, guild=guild)
 
         self.queue = Queue()
-        self.text_channel_id = channel_id
 
     async def do_next(self) -> None:
         track = self.queue.skip()
