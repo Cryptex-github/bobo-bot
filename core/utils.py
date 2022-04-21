@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import asyncio
 import functools
 import time
 import re
 
-from typing import Awaitable, Callable, TypeVar, ParamSpec, Iterable, Generator
+from typing import TYPE_CHECKING, Awaitable, Any, Callable, TypeVar, ParamSpec, Iterable, Generator
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ('Timer', 'finder', 'async_executor', 'unique_list')
 
@@ -14,37 +19,40 @@ U = TypeVar('U')
 
 
 class Timer:
-    def __init__(self):
-        self._start = None
-        self._end = None
+    __slots__ = ('_start', '_end')
 
-    def start(self):
+    def __init__(self) -> None:
+        self._start: float | None = None
+        self._end: float | None = None
+
+    def start(self) -> None:
         self._start = time.perf_counter()
 
-    def stop(self):
+    def stop(self) -> None:
         self._end = time.perf_counter()
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.start()
+
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
         self.stop()
 
-    def __int__(self):
+    def __int__(self) -> int:
         return round(self.time)
 
-    def __float__(self):
+    def __float__(self) -> float:
         return self.time
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.time)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Timer time={self.time}>"
 
     @property
-    def time(self):
+    def time(self) -> float:
         if self._end is None:
             raise ValueError('Timer has not been ended.')
         if self._start is None:
