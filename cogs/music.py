@@ -52,6 +52,7 @@ class Player(_Player['BoboBot']):
         super().__init__(client, channel, node=node, guild=guild)
 
         self.queue = Queue()
+        self.queue.reset()
 
     async def do_next(self) -> None:
         track = self.queue.skip()
