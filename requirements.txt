@@ -8,6 +8,7 @@ asyncpg
 psutil
 mystbin.py
 redis[hiredis]
+humanize
 uvloop
 requests-html
 import-expression

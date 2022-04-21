@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import json
+from asyncio import to_thread
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from datetime import datetime
 from textwrap import dedent
 from typing import TYPE_CHECKING
+from platform import node
+import psutil
+import humanize
 
 from core import Cog, command
 
@@ -31,6 +35,53 @@ class Misc(Cog):
             Discord WS latency: {res.discord_ws}ms
         """
         )
+
+    @command()
+    async def sys(self, ctx: BoboContext) -> Embed:
+        proc = psutil.Process()
+
+        with proc.oneshot():
+            mem = proc.memory_full_info()
+            net = psutil.net_io_counters()
+            disk = psutil.disk_usage('/')
+
+            embed = ctx.embed(title='System Info')
+
+            embed.description = dedent(
+                f"""
+                ```prolog
+                Node: {node()}
+
+                CPU:
+                    Usage: {await to_thread(psutil.cpu_percent, interval=0.3)}%
+
+                Process:
+                    PID: {proc.pid}
+                    Threads: {proc.num_threads()}
+                    Memory:
+                        Physical: {humanize.naturalsize(mem.rss)}
+                        Virtual: {humanize.naturalsize(mem.vms)}
+
+                Disk:
+                    Total: {humanize.naturalsize(disk.total)}
+                    Free: {humanize.naturalsize(disk.free)}
+                    Used: {humanize.naturalsize(disk.used)}
+                    Used Percent: {disk.percent}%
+                
+                Network:
+                    Bytes Sent: {humanize.naturalsize(net.bytes_sent)}
+                    Bytes Received: {humanize.naturalsize(net.bytes_recv)}
+                    Packets Sent: {net.packets_sent:,}
+                    Packets Received: {net.packets_recv:,}
+                
+                System:
+                    Boot Time: {datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}
+                ```
+                """
+            )
+
+        return embed
+        
 
     @command()
     async def speedtest(self, ctx: BoboContext) -> Embed | str:
