@@ -5,7 +5,16 @@ import functools
 import time
 import re
 
-from typing import TYPE_CHECKING, Awaitable, Any, Callable, TypeVar, ParamSpec, Iterable, Generator
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Any,
+    Callable,
+    TypeVar,
+    ParamSpec,
+    Iterable,
+    Generator,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Self

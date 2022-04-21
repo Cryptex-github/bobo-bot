@@ -284,7 +284,6 @@ class Music(Cog):
 
             player.queue.append_tracks(actual_tracks)
 
-
             for track in actual_tracks:
                 track.metadata = MetaData(ctx.author)
 

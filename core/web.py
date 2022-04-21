@@ -14,6 +14,7 @@ class Quart(_Quart):
 
         bot: BoboBot
 
+
 app = Quart(__name__)
 
 app.config['JSON_SORT_KEYS'] = False

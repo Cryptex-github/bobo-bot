@@ -21,14 +21,24 @@ class VideoMetadata(NamedTuple):
 
 
 class YoutubeDownloader:
-    def __init__(self, url: str, *, max_filesize: int, audio_only: bool = False) -> None:
+    def __init__(
+        self, url: str, *, max_filesize: int, audio_only: bool = False
+    ) -> None:
         self.url = url
         self.max_filesize = max_filesize
         self.audio_only = audio_only
 
     @staticmethod
     async def metadata(url: str) -> VideoMetadata:
-        proc = await create_subprocess_exec('yt-dlp', url, '-qse', '--get-id', '--skip-download', stdout=PIPE, stderr=DEVNULL)
+        proc = await create_subprocess_exec(
+            'yt-dlp',
+            url,
+            '-qse',
+            '--get-id',
+            '--skip-download',
+            stdout=PIPE,
+            stderr=DEVNULL,
+        )
 
         stdout, _ = await proc.communicate()
         stdout = stdout.decode('utf-8')
@@ -42,16 +52,20 @@ class YoutubeDownloader:
 
         return VideoMetadata(
             title=title,
-            thumbnail_url=f'http://img.youtube.com/vi/{video_id}/maxresdefault.jpg'
+            thumbnail_url=f'http://img.youtube.com/vi/{video_id}/maxresdefault.jpg',
         )
 
     async def download(self) -> tuple[BytesIO, str]:
         args = (
-            self.url, 
-            '--max-filesize', str(self.max_filesize),
-            '-o', '-',
-            '--audio-format', 'mp3',
-            '--recode-video', 'mp4',
+            self.url,
+            '--max-filesize',
+            str(self.max_filesize),
+            '-o',
+            '-',
+            '--audio-format',
+            'mp3',
+            '--recode-video',
+            'mp4',
         )
 
         if self.audio_only:
@@ -59,7 +73,9 @@ class YoutubeDownloader:
         else:
             args += ('-f', 'bestvideo+bestaudio')
 
-        proc = await create_subprocess_exec('yt-dlp', *args, stdout=PIPE, stderr=DEVNULL)
+        proc = await create_subprocess_exec(
+            'yt-dlp', *args, stdout=PIPE, stderr=DEVNULL
+        )
 
         stdout, _ = await proc.communicate()
 
@@ -120,7 +136,9 @@ class Videos(Cog):
         else:
             filesize_limit = 8388608
 
-        yt = YoutubeDownloader(url, max_filesize=filesize_limit, audio_only=prompt.result == 'audio')
+        yt = YoutubeDownloader(
+            url, max_filesize=filesize_limit, audio_only=prompt.result == 'audio'
+        )
 
         async with ctx.typing():
             b, file_type = await yt.download()

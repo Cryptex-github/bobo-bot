@@ -104,7 +104,9 @@ class BoboBot(commands.Bot):
         self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
 
-        self.redis = aioredis.from_url('unix:///var/run/redis/redis-server.sock', decode_responses=True)
+        self.redis = aioredis.from_url(
+            'unix:///var/run/redis/redis-server.sock', decode_responses=True
+        )
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
         self.ready_once = False
@@ -123,8 +125,7 @@ class BoboBot(commands.Bot):
 
         if not getattr(command._buckets, '_cooldown', None):
             command._buckets = commands.DynamicCooldownMapping(
-                self.get_cooldown, 
-                commands.BucketType.user
+                self.get_cooldown, commands.BucketType.user
             )
 
         if (
