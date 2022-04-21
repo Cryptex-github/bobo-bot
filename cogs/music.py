@@ -221,7 +221,7 @@ class Music(Cog):
             for track in actual_tracks:
                 track.metadata = MetaData(ctx.author)
 
-            if len(player.queue) == 1:
+            if not player.is_playing():
                 assert player.queue.current is not None
 
                 await player.play(player.queue.current)
@@ -234,7 +234,7 @@ class Music(Cog):
 
         player.queue.add(track)
 
-        if len(player.queue) == 1:
+        if not player.is_playing():
             assert player.queue.current is not None
 
             await player.play(player.queue.current)
