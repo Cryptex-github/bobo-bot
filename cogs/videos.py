@@ -63,7 +63,7 @@ class YoutubeDownloader:
 
         stdout, _ = await proc.communicate()
 
-        return BytesIO(stdout), ('mp4' if self.audio_only else 'mp3')
+        return BytesIO(stdout), ('mp3' if self.audio_only else 'mp4')
 
 
 class VideoPrompt(BaseView):
@@ -95,6 +95,8 @@ class VideoPrompt(BaseView):
 class Videos(Cog):
     @command()
     async def yt(self, ctx: BoboContext, *, url: str) -> str | discord.File:
+        await ctx.trigger_typing()
+
         try:
             metadata = await YoutubeDownloader.metadata(url)
         except ValueError:
