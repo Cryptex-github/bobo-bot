@@ -131,7 +131,7 @@ class Node(_Node['BoboBot']):
 class Music(Cog):
     async def cog_load(self) -> None:
         if not hasattr(self.bot, 'magmatic_node'):
-            self.bot.magmatic_node = self.node = Node(
+            self.bot.magmatic_node = Node(
                 bot=self.bot,
                 host=LavalinkConnectionDetails.host,
                 port=LavalinkConnectionDetails.port,
@@ -143,6 +143,8 @@ class Music(Cog):
 
             await self.node.start()
             magmatic.add_node(self.node)
+
+        self.node = self.bot.magmatic_node
 
     async def cog_check(self, ctx: BoboContext) -> bool:
         if not ctx.guild:
