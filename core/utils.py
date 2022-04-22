@@ -27,6 +27,22 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
+class Duration:
+    __slots__ = ('_time',)
+
+    def __init__(self, time: float) -> None:
+        self._time = time
+
+    def as_nanos(self) -> float:
+        return self._time * 1e9
+
+    def as_micros(self) -> float:
+        return self._time * 1e6
+
+    def as_millis(self) -> float:
+        return self._time * 1e3
+
+
 class Timer:
     __slots__ = ('_start', '_end')
 
@@ -36,9 +52,14 @@ class Timer:
 
     def start(self) -> None:
         self._start = time.perf_counter()
+    
+    now = start
 
     def stop(self) -> None:
         self._end = time.perf_counter()
+    
+    def elapsed(self) -> Duration:
+        return Duration(self.time)
 
     def __enter__(self) -> Self:
         self.start()
