@@ -53,7 +53,12 @@ class Timer:
     def start(self) -> None:
         self._start = time.perf_counter()
     
-    now = start
+    @classmethod
+    def now(cls) -> Self:
+        timer = cls()
+        timer.start()
+
+        return timer
 
     def stop(self) -> None:
         self._end = time.perf_counter()
