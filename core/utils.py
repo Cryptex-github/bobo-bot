@@ -50,8 +50,12 @@ class Timer:
         self._start: float | None = None
         self._end: float | None = None
 
-    def start(self) -> None:
-        self._start = time.perf_counter()
+    @classmethod
+    def start(cls) -> Self:
+        timer = cls()
+        timer._start = time.perf_counter()
+
+        return timer
     
     now = start
 
