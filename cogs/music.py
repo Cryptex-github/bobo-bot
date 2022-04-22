@@ -263,6 +263,9 @@ class Music(Cog):
         assert ctx.guild is not None
         assert isinstance(ctx.author, Member)
 
+        if not (ctx.author.voice and ctx.author.voice.channel):
+            return 'You are not currently in a voice channel.'
+
         player = self.node.get_player(ctx.guild)
         player.ctx = ctx
 
