@@ -110,9 +110,9 @@ class Player(_Player['BoboBot']):
 
         return embed
 
-    async def send_embed(self) -> None:
+    async def send_embed(self, delete_after: bool = True) -> None:
         if track := self.queue.current:
-            await self.ctx.send(embed=self._make_embed(track))
+            await self.ctx.send(embed=self._make_embed(track), delete_after=5 if delete_after else None)
 
 
 class Node(_Node['BoboBot']):
@@ -188,7 +188,7 @@ class Music(Cog):
         player = self.node.get_player(ctx.guild)
 
         if player.queue.current:
-            await player.send_embed()
+            await player.send_embed(delete_after=False)
 
             return
 
@@ -285,7 +285,8 @@ class Music(Cog):
                 track.metadata = MetaData(ctx.author)
 
             if not player.is_playing():
-                await player.play(player.queue.get())
+                if track_ := player.queue.get():
+                    await player.play(track_)
 
             return f'Added playlist: `{track.name}` with {len(actual_tracks)} tracks.'
 
@@ -296,7 +297,8 @@ class Music(Cog):
         player.queue.add(track)
 
         if not player.is_playing():
-            await player.play(player.queue.get())
+            if track_ := player.queue.get():
+                await player.play(track_)
 
         return f'Added track: `{track.title}`.'
 
