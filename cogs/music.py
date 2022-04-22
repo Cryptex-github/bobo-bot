@@ -297,17 +297,11 @@ class Music(Cog):
 
         track = cast(Track, track)
 
-        await ctx.send(str(player.queue.queue))
         player.queue.add(track)
-        await ctx.send('added to queue')
-        await ctx.send(str(player.queue.queue))
 
         if not player.is_playing():
             if track_ := player.queue.get():
                 await player.play(track_)
-                await ctx.send('playing')
-
-            await ctx.send('get')
 
         return f'Added track: `{track.title}`.'
 
