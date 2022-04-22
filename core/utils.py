@@ -19,7 +19,7 @@ from typing import (
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-__all__ = ('Timer', 'finder', 'async_executor', 'unique_list')
+__all__ = ('Instant', 'Timer', 'finder', 'async_executor', 'unique_list')
 
 R = TypeVar('R')
 P = ParamSpec('P')
@@ -33,6 +33,10 @@ class Duration:
     def __init__(self, time: float) -> None:
         self._time = time
 
+    @classmethod
+    def from_secs(cls, secs: float) -> Duration:
+        return cls(secs)
+
     def as_nanos(self) -> float:
         return self._time * 1e9
 
@@ -43,7 +47,7 @@ class Duration:
         return self._time * 1e3
 
 
-class Timer:
+class Instant:
     __slots__ = ('_start', '_end')
 
     def __init__(self) -> None:
@@ -64,7 +68,7 @@ class Timer:
         self._end = time.perf_counter()
     
     def elapsed(self) -> Duration:
-        return Duration(self.time)
+        return Duration.from_secs(self.time)
 
     def __enter__(self) -> Self:
         self.start()
@@ -94,6 +98,8 @@ class Timer:
             raise ValueError('Timer has not been started.')
 
         return self._end - self._start
+
+Timer = Instant
 
 
 # Shamelessly robbed from R. Danny
