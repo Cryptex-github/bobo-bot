@@ -16,7 +16,7 @@ from jishaku.codeblocks import codeblock_converter
 from jishaku.exception_handling import ReactionProcedureTimer
 from tabulate import tabulate
 
-from core import BoboContext, Cog, Regexs, Timer, command, unique_list
+from core import BoboContext, Cog, Regexs, Instant, command, unique_list
 from core.constants import CAN_DELETE, SAFE_SEND
 from core.types import OutputType
 
@@ -130,7 +130,7 @@ class Owner(Cog):
 
     @command()
     async def sql(self, ctx: BoboContext, *, query: str):
-        with Timer() as timer:
+        with Instant() as instant:
             res = await self.bot.db.fetch(query)
 
         fmted = '```sql\n'
@@ -138,7 +138,7 @@ class Owner(Cog):
         if res:
             fmted += tabulate(res, headers='keys', tablefmt='psql') + '\n```'
 
-        fmted += f'\n\n{len(res)} result(s) in {float(timer):.2f} seconds'
+        fmted += f'\n\n{len(res)} result(s) in {instant.elapsed.as_secs():.2f} seconds'
 
         if len(fmted) <= 2000:
             return fmted, True

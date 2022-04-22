@@ -19,7 +19,7 @@ from typing import (
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-__all__ = ('Instant', 'Timer', 'finder', 'async_executor', 'unique_list')
+__all__ = ('Instant', 'finder', 'async_executor', 'unique_list')
 
 R = TypeVar('R')
 P = ParamSpec('P')
@@ -46,6 +46,9 @@ class Duration:
     def as_millis(self) -> float:
         return self._time * 1e3
 
+    def as_secs(self) -> float:
+        return self._time
+
 
 class Instant:
     __slots__ = ('_start', '_end')
@@ -59,14 +62,15 @@ class Instant:
     
     @classmethod
     def now(cls) -> Self:
-        timer = cls()
-        timer.start()
+        instant = cls()
+        instant.start()
 
-        return timer
+        return instant
 
     def stop(self) -> None:
         self._end = time.perf_counter()
     
+    @property
     def elapsed(self) -> Duration:
         return Duration.from_secs(self.time)
 
@@ -88,18 +92,16 @@ class Instant:
         return str(self.time)
 
     def __repr__(self) -> str:
-        return f"<Timer time={self.time}>"
+        return f"<Instant time={self.time}>"
 
     @property
     def time(self) -> float:
         if self._end is None:
-            raise ValueError('Timer has not been ended.')
+            raise ValueError('Instant has not been ended.')
         if self._start is None:
-            raise ValueError('Timer has not been started.')
+            raise ValueError('Instant has not been started.')
 
         return self._end - self._start
-
-Timer = Instant
 
 
 # Shamelessly robbed from R. Danny

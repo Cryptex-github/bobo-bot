@@ -17,7 +17,7 @@ from discord.ext.commands.cooldowns import MaxConcurrency
 from requests_html import AsyncHTMLSession
 
 from core.cache_manager import DeleteMessageManager
-from core.utils import Timer
+from core.utils import Instant
 from core.cdn import CDNClient
 
 jishaku.Flags.NO_UNDERSCORE = True
@@ -65,21 +65,21 @@ class BoboBot(commands.Bot):
         )
 
     async def self_test(self) -> SelfTestResult:
-        with Timer() as postgres_timer:
+        with Instant() as postgres_instant:
             await self.db.execute('SELECT 1')
 
-        with Timer() as redis_timer:
+        with Instant() as redis_instant:
             await self.redis.ping()
 
-        with Timer() as discord_rest_timer:
+        with Instant() as discord_rest_instant:
             await self.http.get_gateway()
 
         r = lambda x: round(x, 3)
 
         return SelfTestResult(
-            r(float(postgres_timer) * 1000),
-            r(float(redis_timer) * 1000),
-            r(float(discord_rest_timer) * 1000),
+            r(postgres_instant.elapsed.as_millis()),
+            r(redis_instant.elapsed.as_millis()),
+            r(discord_rest_instant.elapsed.as_millis()),
             r(float(self.latency) * 1000),
         )
 
