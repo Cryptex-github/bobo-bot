@@ -142,7 +142,7 @@ class Music(Cog):
             )
 
             await self.bot.magmatic_node.start()
-            magmatic.add_node(self.node)
+            magmatic.add_node(self.bot.magmatic_node)
 
         self.node = self.bot.magmatic_node
 
