@@ -11,6 +11,7 @@ from discord.utils import MISSING
 from config import LavalinkConnectionDetails
 
 from core import Cog, command
+from core.paginator import EmbedListPageSource, ViewMenuPages
 
 if TYPE_CHECKING:
     from discord import Embed
@@ -52,10 +53,9 @@ class Player(_Player['BoboBot']):
         super().__init__(client, channel, node=node, guild=guild)
 
         self.queue = Queue()
-        self.queue.reset()
 
     async def do_next(self) -> None:
-        track = self.queue.skip()
+        track = self.queue.get()
 
         if not track:
             return
@@ -195,6 +195,69 @@ class Music(Cog):
         return 'No track is currently playing.'
 
     @command()
+    async def queue(self, ctx: BoboContext) -> str | None:
+        """Shows the current queue."""
+        assert ctx.guild is not None
+
+        player = self.node.get_player(ctx.guild)
+
+        if player.queue.is_empty():
+            return 'The queue is empty.'
+
+        pages = EmbedListPageSource(
+            [
+                f'{i}: [**{track.title}**]({track.uri})\nRequested By: {track.metadata.requestor.mention}'
+                for i, track in enumerate(player.queue.queue, 1)
+            ],
+            title='Current Queue',
+        )
+
+        pages = ViewMenuPages(pages)
+        await pages.start(ctx)
+
+    @command()
+    async def pause(self, ctx: BoboContext) -> str:
+        """Pauses the currently playing track."""
+        assert ctx.guild is not None
+
+        player = self.node.get_player(ctx.guild)
+
+        if not player.is_playing():
+            return 'No track is currently playing.'
+
+        await player.pause()
+
+        return '\U0001f44d'
+
+    @command(aliases=['resume'])
+    async def unpause(self, ctx: BoboContext) -> str:
+        """Resumes the currently paused track."""
+        assert ctx.guild is not None
+
+        player = self.node.get_player(ctx.guild)
+
+        if not player.is_paused():
+            return 'No track is currently paused.'
+
+        await player.resume()
+
+        return '\U0001f44d'
+
+    @command()
+    async def skip(self, ctx: BoboContext) -> str:
+        """Skips the currently playing track."""
+        assert ctx.guild is not None
+
+        player = self.node.get_player(ctx.guild)
+
+        if not player.is_playing():
+            return 'No track is currently playing.'
+
+        await player.stop()
+
+        return '\U0001f44d'
+
+    @command()
     async def play(self, ctx: BoboContext, *, query: str) -> str:
         """Plays a track."""
         assert ctx.guild is not None
@@ -222,9 +285,7 @@ class Music(Cog):
                 track.metadata = MetaData(ctx.author)
 
             if not player.is_playing():
-                assert player.queue.current is not None
-
-                await player.play(player.queue.current)
+                await player.play(player.queue.get())
 
             return f'Added playlist: `{track.name}` with {len(actual_tracks)} tracks.'
 
@@ -235,9 +296,7 @@ class Music(Cog):
         player.queue.add(track)
 
         if not player.is_playing():
-            assert player.queue.current is not None
-
-            await player.play(player.queue.current)
+            await player.play(player.queue.get())
 
         return f'Added track: `{track.title}`.'
 
