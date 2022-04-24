@@ -73,11 +73,13 @@ class MusicController(BaseView):
     
     def make_embed(self) -> Embed:
         embed = self.player.ctx.embed()
+        
         guild = self.player.bot.get_guild(self.player.guild_id)
+        channel = self.player.channel
 
         assert guild is not None
 
-        embed.set_author(name='Music Controller: ' + guild.name, icon_url=guild.icon.url if guild.icon else None)
+        embed.set_author(name='Music Controller: ' + channel.mention, icon_url=guild.icon.url if guild.icon else None)
 
         embed.add_field(name='Volume', value=str(self.player.volume) + '%')
         embed.add_field(name='Loop Type', value=self.player.queue.loop_type.name)
