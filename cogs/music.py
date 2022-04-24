@@ -117,7 +117,7 @@ class MusicController(BaseView):
         view.add_item(select)
 
         await interaction.response.defer(ephemeral=True)
-        await interaction.followup.send(view=view, ephemeral=True)
+        message = await interaction.followup.send(view=view, ephemeral=True, wait=True)
         await view.wait()
 
         selected = select.values[0]
@@ -132,6 +132,7 @@ class MusicController(BaseView):
         self.player.queue.loop_type = loop_type
 
         await interaction.edit_original_message(embed=self.make_embed())
+        await message.delete()
     
     @button(label='Toggle Pause', emoji='⏸', style=ButtonStyle.primary)
     async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
