@@ -1,4 +1,5 @@
 from __future__ import annotations
+from code import interact
 
 from typing import TYPE_CHECKING, TypeAlias, Type, cast, Callable, TypeVar
 
@@ -48,7 +49,7 @@ class SetVolumeModal(Modal, title='Set Volume'):
     volume = TextInput(label='Volume', min_length=1, max_length=3)
 
     async def on_submit(self, interaction: Interaction) -> None:
-        await interaction.response.send_message(f'Changed Volume to {self.volume}%', ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
 
         self.stop()
 
@@ -62,6 +63,8 @@ class LoopTypeSelect(Select):
         self.add_option(label='Queue', value='Queue', emoji='🔁')
     
     async def callback(self, interaction: Interaction) -> None:
+        await interaction.response.defer(ephemeral=True)
+
         if self.view:
             self.view.stop()
 
@@ -113,7 +116,8 @@ class MusicController(BaseView):
         select = LoopTypeSelect()
         view.add_item(select)
 
-        await interaction.response.send_message(view=view, ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
+        await interaction.followup.send(view=view, ephemeral=True)
         await view.wait()
 
         selected = select.values[0]
