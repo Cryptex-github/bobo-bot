@@ -62,8 +62,6 @@ class LoopTypeSelect(Select):
         self.add_option(label='Queue', value='Queue', emoji='🔁')
     
     async def callback(self, interaction: Interaction) -> None:
-        await interaction.response.send_message(f'Changed loop type to {self.values[0]}', ephemeral=True)
-        
         if self.view:
             self.view.stop()
 
@@ -115,9 +113,7 @@ class MusicController(BaseView):
         select = LoopTypeSelect()
         view.add_item(select)
 
-        await interaction.response.defer(ephemeral=True)
-
-        await interaction.followup.send(view=view, ephemeral=True)
+        await interaction.response.send_message(view=view, ephemeral=True)
         await view.wait()
 
         selected = select.values[0]
