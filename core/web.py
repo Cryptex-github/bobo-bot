@@ -1,18 +1,26 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from discord.http import Route
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from datetime import datetime
 
-from quart import Quart as _Quart
+from quart import Quart, request
 from quart_cors import cors
 
+from config import client_secret
 
-class Quart(_Quart):
-    if TYPE_CHECKING:
+
+if TYPE_CHECKING:
+    METHODS: TypeAlias = Literal['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
+    JSON: TypeAlias = dict[str, str | int]
+
+    class _Quart(Quart):
         from core.bot import BoboBot
-
+        
         bot: BoboBot
+    
+    Quart = _Quart
 
 
 app = Quart(__name__)
@@ -21,11 +29,26 @@ app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
+async def discord_request(method: METHODS, route: str, data: JSON) -> JSON | tuple[JSON, int]:
+    try:
+        token = request.args['Access-Token']
+    except KeyError:
+        return {'error': 'Missing Access-Token header'}, 401
+    
+    route = Route.BASE + route
+    headers = {'Authorization': 'Bearer ' + token}
+
+    async with app.bot.session.request(method, route, headers=headers, json=data) as resp:
+        if not resp.ok:
+            return {
+                'error': f'{resp.status}: {await resp.text()}'
+            }, 400
+        
+        return await resp.json()
 
 @app.get('/')
 async def index():
     return {'message': 'Hello World!'}
-
 
 @app.get('/stats')
 async def stats():
@@ -58,3 +81,27 @@ async def stats():
         'Total Gateway Events': events,
         'Average Events per minute': f'{events // time_difference}',
     }
+
+@app.post('/exchange-code')
+async def exchange_code() -> JSON | tuple[JSON, int]:
+    try:
+        code = request.args['code']
+    except KeyError:
+        return {'error': 'No code provided'}, 400
+    
+    data = {
+        'client_id': app.bot.user.id,
+        'client_secret': client_secret,
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': 'https://bobobot.cf'
+    }
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+    async with app.bot.session.post(Route.BASE + '/oauth2/token', data=data, headers=headers) as resp:
+        if not resp.ok:
+            return {
+                'error': f'{resp.status}: {await resp.text()}'
+            }, 400
+        
+        return await resp.json()

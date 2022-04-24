@@ -1,5 +1,4 @@
 from __future__ import annotations
-from code import interact
 
 from typing import TYPE_CHECKING, TypeAlias, Type, cast, Callable, TypeVar
 

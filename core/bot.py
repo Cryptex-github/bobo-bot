@@ -177,7 +177,7 @@ class BoboBot(commands.Bot):
 
         app.bot = self
 
-        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082))
+        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082, use_reloader=False))
 
     async def load_all_extensions(self) -> None:
         for file in os.listdir('./cogs'):
