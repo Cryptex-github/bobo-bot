@@ -48,7 +48,7 @@ class SetVolumeModal(Modal, title='Set Volume'):
     volume = TextInput(label='Volume', min_length=1, max_length=3)
 
     async def on_submit(self, interaction: Interaction) -> None:
-        await interaction.response.send_message(f'Changed Volume to {self.volume}%')
+        await interaction.response.send_message(f'Changed Volume to {self.volume}%', ephemeral=True)
 
         self.stop()
 
@@ -105,6 +105,8 @@ class MusicController(BaseView):
             return
 
         await self.player.set_volume(volume)
+
+        await interaction.edit_original_message(embed=self.make_embed())
     
     @button(label='Loop Type', emoji='🔁', style=ButtonStyle.primary)
     async def set_loop_type(self, interaction: Interaction, button: Button) -> None:
@@ -126,24 +128,32 @@ class MusicController(BaseView):
             loop_type = LoopType.queue
         
         self.player.queue.loop_type = loop_type
+
+        await interaction.edit_original_message(embed=self.make_embed())
     
     @button(label='Toggle Pause', emoji='⏸', style=ButtonStyle.primary)
     async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
         await self.player.toggle_pause()
 
         await interaction.response.send_message(f'Toggled pause to {self.player.is_paused()}', ephemeral=True)
+        await interaction.edit_original_message(embed=self.make_embed())
     
     @button(label='Skip', emoji='⏭', style=ButtonStyle.primary)
     async def skip(self, interaction: Interaction, button: Button) -> None:
         await self.player.stop()
 
         await interaction.response.send_message('Skipped current track', ephemeral=True)
+        await interaction.edit_original_message(embed=self.make_embed())
     
     @button(label='Leave', emoji='⏹', style=ButtonStyle.danger)
     async def leave(self, interaction: Interaction, button: Button) -> None:
         await self.player.disconnect()
 
         await interaction.response.send_message('Left voice channel', ephemeral=True)
+
+        self._disable_all()
+        await interaction.edit_original_message(embed=self.make_embed(), view=self)
+
         self.stop()
 
 
