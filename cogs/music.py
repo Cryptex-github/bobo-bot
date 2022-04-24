@@ -125,7 +125,7 @@ class MusicController(BaseView):
         else:
             loop_type = LoopType.queue
         
-        self.player.loop_type = loop_type
+        self.player.queue.loop_type = loop_type
     
     @button(label='Toggle Pause', emoji='⏸', style=ButtonStyle.primary)
     async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
