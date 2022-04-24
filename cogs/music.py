@@ -137,21 +137,19 @@ class MusicController(BaseView):
     async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
         await self.player.toggle_pause()
 
-        await interaction.response.edit_message(content=f'Toggled pause to {self.player.is_paused()}', embed=self.make_embed())
+        await interaction.response.edit_message(embed=self.make_embed())
     
     @button(label='Skip', emoji='⏭', style=ButtonStyle.primary)
     async def skip(self, interaction: Interaction, button: Button) -> None:
         await self.player.stop()
 
-        await interaction.edit_original_message(embed=self.make_embed())
-        await interaction.response.send_message('Skipped current track', ephemeral=True)
+        await interaction.response.edit_message(embed=self.make_embed())
     
     @button(label='Leave', emoji='⏹', style=ButtonStyle.danger)
     async def leave(self, interaction: Interaction, button: Button) -> None:
         await self.player.disconnect()
 
-        await interaction.edit_original_message(embed=self.make_embed(), view=self)
-        await interaction.response.send_message('Left voice channel', ephemeral=True)
+        await interaction.response.edit_message(embed=self.make_embed(), view=self)
 
         self._disable_all()
 
