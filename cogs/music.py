@@ -149,9 +149,8 @@ class MusicController(BaseView):
     async def leave(self, interaction: Interaction, button: Button) -> None:
         await self.player.disconnect()
 
-        await interaction.response.edit_message(embed=self.make_embed(), view=self)
-
         self._disable_all()
+        await interaction.response.edit_message(embed=self.make_embed(), view=self)
 
         self.stop()
 
