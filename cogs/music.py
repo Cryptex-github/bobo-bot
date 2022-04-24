@@ -79,10 +79,9 @@ class MusicController(BaseView):
 
         embed.set_author(name='Music Controller: ' + guild.name, icon_url=guild.icon.url if guild.icon else None)
 
-        for attr in ('volume', 'loop_type', 'is_paused'):
-            value = getattr(self.player, attr)
-
-            embed.add_field(name=attr.replace('_', '').title(), value=str(value))
+        embed.add_field(name='Volume', value=str(self.player.volume) + '%')
+        embed.add_field(name='Loop Type', value=self.player.queue.loop_type.name)
+        embed.add_field(name='Is paused', value=str(self.player.is_paused))
         
         embed.timestamp = utcnow()
 
