@@ -81,7 +81,7 @@ class MusicController(BaseView):
 
         embed.add_field(name='Volume', value=str(self.player.volume) + '%')
         embed.add_field(name='Loop Type', value=self.player.queue.loop_type.name)
-        embed.add_field(name='Is paused', value=str(self.player.is_paused))
+        embed.add_field(name='Is paused', value=str(self.player.is_paused()))
         
         embed.timestamp = utcnow()
 
