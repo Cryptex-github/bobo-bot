@@ -54,10 +54,11 @@ class SetVolumeModal(Modal, title='Set Volume'):
 
 
 class LoopTypeSelect(Select):
-    def __init__(self, player: Player) -> None:
+    def __init__(self, player: Player, make_embed: Callable[[], Embed]) -> None:
         super().__init__()
 
         self.player = player
+        self.make_embed = make_embed
 
         self.add_option(label='None', value='None')
         self.add_option(label='Track', value='Track', emoji='🔂')
@@ -77,8 +78,7 @@ class LoopTypeSelect(Select):
         
         self.player.queue.loop_type = loop_type
 
-        if self.view:
-            await interaction.edit_original_message(embed=self.view.make_embed())
+        await interaction.edit_original_message(embed=self.make_embed())
 
 
 class MusicController(BaseView):
@@ -125,7 +125,7 @@ class MusicController(BaseView):
     async def set_loop_type(self, interaction: Interaction, button: Button) -> None:
         view = BaseView(interaction.user.id, timeout=None)
 
-        select = LoopTypeSelect(self.player)
+        select = LoopTypeSelect(self.player, self.make_embed)
         view.add_item(select)
 
         await interaction.response.defer(ephemeral=True)
