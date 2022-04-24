@@ -79,7 +79,7 @@ class MusicController(BaseView):
 
         assert guild is not None
 
-        embed.set_author(name='Music Controller: ' + channel.mention, icon_url=guild.icon.url if guild.icon else None)
+        embed.set_author(name='Music Controller: ' + channel.name)
 
         embed.add_field(name='Volume', value=str(self.player.volume) + '%')
         embed.add_field(name='Loop Type', value=self.player.queue.loop_type.name)
@@ -206,11 +206,8 @@ class Player(_Player['BoboBot']):
             bar = ''
 
         embed = self.ctx.embed(
-            title='Current Track',
-            description=(
-                f'**{track.title}**'
-                f'\n{bar}\n\n{position}/{duration}'
-            ),
+            title=f'**{track.title}**',
+            description=f'\n{bar}\n\n{position}/{duration}',
             url=track.uri,
         )
 
