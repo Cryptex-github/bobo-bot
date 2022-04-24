@@ -45,7 +45,7 @@ class SetVolumeModal(Modal, title='Set Volume'):
     volume = TextInput(label='Volume', min_length=1, max_length=3)
 
     async def on_submit(self, interaction: Interaction) -> None:
-        await interaction.response.send_message(f'Setted Volume to {self.volume}%')
+        await interaction.response.send_message(f'Changed Volume to {self.volume}%')
 
         self.stop()
 
@@ -59,7 +59,7 @@ class LoopTypeSelect(Select):
         self.add_option(label='Queue', value='Queue', emoji='🔁')
     
     async def callback(self, interaction: Interaction) -> None:
-        await interaction.response.send_message(f'Setted loop type to {self.values[0]}', ephemeral=True)
+        await interaction.response.send_message(f'Changed loop type to {self.values[0]}', ephemeral=True)
         
         if self.view:
             self.view.stop()
