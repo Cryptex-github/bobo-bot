@@ -100,7 +100,7 @@ class MusicController(BaseView):
         await modal.wait()
 
         try:
-            volume = int(modal.volume) # type: ignore
+            volume = int(modal.volume.value) # type: ignore
         except ValueError:
             return
 
