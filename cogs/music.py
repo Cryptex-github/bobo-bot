@@ -129,6 +129,12 @@ class MusicController(BaseView):
         await self.player.toggle_pause()
 
         await interaction.response.send_message(f'Toggled pause to {self.player.is_paused()}', ephemeral=True)
+    
+    @button(label='Skip', emoji='⏭', style=ButtonStyle.primary)
+    async def skip(self, interaction: Interaction, button: Button) -> None:
+        await self.player.stop()
+
+        await interaction.response.send_message('Skipped current track', ephemeral=True)
 
 
 class MusicControllerInvoke(BaseView):
