@@ -101,7 +101,6 @@ class BoboBot(commands.Bot):
         self.cdn = CDNClient(self)
 
     async def initialize_constants(self) -> None:
-        self.color = 0xFF4500
         self.session = aiohttp.ClientSession(connector=self.connector)
 
         self.redis = aioredis.from_url(

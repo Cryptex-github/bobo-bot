@@ -3,18 +3,22 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeAlias, Type, cast
 
 import magmatic
-from magmatic import Source, Playlist, Track as _Track, Player as _Player, Node as _Node, Queue as _Queue
+from magmatic import Source, Playlist, Track as _Track, Player as _Player, Node as _Node, Queue as _Queue, LoopType
 
-from discord import VoiceChannel, StageChannel, Member
-from discord.utils import MISSING
+from discord import VoiceChannel, StageChannel, Member, Embed, ButtonStyle
+from discord.ui import button, Modal, TextInput, Select
+from discord.utils import MISSING, utcnow
 
 from config import LavalinkConnectionDetails
 
 from core import Cog, command
+from core.view import BaseView
 from core.paginator import EmbedListPageSource, ViewMenuPages
 
 if TYPE_CHECKING:
-    from discord import Embed
+    from discord import Embed, Message
+    from discord import Interaction
+    from discord.ui import Button
     from discord.channel import VocalGuildChannel
     from discord.abc import Snowflake
 
@@ -37,9 +41,111 @@ class Queue(_Queue[MetaData]):
     ...
 
 
+class SetVolumeModal(Modal, title='Set Volume'):
+    volume = TextInput(label='Volume', min_length=1, max_length=3)
+
+    async def on_submit(self, interaction: Interaction) -> None:
+        await interaction.response.send_message(f'Setted Volume to {self.volume}%')
+
+        self.stop()
+
+
+class LoopTypeSelect(Select):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.add_option(label='None', value='None')
+        self.add_option(label='Track', value='Track', emoji='🔂')
+        self.add_option(label='Queue', value='Queue', emoji='🔁')
+    
+    async def callback(self, interaction: Interaction) -> None:
+        await interaction.response.send_message(f'Setted loop type to {self.values[0]}', ephemeral=True)
+        
+        if self.view:
+            self.view.stop()
+
+
+class MusicController(BaseView):
+    def __init__(self, player: Player, user_id: int, timeout: int = 180) -> None:
+        super().__init__(user_id, timeout)
+
+        self.player = player
+    
+    def make_embed(self) -> Embed:
+        embed = self.player.ctx.embed()
+        guild = self.player.bot.get_guild(self.player.guild_id)
+
+        assert guild is not None
+
+        embed.set_author(name='Music Controller: ' + guild.name, icon_url=guild.icon.url if guild.icon else None)
+
+        for attr in ('volume', 'loop_type', 'is_paused'):
+            value = getattr(self.player, attr)
+
+            embed.add_field(name=attr.replace('_', '').title(), value=str(value))
+        
+        embed.timestamp = utcnow()
+
+        return embed
+    
+    @button(label='Volume', emoji='🔊', style=ButtonStyle.primary)
+    async def set_volume(self, interaction: Interaction, button: Button) -> None:
+        modal = SetVolumeModal()
+
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+
+        try:
+            volume = int(modal.volume) # type: ignore
+        except ValueError:
+            return
+
+        await self.player.set_volume(volume)
+    
+    @button(label='Loop Type', emoji='🔁', style=ButtonStyle.primary)
+    async def set_loop_type(self, interaction: Interaction, button: Button) -> None:
+        view = BaseView(interaction.user.id)
+
+        select = LoopTypeSelect()
+        view.add_item(select)
+
+        await interaction.response.send_message(view=view, ephemeral=True)
+        await view.wait()
+
+        selected = select.values[0]
+        
+        if selected == 'None':
+            loop_type = LoopType.none
+        elif selected == 'Track':
+            loop_type = LoopType.track
+        else:
+            loop_type = LoopType.queue
+        
+        self.player.loop_type = loop_type
+    
+    @button(label='Toggle Pause', emoji='⏸', style=ButtonStyle.primary)
+    async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
+        await self.player.toggle_pause()
+
+        await interaction.response.send_message(f'Toggled pause to {self.player.is_paused}', ephemeral=True)
+
+
+class MusicControllerInvoke(BaseView):
+    def __init__(self, player: Player, user_id: int, timeout: int = 180) -> None:
+        super().__init__(user_id, timeout)
+        self.player = player
+
+    @button(label='Music Controller', emoji='🎵', style=ButtonStyle.primary)
+    async def invoke(self, interaction: Interaction, button: Button) -> None:
+        controller = MusicController(self.player, interaction.user.id)
+
+        await interaction.response.send_message(view=controller, embed=controller.make_embed(), ephemeral=True)
+
+
 class Player(_Player['BoboBot']):
     if TYPE_CHECKING:
         ctx: BoboContext
+        loop_type: LoopType
 
     def __init__(
         self,
@@ -52,6 +158,7 @@ class Player(_Player['BoboBot']):
     ) -> None:
         super().__init__(client, channel, node=node, guild=guild)
 
+        self._prev_message: Message | None = None
         self.queue = Queue()
 
     async def do_next(self) -> None:
@@ -100,19 +207,31 @@ class Player(_Player['BoboBot']):
         embed = self.ctx.embed(
             title='Current Track',
             description=(
-                f'**{track.title}** By: **{track.author}**'
+                f'**{track.title}**'
                 f'\n{bar}\n\n{position}/{duration}'
             ),
+            url=track.uri,
         )
+
+        embed.add_field(name='Author', value=track.author)
         embed.add_field(
-            name='Requested By', value=f'{track.metadata.requestor.mention}'
+            name='Requested By', value=track.metadata.requestor.mention
         )
+        embed.add_field(name='Volume', value=f'{self.volume}%')
+
+        if track.thumbnail:
+            embed.set_thumbnail(url=track.thumbnail)
 
         return embed
 
-    async def send_embed(self, delete_after: bool = True) -> None:
+    async def send_embed(self) -> None:
         if track := self.queue.current:
-            await self.ctx.send(embed=self._make_embed(track), delete_after=5 if delete_after else None)
+            if message := self._prev_message:
+                await message.delete()
+            
+            view = MusicControllerInvoke(self, self.ctx.author.id)
+
+            self._prev_message = await self.ctx.send(embed=self._make_embed(track), view=view)
 
 
 class Node(_Node['BoboBot']):
@@ -144,7 +263,8 @@ class Music(Cog):
             await self.bot.magmatic_node.start()
             magmatic.add_node(self.bot.magmatic_node)
 
-        self.node = self.bot.magmatic_node
+        node = cast(Node, self.bot.magmatic_node)
+        self.node = node
 
     async def cog_check(self, ctx: BoboContext) -> bool:
         if not ctx.guild:
@@ -190,7 +310,7 @@ class Music(Cog):
         player = self.node.get_player(ctx.guild)
 
         if player.queue.current:
-            await player.send_embed(delete_after=False)
+            await player.send_embed()
 
             return
 
