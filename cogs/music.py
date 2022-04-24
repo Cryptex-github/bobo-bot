@@ -1,5 +1,4 @@
 from __future__ import annotations
-from code import interact
 
 from typing import TYPE_CHECKING, TypeAlias, Type, cast, Callable, TypeVar
 
@@ -55,8 +54,10 @@ class SetVolumeModal(Modal, title='Set Volume'):
 
 
 class LoopTypeSelect(Select):
-    def __init__(self) -> None:
+    def __init__(self, player: Player) -> None:
         super().__init__()
+
+        self.player = player
 
         self.add_option(label='None', value='None')
         self.add_option(label='Track', value='Track', emoji='🔂')
@@ -65,8 +66,19 @@ class LoopTypeSelect(Select):
     async def callback(self, interaction: Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
 
+        selected = self.values[0]
+        
+        if selected == 'None':
+            loop_type = LoopType.none
+        elif selected == 'Track':
+            loop_type = LoopType.track
+        else:
+            loop_type = LoopType.queue
+        
+        self.player.queue.loop_type = loop_type
+
         if self.view:
-            self.view.stop()
+            await interaction.edit_original_message(embed=self.view.make_embed())
 
 
 class MusicController(BaseView):
@@ -111,28 +123,13 @@ class MusicController(BaseView):
     
     @button(label='Loop Type', emoji='🔁', style=ButtonStyle.primary)
     async def set_loop_type(self, interaction: Interaction, button: Button) -> None:
-        view = BaseView(interaction.user.id)
+        view = BaseView(interaction.user.id, timeout=None)
 
-        select = LoopTypeSelect()
+        select = LoopTypeSelect(self.player)
         view.add_item(select)
 
         await interaction.response.defer(ephemeral=True)
-        message = await interaction.followup.send(view=view, ephemeral=True, wait=True)
-        await view.wait()
-
-        selected = select.values[0]
-        
-        if selected == 'None':
-            loop_type = LoopType.none
-        elif selected == 'Track':
-            loop_type = LoopType.track
-        else:
-            loop_type = LoopType.queue
-        
-        self.player.queue.loop_type = loop_type
-
-        await interaction.edit_original_message(embed=self.make_embed())
-        await message.delete()
+        await interaction.followup.send(view=view, ephemeral=True)
     
     @button(label='Toggle Pause', emoji='⏸', style=ButtonStyle.primary)
     async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
