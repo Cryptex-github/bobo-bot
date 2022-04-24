@@ -143,8 +143,8 @@ class MusicController(BaseView):
     async def leave(self, interaction: Interaction, button: Button) -> None:
         await self.player.disconnect()
 
-        self._disable_all()
-        await interaction.response.send_message('Left voice channel', ephemeral=True, view=self)
+        await interaction.response.send_message('Left voice channel', ephemeral=True)
+        self.stop()
 
 
 class MusicControllerInvoke(BaseView):
