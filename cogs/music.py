@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias, Type, cast
+from typing import TYPE_CHECKING, TypeAlias, Type, cast, Callable, TypeVar
 
 import magmatic
 from magmatic import Source, Playlist, Track as _Track, Player as _Player, Node as _Node, Queue as _Queue, LoopType
 
-from discord import VoiceChannel, StageChannel, Member, Embed, ButtonStyle
+from discord import VoiceChannel, StageChannel, Member, Embed, ButtonStyle, PartialMessageable
+from discord.ext.commands import CheckFailure, check
 from discord.ui import button, Modal, TextInput, Select
 from discord.utils import MISSING, utcnow
 
@@ -26,6 +27,8 @@ if TYPE_CHECKING:
 
     from core.context import BoboContext
     from core.bot import BoboBot
+
+    T = TypeVar('T')
 
 
 class MetaData:
@@ -66,7 +69,7 @@ class LoopTypeSelect(Select):
 
 
 class MusicController(BaseView):
-    def __init__(self, player: Player, user_id: int, timeout: int = 180) -> None:
+    def __init__(self, player: Player, user_id: int, timeout: int | None = None) -> None:
         super().__init__(user_id, timeout)
 
         self.player = player
@@ -145,8 +148,9 @@ class MusicController(BaseView):
 
 
 class MusicControllerInvoke(BaseView):
-    def __init__(self, player: Player, user_id: int, timeout: int = 180) -> None:
+    def __init__(self, player: Player, user_id: int, timeout: int | None = None) -> None:
         super().__init__(user_id, timeout)
+
         self.player = player
 
     @button(label='Music Controller', emoji='🎵', style=ButtonStyle.primary)
@@ -173,7 +177,21 @@ class Player(_Player['BoboBot']):
         super().__init__(client, channel, node=node, guild=guild)
 
         self._prev_message: Message | None = None
+        self.dj: int | None = None
+        self.dj_mention: str | None = None
         self.queue = Queue()
+    
+    def is_dj(self, ctx: BoboContext) -> bool:
+        assert isinstance(ctx.author, Member)
+
+        if ctx.author.id == self.dj:
+            return True
+        
+        if not isinstance(ctx.channel, PartialMessageable):
+            if ctx.channel.permissions_for(ctx.author).manage_guild:
+                return True
+        
+        raise CheckFailure('Only the DJ can do this.')
 
     async def do_next(self) -> None:
         track = self.queue.get()
@@ -230,6 +248,9 @@ class Player(_Player['BoboBot']):
         )
         embed.add_field(name='Volume', value=f'{self.volume}%')
 
+        if self.dj_mention:
+            embed.add_field(name='DJ', value=self.dj_mention)
+
         if track.thumbnail:
             embed.set_thumbnail(url=track.thumbnail)
 
@@ -240,10 +261,20 @@ class Player(_Player['BoboBot']):
             if message := self._prev_message:
                 await message.delete()
             
-            view = MusicControllerInvoke(self, self.ctx.author.id)
+            view = MusicControllerInvoke(self, self.dj or self.ctx.author.id)
 
             self._prev_message = await self.ctx.send(embed=self._make_embed(track), view=view)
 
+def is_dj() -> Callable[[T], T]:
+    async def _is_dj(ctx: BoboContext) -> bool:
+        player = cast(Player, ctx.voice_client)
+        
+        if not player:
+            return False
+        
+        return player.is_dj(ctx)
+    
+    return check(_is_dj)
 
 class Node(_Node['BoboBot']):
     def get_player(
@@ -254,7 +285,7 @@ class Node(_Node['BoboBot']):
         fail_if_not_exists: bool = False,
     ) -> Player:
         return super().get_player(
-            guild, cls=Player, fail_if_not_exists=fail_if_not_exists
+            guild, cls=cls, fail_if_not_exists=fail_if_not_exists
         )
 
 
@@ -308,6 +339,8 @@ class Music(Cog):
             channel = ctx.author.voice.channel
 
         player = self.node.get_player(ctx.guild)
+        if player.is_connected() and not player.is_dj(ctx):
+            return 'I am already connected to a voice channel and only DJ can move me to another channel.'
 
         await player.connect(channel)
 
@@ -349,6 +382,7 @@ class Music(Cog):
         await pages.start(ctx)
 
     @command()
+    @is_dj()
     async def pause(self, ctx: BoboContext) -> str:
         """Pauses the currently playing track."""
         assert ctx.guild is not None
@@ -363,6 +397,7 @@ class Music(Cog):
         return '\U0001f44d'
 
     @command(aliases=['resume'])
+    @is_dj()
     async def unpause(self, ctx: BoboContext) -> str:
         """Resumes the currently paused track."""
         assert ctx.guild is not None
@@ -377,6 +412,7 @@ class Music(Cog):
         return '\U0001f44d'
 
     @command()
+    @is_dj()
     async def skip(self, ctx: BoboContext) -> str:
         """Skips the currently playing track."""
         assert ctx.guild is not None
@@ -401,6 +437,13 @@ class Music(Cog):
 
         player = self.node.get_player(ctx.guild)
         player.ctx = ctx
+
+        if not player.dj:
+            player.dj = ctx.author.id
+            player.dj_mention = ctx.author.mention
+        
+        if not player.is_dj(ctx):
+            return 'Only DJ can use this command.'
 
         track = await self.node.search_track(
             query, source=Source.youtube, prefer_selected_track=False
@@ -439,6 +482,7 @@ class Music(Cog):
         return f'Added track: `{track.title}`.'
 
     @command(aliases=['disconnect'])
+    @is_dj()
     async def leave(self, ctx: BoboContext) -> str:
         """Leaves the current voice channel."""
         assert ctx.guild is not None
