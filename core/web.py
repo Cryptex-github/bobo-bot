@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from datetime import datetime
 
-from quart import Quart, request
+from quart import Quart, request, websocket
 from quart_cors import cors
 
 from config import client_secret
@@ -105,3 +105,7 @@ async def exchange_code() -> JSON | tuple[JSON, int]:
             }, 400
         
         return await resp.json()
+
+@app.websocket('/ws')
+async def ws():
+    await websocket.send('Hello World!')
