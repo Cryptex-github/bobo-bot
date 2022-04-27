@@ -220,14 +220,14 @@ class Player(_Player['BoboBot']):
             minutes, seconds = divmod(remainder, 60)
 
             duration = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
-        except:
+        except (ValueError, ZeroDivisionError, OverflowError):
             duration = 'Duration too long.'
 
         try:
             hours, remainder = divmod(int(self.position or 0), 3600)
             minutes, seconds = divmod(remainder, 60)
             position = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
-        except:
+        except (ValueError, ZeroDivisionError, OverflowError):
             position = 'Position too long.'
 
         try:
@@ -239,7 +239,7 @@ class Player(_Player['BoboBot']):
                 + '⬛' * int(20 - (20 / 100 * percentage))
                 + '`'
             )
-        except:
+        except (ValueError, ZeroDivisionError):
             bar = ''
 
         embed = self.ctx.embed(
