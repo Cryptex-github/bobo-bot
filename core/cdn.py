@@ -1,3 +1,5 @@
+#! This CDN client is by jay3332
+
 from __future__ import annotations
 
 import os
