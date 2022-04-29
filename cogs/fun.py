@@ -172,7 +172,7 @@ class AkinatorView(BaseView):
             )
         else:
             question = await self.akinator.start_game(
-                language=selected, lient_session=ctx.bot.session, child_mode=False
+                language=selected, client_session=ctx.bot.session, child_mode=False
             )
 
         embed = self.make_embed(question)
