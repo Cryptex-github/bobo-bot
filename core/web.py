@@ -78,7 +78,7 @@ async def stats():
         'Redis Latency': f'{latency.redis} ms',
         'Discord REST Latency': f'{latency.discord_rest} ms',
         'Discord WebSocket Latency': f'{latency.discord_ws} ms',
-        'Total Gateway Events': events,
+        'Total Gateway Events': f'{events:,}',
         'Average Events per minute': f'{events // time_difference}',
     }
 
@@ -105,6 +105,7 @@ async def exchange_code() -> JSON | tuple[JSON, int]:
             }, 400
         
         return await resp.json()
+
 
 @app.websocket('/ws')
 async def ws():

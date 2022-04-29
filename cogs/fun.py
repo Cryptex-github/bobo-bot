@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Any
 from io import BytesIO
 
 from akinator.async_aki import Akinator
@@ -13,10 +13,10 @@ from core.view import BaseView
 from core.utils import cutoff
 
 if TYPE_CHECKING:
-    from core.context import BoboContext
     from discord import Embed, Interaction
     from discord.ui import Button
 
+    from core.context import BoboContext
     from core.types import OutputType
 
     from typing import TypeVar
@@ -164,7 +164,7 @@ class AkinatorView(BaseView):
         self.akinator = Akinator()
         self.embed = ctx.embed
 
-        nsfw = getattr(ctx.channel, 'nsfw', False)
+        nsfw = getattr(ctx.channel, 'is_nsfw', lambda *_: True)()
 
         if ctx.guild:
             question = await self.akinator.start_game(
@@ -288,10 +288,12 @@ class Fun(Cog):
             return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
 
     @staticmethod
-    def process_reddit_post(ctx, _js) -> OutputType:
+    def process_reddit_post(ctx: BoboContext, _js: Any) -> OutputType:
         js = _js[0]['data']['children'][0]['data']
 
-        if js['over_18'] and not ctx.channel.is_nsfw():
+        nsfw = getattr(ctx.channel, 'is_nsfw', lambda *_: True)()
+
+        if js['over_18'] and not nsfw:
             return 'This post is NSFW and this is an non-NSFW channel.'
 
         embed = ctx.embed(
@@ -363,7 +365,7 @@ class Fun(Cog):
         await self.reddit(ctx, url)
 
     @reddit.command(name='random', aliases=['r'])
-    async def reddit_random(self, ctx, subreddit: str) -> OutputType:
+    async def reddit_random(self, ctx: BoboContext, subreddit: str) -> OutputType:
         """
         Shows a random post from a subreddit.
         """

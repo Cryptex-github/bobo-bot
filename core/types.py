@@ -1,4 +1,6 @@
-from typing import TypeAlias, Any, Literal
+from __future__ import annotations
+
+from typing import TypeAlias, Literal
 
 from discord import Embed, File
 from discord.ui import View
@@ -8,12 +10,15 @@ from core.constants import Constant
 __all__ = ('OutputType', 'PossibleRTFMSources')
 
 
+JsonValue: TypeAlias = str | int | float | bool | list['JsonValue'] | dict[str, 'JsonValue'] | None
+Json: TypeAlias = dict[str, JsonValue] | list[JsonValue]
+
 OutputType: TypeAlias = (
-    tuple[Embed | str | File | dict[str, Any] | bool | Constant | View | None, ...]
+    tuple[Embed | str | File | Json | bool | Constant | View | None, ...]
     | Embed
     | str
     | File
-    | dict[str, Any]
+    | Json
     | bool
     | Constant
     | View
