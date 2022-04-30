@@ -128,7 +128,7 @@ async def commands() -> JSON | tuple[JSON, int]:
             'cooldown': cooldown_fmted
         })
 
-    cogs = [cog.qualified_name for cog in bot.cogs.values() if not getattr(cog, 'hidden', False)]
+    cogs = [cog.qualified_name for cog in bot.cogs.values() if not getattr(cog, 'ignore', False)]
     del cogs[cogs.index('Jishaku')]
 
     return {'commands': json, 'categories': cogs}
