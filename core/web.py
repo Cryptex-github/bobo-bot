@@ -111,7 +111,7 @@ async def commands() -> JSON | tuple[JSON, int]:
     json = []
 
     for command in bot.walk_commands():
-        cooldown_fmted = 'None'
+        cooldown_fmted = None
 
         if bucket := getattr(command, '_buckets'):
             if cooldown := getattr(bucket, '_cooldown'):
