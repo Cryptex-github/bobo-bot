@@ -128,4 +128,7 @@ async def commands() -> JSON | tuple[JSON, int]:
             'cooldown': cooldown_fmted
         })
 
-    return {'commands': json}
+    cogs = [cog.qualified_name for cog in bot.cogs.values() if not getattr(cog, 'hidden', False)]
+    del cogs[cogs.index('Jishaku')]
+
+    return {'commands': json, 'categories': cogs}
