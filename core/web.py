@@ -1,23 +1,22 @@
 from __future__ import annotations
 
 from discord.http import Route
-from typing import TYPE_CHECKING, Literal, TypeAlias
+from typing import TYPE_CHECKING, Literal, TypeAlias, cast
 
 from datetime import datetime
 
-from quart import Quart, request, websocket
+from quart import Quart, request
 from quart_cors import cors
 
 from config import client_secret
+from .bot import BoboBot
 
 
 if TYPE_CHECKING:
     METHODS: TypeAlias = Literal['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
     JSON: TypeAlias = dict[str, str | int]
 
-    class _Quart(Quart):
-        from core.bot import BoboBot
-        
+    class _Quart(Quart):        
         bot: BoboBot
     
     Quart = _Quart
@@ -106,7 +105,26 @@ async def exchange_code() -> JSON | tuple[JSON, int]:
         
         return await resp.json()
 
+@app.get('/commands')
+async def commands() -> JSON | tuple[JSON, int]:
+    bot = cast(BoboBot, app.bot)
+    json = {}
 
-@app.websocket('/ws')
-async def ws():
-    await websocket.send('Hello World!')
+    for command in bot.walk_commands():
+        cooldown_fmted = 'None'
+
+        if bucket := getattr(command, '_buckets'):
+            if cooldown := getattr(bucket, '_cooldown'):
+                cooldown_fmted = f'{cooldown.rate} time(s) per {cooldown.per} second(s)'
+
+        json[command.qualified_name] = {
+            'args': command.signature,
+            'category': command.cog_name,
+            'description': (
+                command.description or command.short_doc or 'No Help Provided'
+            ),
+            'aliases': command.aliases,
+            'cooldown': cooldown_fmted
+        }
+
+    return json
