@@ -108,7 +108,7 @@ async def exchange_code() -> JSON | tuple[JSON, int]:
 @app.get('/commands')
 async def commands() -> JSON | tuple[JSON, int]:
     bot = cast(BoboBot, app.bot)
-    json = {}
+    json = []
 
     for command in bot.walk_commands():
         cooldown_fmted = 'None'
@@ -117,7 +117,8 @@ async def commands() -> JSON | tuple[JSON, int]:
             if cooldown := getattr(bucket, '_cooldown'):
                 cooldown_fmted = f'{cooldown.rate} time(s) per {cooldown.per} second(s)'
 
-        json[command.qualified_name] = {
+        json.append({
+            'name': command.qualified_name,
             'args': command.signature,
             'category': command.cog_name,
             'description': (
@@ -125,6 +126,6 @@ async def commands() -> JSON | tuple[JSON, int]:
             ),
             'aliases': command.aliases,
             'cooldown': cooldown_fmted
-        }
+        })
 
     return json
