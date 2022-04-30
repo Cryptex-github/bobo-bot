@@ -72,7 +72,8 @@ class BoboBot(commands.Bot):
             await self.redis.ping()
 
         with Instant() as discord_rest_instant:
-            await self.http.get_gateway()
+            async with self.session.get('https://discord.com/api/v10') as resp:
+                ...
 
         r = lambda x: round(x, 3)
 
