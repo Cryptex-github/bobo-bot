@@ -128,4 +128,4 @@ async def commands() -> JSON | tuple[JSON, int]:
             'cooldown': cooldown_fmted
         })
 
-    return json
+    return {'commands': json}
