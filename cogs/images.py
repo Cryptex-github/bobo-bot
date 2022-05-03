@@ -320,6 +320,7 @@ class Images(Cog):
         embed.add_field(name='HEX', value=f'#{hex_} | 0x{hex_}')
 
         embed.add_field(name='HSL', value=self._rgb_to_hsl(*color))
+        embed.add_field(name='HSV', value=self._rgb_to_hsv(*color))
         embed.add_field(name='XYZ', value=str(self._rgb_to_xy_bri(*color)))
 
         embed.set_thumbnail(url=f'attachment://color_{hex_}.png')
