@@ -22,7 +22,7 @@ from discord.ext.commands import (
 )
 from PIL import Image, ImageColor
 
-from core import Cog, Regexs
+from core import Cog, Regexes
 from core.command import command
 from core.context import BoboContext
 
@@ -142,7 +142,7 @@ class ImageResolver:
 
         content = content.strip('<>')
 
-        if Regexs.URL_REGEX.match(content):
+        if Regexes.URL_REGEX.match(content):
             return content
 
         return None
