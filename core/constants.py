@@ -19,9 +19,9 @@ class Regexs:
     )
 
 
-INVITE_LINK: Final[
-    str
-] = r'https://discord.com/api/oauth2/authorize?client_id=808485782067216434&permissions=448827607232&scope=bot%20applications.commands'
+INVITE_LINK: Final[str] = (
+    r'https://discord.com/api/oauth2/authorize?client_id=808485782067216434&permissions=448827607232&scope=bot%20applications.commands'
+)
 SUPPORT_SERVER: Final[str] = 'https://discord.gg/AHYTRPr8hZ'
 BOT_COLOR: Final[int] = 0xFF4500
 

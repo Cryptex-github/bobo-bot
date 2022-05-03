@@ -16,3 +16,5 @@ quart
 Quart-CORS
 tabulate
 typing-extensions
+webcolors
+Pillow
