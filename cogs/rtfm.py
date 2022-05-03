@@ -170,6 +170,35 @@ class RTFM(Cog):
         Search discordpy master branch documentation.
         """
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
+    
+    async def parse_rust_doc(self, url: str, *, query: str, crate: str | None = None) -> list[tuple[str, str]] | None:
+        resp = await self.bot.html_session.get(url + '?search=' + query)
+        await resp.html.arender()
+
+        try:
+            a = resp.html.find('.search-results')[0].find('a')
+        except IndexError:
+            return
+
+        results = {}
+
+        for element in a:
+            try:
+                div = element.find('.result-name')[0]
+            except IndexError:
+                div = element
+
+            key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
+
+            results[key] = url + element.attrs[
+                'href'
+            ].replace('..', '')
+
+        if crate:
+            await self.cache.add('crates', f'{crate}:{query}', results)
+        else:
+            await self.cache.add('rust', query, results)
+
 
     @rtfm.command()
     async def rust(self, ctx, *, query: str | None = None) -> str | None:
@@ -192,32 +221,13 @@ class RTFM(Cog):
 
             return
 
-        results = {}
+        res = await self.parse_rust_doc(base_url, query=query)
 
-        resp = await self.bot.html_session.get(base_url + '?search=' + query)
-        await resp.html.arender()
-
-        try:
-            a = resp.html.find('.search-results')[0].find('a')
-        except IndexError:
+        if not res:
             return 'No results found for your query.'
 
-        for element in a:
-            try:
-                div = element.find('.result-name')[0]
-            except IndexError:
-                div = element
-
-            key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
-
-            results[key] = 'https://doc.rust-lang.org' + element.attrs['href'].replace(
-                '..', ''
-            )
-
-        await self.cache.add('rust', query, results)
-
         pages = ViewMenuPages(
-            source=RTFMMenuSource(list(results.items()), 'Rust Standard Library')
+            source=RTFMMenuSource(res, 'Rust Standard Library')
         )
 
         await pages.start(ctx)
@@ -235,6 +245,8 @@ class RTFM(Cog):
                     return 'Crate not found.'
 
             return crate_url
+        
+        query = quote(query.lower())
 
         if cached := await self.cache.get('crates', f'{crate}:{query}'):
             pages = ViewMenuPages(source=RTFMMenuSource(list(cached.items()), crate))
@@ -242,36 +254,13 @@ class RTFM(Cog):
             await pages.start(ctx)
 
             return
+        
+        res = await self.parse_rust_doc('https://docs.rs/', query=query, crate=crate)
 
-        query = quote(query.lower())
-
-        resp = await self.bot.html_session.get(
-            f'https://docs.rs/{crate}/?search=' + query
-        )
-        await resp.html.arender()
-
-        try:
-            a = resp.html.find('.search-results')[0].find('a')
-        except IndexError:
+        if not res:
             return 'No results found for your query.'
 
-        results = {}
-
-        for element in a:
-            try:
-                div = element.find('.result-name')[0]
-            except IndexError:
-                div = element
-
-            key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
-
-            results[key] = f'https://docs.rs/{crate}/latest' + element.attrs[
-                'href'
-            ].replace('..', '')
-
-        await self.cache.add('crates', f'{crate}:{query}', results)
-
-        pages = ViewMenuPages(source=RTFMMenuSource(list(results.items()), crate))
+        pages = ViewMenuPages(source=RTFMMenuSource(res, crate))
 
         await pages.start(ctx)
 
