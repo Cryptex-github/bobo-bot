@@ -237,8 +237,9 @@ class RTFM(Cog):
         """
         Search a crate's documentation.
         """
+        base_url = 'https://docs.rs/'
         if not query:
-            crate_url = 'https://docs.rs/' + crate
+            crate_url = base_url + crate
 
             async with self.bot.session.get(crate_url) as resp:
                 if resp.status != 200:
@@ -255,7 +256,7 @@ class RTFM(Cog):
 
             return
         
-        res = await self.parse_rust_doc('https://docs.rs/', query=query, crate=crate)
+        res = await self.parse_rust_doc(base_url + crate, query=query, crate=crate)
 
         if not res:
             return 'No results found for your query.'
