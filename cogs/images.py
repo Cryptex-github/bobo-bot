@@ -297,10 +297,10 @@ class Images(Cog):
         y = (y - min_cmy) / (1 - min_cmy)
         k = min_cmy
 
-        return c * CMYK_SCALE, m * CMYK_SCALE, y * CMYK_SCALE, k * CMYK_SCALE
+        return tuple((round(i) for i in (c * CMYK_SCALE, m * CMYK_SCALE, y * CMYK_SCALE, k * CMYK_SCALE)))
 
     @command()
-    async def color(self, ctx: BoboContext, color: tuple[int, int, int] = param(converter=ColorConverter)) -> tuple[Embed, File]:
+    async def color(self, ctx: BoboContext, *, color: tuple[int, int, int] = param(converter=ColorConverter)) -> tuple[Embed, File]:
         try:
             name = rgb_to_name(color)
         except ValueError:
