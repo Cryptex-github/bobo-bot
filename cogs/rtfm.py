@@ -198,6 +198,8 @@ class RTFM(Cog):
             await self.cache.add('crates', f'{crate}:{query}', results)
         else:
             await self.cache.add('rust', query, results)
+        
+        return list(results.items())
 
 
     @rtfm.command()
