@@ -207,7 +207,7 @@ class RTFM(Cog):
         """
         Search Rust standard library documentation.
         """
-        base_url = 'https://doc.rust-lang.org/std/'
+        base_url = 'https://doc.rust-lang.org'
 
         if not query:
             return base_url
