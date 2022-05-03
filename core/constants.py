@@ -4,12 +4,12 @@ import re
 from re import Pattern
 
 
-__all__ = ('Regexs',)
+__all__ = ('Regexes',)
 
 RePattern: TypeAlias = Final[Pattern[str]]
 
 
-class Regexs:
+class Regexes:
     FILES_TO_RELOAD_REGEX: RePattern = re.compile(r'\w+/[a-z_]+\.py')
     SPHINX_ENTRY_REGEX: RePattern = re.compile(
         r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)"
