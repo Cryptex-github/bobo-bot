@@ -47,9 +47,9 @@ class ColorConverter(Converter[tuple[int, int, int]]):
             if argument.isdigit() and int(argument) <= 16777215:
                 try:
                     arg = int(argument)
-                    red = (arg >> 16) & 255
-                    green = (arg >> 8) & 255
                     blue = arg & 255
+                    green = (arg >> 8) & 255
+                    red = (arg >> 16) & 255
 
                     return red, green, blue
                 except ValueError:
@@ -267,7 +267,9 @@ class Images(Cog):
         mn = min(r, g, b)
         df = mx - mn
 
-        if mx == r:
+        if mx == mn:
+            h = 0
+        elif mx == r:
             h = (60 * ((g - b) / df) + 360) % 360
         elif mx == g:
             h = (60 * ((b - r) / df) + 120) % 360
