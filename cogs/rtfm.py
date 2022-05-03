@@ -9,7 +9,7 @@ import discord
 from discord.ext.menus import ListPageSource
 from discord.ext.menus.views import ViewMenuPages
 
-from core import Cog, Regexs, RTFMCacheManager, finder
+from core import Cog, Regexes, RTFMCacheManager, finder
 from core.command import group
 from core.types import PossibleRTFMSources
 
@@ -72,7 +72,7 @@ class RTFM(Cog):
         _data = ''.join(yield_decompressed_bytes(stream))
 
         for line in _data.split('\n'):
-            match = Regexs.SPHINX_ENTRY_REGEX.match(line)
+            match = Regexes.SPHINX_ENTRY_REGEX.match(line)
 
             if not match:
                 continue
