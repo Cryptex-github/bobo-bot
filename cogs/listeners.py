@@ -1,6 +1,8 @@
+import asyncio
 from datetime import datetime
 
 import discord
+from discord.ext.tasks import loop
 
 from core import Cog
 from core.context import BoboContext
@@ -8,10 +10,28 @@ from core.context import BoboContext
 
 class Listeners(Cog):
     ignore = True
-
     async def cog_load(self):
+        self._events_lock = asyncio.Lock()
+        self._events_to_send = []
+
         if not await self.bot.redis.get('events_start_time'):
             await self.bot.redis.set('events_start_time', datetime.now().timestamp())
+
+    @loop(seconds=1)
+    async def send_events(self):
+        await self.bot.wait_until_ready()
+
+        if not self._events_to_send:
+            return
+        
+        async with self._events_lock:
+            async with self.bot.redis.pipeline() as pipe:
+                for event in self._events_to_send:
+                    pipe.hincrby('events', event, 1)
+                
+                await pipe.execute()
+            
+            self._events_to_send.clear()
 
     @Cog.listener()
     async def on_raw_message_delete(
@@ -53,7 +73,11 @@ class Listeners(Cog):
 
     @Cog.listener()
     async def on_socket_event_type(self, event: str) -> None:
-        await self.bot.redis.hincrby('events', event, 1)
+        if not hasattr(self, '_events_to_send') or not hasattr(self, '_events_lock'):
+            return
+
+        async with self._events_lock:
+            self._events_to_send.append(event)
 
     @Cog.listener()
     async def on_command_completion(self, ctx: BoboContext):
