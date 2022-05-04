@@ -180,7 +180,7 @@ class RTFM(Cog):
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
     
     async def parse_rust_doc(self, url: str, *, query: str, crate: str | None = None) -> list[tuple[str, str]] | None:
-        resp = await self.bot.html_session.get(f'{url}/{crate if crate else "std"}?search={query}')
+        resp = await self.bot.html_session.get(f'{url}/{crate if crate else "std"}/?search={query}')
         await resp.html.arender()
 
         try:
@@ -208,6 +208,16 @@ class RTFM(Cog):
             await self.cache.add('rust', query, results)
         
         return list(results.items())
+    
+    async def parse_rust_struct(self, url: str) -> RustDocParsedResult:
+        resp = await self.bot.html_session.get(url)
+        await resp.html.arender()
+
+        title = resp.html.find('.fqn')[0].full_text
+        signature = resp.html.find('code')[0].text
+        description = resp.html.find('p')[0].full_text
+
+        return RustDocParsedResult(title, signature, description)
 
     @rtfm.command()
     async def rust(self, ctx, *, query: str | None = None) -> str | None:
