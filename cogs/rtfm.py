@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import os
 from urllib.parse import quote
 import zlib
 from asyncio import to_thread
 from io import BytesIO
-from typing import Dict, Iterator, List, Tuple
+from typing import Iterator, NamedTuple
 
 import discord
 from discord.ext.menus import ListPageSource
@@ -14,13 +16,19 @@ from core.command import group
 from core.types import PossibleRTFMSources
 
 
+class RustDocParsedResult(NamedTuple):
+    title: str
+    signature: str
+    description: str
+
+
 class RTFMMenuSource(ListPageSource):
-    def __init__(self, data: List[Tuple[str, str]], name: str) -> None:
+    def __init__(self, data: list[tuple[str, str]], name: str) -> None:
         self.name = name
 
         super().__init__(data, per_page=10)
 
-    async def format_page(self, menu, entries) -> Dict[str, discord.Embed]:
+    async def format_page(self, menu, entries) -> dict[str, discord.Embed]:
         return {
             'embed': menu.ctx.embed(
                 title=self.name,
@@ -40,7 +48,7 @@ class RTFM(Cog):
         self.cache = RTFMCacheManager(self.bot.redis)
 
     @staticmethod
-    def parse_sphinx_object_inv(stream: BytesIO, base_url: str) -> Dict[str, str]:
+    def parse_sphinx_object_inv(stream: BytesIO, base_url: str) -> dict[str, str]:
         """
         Parses Sphinx object inventory file.
         """
@@ -172,7 +180,7 @@ class RTFM(Cog):
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
     
     async def parse_rust_doc(self, url: str, *, query: str, crate: str | None = None) -> list[tuple[str, str]] | None:
-        resp = await self.bot.html_session.get(url + '?search=' + query)
+        resp = await self.bot.html_session.get(f'{url}/{crate if crate else "std"}?search={query}')
         await resp.html.arender()
 
         try:
@@ -201,16 +209,15 @@ class RTFM(Cog):
         
         return list(results.items())
 
-
     @rtfm.command()
     async def rust(self, ctx, *, query: str | None = None) -> str | None:
         """
         Search Rust standard library documentation.
         """
-        base_url = 'https://doc.rust-lang.org/std/'
+        base_url = 'https://doc.rust-lang.org'
 
         if not query:
-            return base_url
+            return base_url + '/std'
 
         query = quote(query.lower())
 
@@ -239,9 +246,9 @@ class RTFM(Cog):
         """
         Search a crate's documentation.
         """
-        base_url = 'https://docs.rs/'
+        base_url = 'https://docs.rs'
         if not query:
-            crate_url = base_url + crate
+            crate_url = base_url + '/' + crate
 
             async with self.bot.session.get(crate_url) as resp:
                 if resp.status != 200:
@@ -258,7 +265,7 @@ class RTFM(Cog):
 
             return
         
-        res = await self.parse_rust_doc(base_url + crate, query=query, crate=crate)
+        res = await self.parse_rust_doc(base_url, query=query, crate=crate)
 
         if not res:
             return 'No results found for your query.'
