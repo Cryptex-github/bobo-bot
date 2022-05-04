@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import sys
 from typing import TYPE_CHECKING, NamedTuple, Type
 
 import aiohttp
@@ -19,11 +20,12 @@ from requests_html import AsyncHTMLSession
 from core.cache_manager import DeleteMessageManager
 from core.utils import Instant
 from core.cdn import CDNClient
+from core.constants import BETA_ID, PROD_ID
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 
-from config import DbConnectionDetails, token
+from config import DbConnectionDetails, token, prod_token
 
 from .context import BoboContext
 
@@ -55,7 +57,7 @@ class BoboBot(commands.Bot):
         intents = discord.Intents.all()
 
         super().__init__(
-            command_prefix='bobo ',
+            command_prefix=self._get_prefix,
             intents=intents,
             description='Bobo Bot, The Anime Bot but better.',
             chunk_guilds_at_startup=False,
@@ -63,6 +65,19 @@ class BoboBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions.none(),
             strip_after_prefix=True,
         )
+    
+    @staticmethod
+    def _get_prefix(bot: BoboBot, message: Message) -> str:
+        if not bot.user:
+            return 'bobo '
+
+        if bot.user.id == BETA_ID:
+            return 'bobo '
+
+        if bot.user.id == PROD_ID:
+            return 'bobob '
+
+        return 'bobo '
 
     async def self_test(self) -> SelfTestResult:
         with Instant() as postgres_instant:
@@ -224,4 +239,12 @@ class BoboBot(commands.Bot):
         await super().close()
 
     def run(self) -> None:
-        super().run(token=token)
+        try:
+            mode = sys.argv[1]
+        except IndexError:
+            mode = 'dev'
+        
+        if mode == 'dev':
+            super().run(token=token)
+        else:
+            super().run(token=prod_token)

@@ -24,7 +24,8 @@ INVITE_LINK: Final[str] = (
 )
 SUPPORT_SERVER: Final[str] = 'https://discord.gg/AHYTRPr8hZ'
 BOT_COLOR: Final[int] = 0xFF4500
-
+BETA_ID: Final[int] = 808485782067216434
+PROD_ID: Final[int] = 787927476177076234
 
 class Constant(ABC):
     __slots__ = ()
