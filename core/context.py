@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from .view import ConfirmView, BaseView
 from .button import DeleteButton
+from .constants import BOT_COLOR
 
 if TYPE_CHECKING:
     from typing import Any
@@ -98,6 +99,6 @@ class BoboContext(commands.Context['BoboBot']):
 
     def embed(self, **kwargs) -> discord.Embed:
         if 'color' not in kwargs:
-            kwargs['color'] = self.bot.color
+            kwargs['color'] = BOT_COLOR
 
         return discord.Embed(**kwargs)

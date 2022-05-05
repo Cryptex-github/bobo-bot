@@ -3,42 +3,61 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from collections import namedtuple
-from typing import NamedTuple
+import sys
+from typing import TYPE_CHECKING, NamedTuple, Type
 
 import aiohttp
-import aioredis
+import redis.asyncio as aioredis
 import asyncpg
 import discord
 import jishaku
 import mystbin
+from discord.utils import MISSING
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 from requests_html import AsyncHTMLSession
 
 from core.cache_manager import DeleteMessageManager
-from core.utils import Timer
+from core.utils import Instant
 from core.cdn import CDNClient
+from core.constants import BETA_ID, PROD_ID
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
 
-from config import DbConnectionDetails, token
+from config import DbConnectionDetails, token, prod_token
 
 from .context import BoboContext
+
+if TYPE_CHECKING:
+    from discord import Interaction, Message
+    from discord.ext.commands import Command
+    from discord.ext.commands._types import ContextT
+
+    from magmatic import Node
 
 __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
 
 
+class SelfTestResult(NamedTuple):
+    postgres: float
+    redis: float
+    discord_rest: float
+    discord_ws: float
+
+
 class BoboBot(commands.Bot):
-    def __init__(self):
+    if TYPE_CHECKING:
+        magmatic_node: Node
+
+    def __init__(self) -> None:
         self.logger = __log__
 
         intents = discord.Intents.all()
 
         super().__init__(
-            command_prefix='bobo ',
+            command_prefix=self._get_prefix,
             intents=intents,
             description='Bobo Bot, The Anime Bot but better.',
             chunk_guilds_at_startup=False,
@@ -46,25 +65,31 @@ class BoboBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions.none(),
             strip_after_prefix=True,
         )
+    
+    @staticmethod
+    def _get_prefix(bot: BoboBot, message: Message) -> str:
+        if not bot.user or bot.user.id == BETA_ID:
+            return 'bobo '
 
-    async def self_test(self) -> NamedTuple:
-        with Timer() as postgres_timer:
+        return 'bobob '
+
+    async def self_test(self) -> SelfTestResult:
+        with Instant() as postgres_instant:
             await self.db.execute('SELECT 1')
 
-        with Timer() as redis_timer:
+        with Instant() as redis_instant:
             await self.redis.ping()
 
-        with Timer() as discord_rest_timer:
-            await self.http.get_gateway()
-
-        res = namedtuple('SelfTestResult', 'postgres redis discord_rest discord_ws')
+        with Instant() as discord_rest_instant:
+            async with self.session.get('https://discord.com/api/v10') as resp:
+                ...
 
         r = lambda x: round(x, 3)
 
-        return res(
-            r(float(postgres_timer) * 1000),
-            r(float(redis_timer) * 1000),
-            r(float(discord_rest_timer) * 1000),
+        return SelfTestResult(
+            r(postgres_instant.elapsed.as_millis()),
+            r(redis_instant.elapsed.as_millis()),
+            r(discord_rest_instant.elapsed.as_millis()),
             r(float(self.latency) * 1000),
         )
 
@@ -79,30 +104,37 @@ class BoboBot(commands.Bot):
 
         return obj
 
-    def initialize_libaries(self):
+    def initialize_libaries(self) -> None:
         self.context = BoboContext
         self.mystbin = mystbin.Client(session=self.session)
         self.html_session = AsyncHTMLSession()
         self.cdn = CDNClient(self)
 
-    async def initialize_constants(self):
-        self.color = 0xFF4500
+    async def initialize_constants(self) -> None:
         self.session = aiohttp.ClientSession(connector=self.connector)
 
-        self.redis = aioredis.from_url('redis://127.0.0.1', decode_responses=True)
+        self.redis = aioredis.from_url(
+            'unix:///var/run/redis/redis-server.sock', decode_responses=True
+        )
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
         self.ready_once = False
 
-    def add_command(self, command):
+    def get_cooldown(self, message: Message) -> commands.Cooldown | None:
+        if message.author.id == 590323594744168494:
+            return
+
+        return commands.Cooldown(1, 2)
+
+    def add_command(self, command: Command) -> None:
         ignore_list = ('help',)
 
         super().add_command(command)
         command.cooldown_after_parsing = True
 
         if not getattr(command._buckets, '_cooldown', None):
-            command._buckets = commands.CooldownMapping.from_cooldown(
-                1, 2, commands.BucketType.user
+            command._buckets = commands.DynamicCooldownMapping(
+                self.get_cooldown, commands.BucketType.user
             )
 
         if (
@@ -113,21 +145,21 @@ class BoboBot(commands.Bot):
                 2, per=commands.BucketType.user, wait=False
             )
 
-    async def _async_setup_hook(self):
+    async def _async_setup_hook(self) -> None:
         loop = asyncio.get_running_loop()
         self.connector = aiohttp.TCPConnector(limit=0, loop=loop)
         self.http.connector = self.connector
 
         await super()._async_setup_hook()
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         if self.ready_once:
             return
 
         self.ready_once = True
         self.dispatch('ready_once')
 
-    async def on_ready_once(self):
+    async def on_ready_once(self) -> None:
         chunk_tasks = []
 
         for guild in self.guilds:
@@ -136,7 +168,7 @@ class BoboBot(commands.Bot):
 
         await asyncio.gather(*chunk_tasks)
 
-    async def setup_hook(self):
+    async def setup_hook(self) -> None:
         from core.web import app
 
         await self.initialize_constants()
@@ -155,9 +187,9 @@ class BoboBot(commands.Bot):
 
         app.bot = self
 
-        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082))
+        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082, use_reloader=False))
 
-    async def load_all_extensions(self):
+    async def load_all_extensions(self) -> None:
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
                 try:
@@ -168,8 +200,10 @@ class BoboBot(commands.Bot):
                     )
         await self.load_extension('jishaku')
 
-    async def get_context(self, message, *, cls=None):
-        return await super().get_context(message, cls=self.context)
+    async def get_context(
+        self, origin: Message | Interaction, *, cls: Type[ContextT] = MISSING
+    ):
+        return await super().get_context(origin, cls=self.context)
 
     async def unload_all_extensions(self):
         for file in os.listdir('./cogs'):
@@ -183,7 +217,7 @@ class BoboBot(commands.Bot):
 
         await self.unload_extension('jishaku')
 
-    async def close(self):
+    async def close(self) -> None:
         tasks = [
             self.unload_all_extensions(),
             self.db.close(),
@@ -198,5 +232,13 @@ class BoboBot(commands.Bot):
 
         await super().close()
 
-    def run(self):
-        super().run(token=token)
+    def run(self) -> None:
+        try:
+            mode = sys.argv[1]
+        except IndexError:
+            mode = 'dev'
+        
+        if mode == 'dev':
+            super().run(token=token)
+        else:
+            super().run(token=prod_token)

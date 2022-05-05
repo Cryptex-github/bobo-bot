@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Tuple
+from asyncio.subprocess import create_subprocess_exec, PIPE, DEVNULL
+from typing import TYPE_CHECKING, NamedTuple
 from io import BytesIO
 
 import discord
-import pytube
 
 
-from core import Cog, command, BaseView, async_executor
+from core import Cog, command, BaseView
 
 if TYPE_CHECKING:
     from discord import Interaction
@@ -15,60 +15,71 @@ if TYPE_CHECKING:
     from core import BoboContext
 
 
-class YouTube:
-    __slots__ = ('_yt',)
+class VideoMetadata(NamedTuple):
+    title: str
+    thumbnail_url: str
 
-    def __init__(self, url: str) -> None:
-        self._yt = pytube.YouTube(url)
 
-    @async_executor
-    def check_availablity(self) -> bool:
-        try:
-            self._yt.check_availability()
-            return True
+class YoutubeDownloader:
+    def __init__(
+        self, url: str, *, max_filesize: int, audio_only: bool = False
+    ) -> None:
+        self.url = url
+        self.max_filesize = max_filesize
+        self.audio_only = audio_only
 
-        except pytube.exceptions.VideoUnavailable:
-            return False
-
-    @async_executor
-    def get_best_video(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = (
-            self._yt.streams.filter(progressive=True).order_by('resolution').desc()
+    @staticmethod
+    async def metadata(url: str) -> VideoMetadata:
+        proc = await create_subprocess_exec(
+            'yt-dlp',
+            url,
+            '-qse',
+            '--get-id',
+            '--skip-download',
+            stdout=PIPE,
+            stderr=DEVNULL,
         )
 
-        filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
+        stdout, _ = await proc.communicate()
+        stdout = stdout.decode('utf-8')
 
-        b = BytesIO()
-        try:
-            stream = list(filtered)[0]
-        except IndexError:
-            return None
+        if 'ERROR' in stdout:
+            raise ValueError('Invalid URL')
 
-        stream.stream_to_buffer(b)
-        b.seek(0)
+        info = stdout.split('\n')
+        title = info[0]
+        video_id = info[1]
 
-        return b, stream.subtype
-
-    @async_executor
-    def get_best_audio(self, max_file_size: int) -> Tuple[BytesIO, str] | None:
-        ordered = (
-            self._yt.streams.filter(only_audio=True, mime_type='audio/mp4')
-            .order_by('abr')
-            .desc()
+        return VideoMetadata(
+            title=title,
+            thumbnail_url=f'http://img.youtube.com/vi/{video_id}/maxresdefault.jpg',
         )
 
-        filtered = filter(lambda x: x.filesize <= max_file_size, ordered)
+    async def download(self) -> tuple[BytesIO, str]:
+        args = (
+            self.url,
+            '--max-filesize',
+            str(self.max_filesize),
+            '-o',
+            '-',
+            '--audio-format',
+            'mp3',
+            '--recode-video',
+            'mp4',
+        )
 
-        b = BytesIO()
-        try:
-            stream = list(filtered)[0]
-        except IndexError:
-            return None
+        if self.audio_only:
+            args += ('-f', 'bestaudio')
+        else:
+            args += ('-f', 'bestvideo+bestaudio')
 
-        stream.stream_to_buffer(b)
-        b.seek(0)
+        proc = await create_subprocess_exec(
+            'yt-dlp', *args, stdout=PIPE, stderr=DEVNULL
+        )
 
-        return b, 'mp3'
+        stdout, _ = await proc.communicate()
+
+        return BytesIO(stdout), ('mp3' if self.audio_only else 'mp4')
 
 
 class VideoPrompt(BaseView):
@@ -99,23 +110,24 @@ class VideoPrompt(BaseView):
 
 class Videos(Cog):
     @command()
-    async def yt(self, ctx: BoboContext, *, url: str):
-        tube = YouTube(url)
+    async def yt(self, ctx: BoboContext, *, url: str) -> str | discord.File:
+        await ctx.trigger_typing()
 
-        if not tube.check_availablity():
+        try:
+            metadata = await YoutubeDownloader.metadata(url)
+        except ValueError:
             return 'Video not available for download.'
 
         prompt = VideoPrompt(user_id=ctx.author.id)
 
-        embed = ctx.embed(title=tube._yt.title, url=url)
+        embed = ctx.embed(title=metadata.title, url=url)
 
-        embed.set_thumbnail(url=tube._yt.thumbnail_url)
-        embed.set_author(name=tube._yt.author, url=tube._yt.channel_url)
+        embed.set_thumbnail(url=metadata.thumbnail_url)
 
         await ctx.send(embed=embed, view=prompt)
 
         if await prompt.wait():
-            return
+            return 'Timed out'
 
         filesize_limit = 0
 
@@ -124,16 +136,12 @@ class Videos(Cog):
         else:
             filesize_limit = 8388608
 
-        if prompt.result == 'video':
-            try:
-                b, file_type = await tube.get_best_video(filesize_limit)  # type: ignore
-            except TypeError:
-                return 'Video is too large.'
-        else:
-            try:
-                b, file_type = await tube.get_best_audio(filesize_limit)  # type: ignore
-            except TypeError:
-                return 'Audio is too large.'
+        yt = YoutubeDownloader(
+            url, max_filesize=filesize_limit, audio_only=prompt.result == 'audio'
+        )
+
+        async with ctx.typing():
+            b, file_type = await yt.download()
 
         return discord.File(b, filename=f'bobo-bot-youtube-download.{file_type}')
 

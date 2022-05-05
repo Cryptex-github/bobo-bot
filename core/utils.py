@@ -1,11 +1,25 @@
+from __future__ import annotations
+
 import asyncio
 import functools
 import time
 import re
 
-from typing import Awaitable, Callable, TypeVar, ParamSpec, Iterable, Generator
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Any,
+    Callable,
+    TypeVar,
+    ParamSpec,
+    Iterable,
+    Generator,
+)
 
-__all__ = ('Timer', 'finder', 'async_executor', 'unique_list')
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+__all__ = ('Instant', 'finder', 'async_executor', 'unique_list')
 
 R = TypeVar('R')
 P = ParamSpec('P')
@@ -13,42 +27,79 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
-class Timer:
-    def __init__(self):
-        self._start = None
-        self._end = None
+class Duration:
+    __slots__ = ('_time',)
 
-    def start(self):
+    def __init__(self, time: float) -> None:
+        self._time = time
+
+    @classmethod
+    def from_secs(cls, secs: float) -> Duration:
+        return cls(secs)
+
+    def as_nanos(self) -> float:
+        return self._time * 1e9
+
+    def as_micros(self) -> float:
+        return self._time * 1e6
+
+    def as_millis(self) -> float:
+        return self._time * 1e3
+
+    def as_secs(self) -> float:
+        return self._time
+
+
+class Instant:
+    __slots__ = ('_start', '_end')
+
+    def __init__(self) -> None:
+        self._start: float | None = None
+        self._end: float | None = None
+
+    def start(self) -> None:
         self._start = time.perf_counter()
+    
+    @classmethod
+    def now(cls) -> Self:
+        instant = cls()
+        instant.start()
 
-    def stop(self):
+        return instant
+
+    def stop(self) -> None:
         self._end = time.perf_counter()
+    
+    @property
+    def elapsed(self) -> Duration:
+        return Duration.from_secs(self.time)
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.start()
+
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
         self.stop()
 
-    def __int__(self):
+    def __int__(self) -> int:
         return round(self.time)
 
-    def __float__(self):
+    def __float__(self) -> float:
         return self.time
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.time)
 
-    def __repr__(self):
-        return f"<Timer time={self.time}>"
+    def __repr__(self) -> str:
+        return f"<Instant time={self.time}>"
 
     @property
-    def time(self):
+    def time(self) -> float:
         if self._end is None:
-            raise ValueError('Timer has not been ended.')
+            raise ValueError('Instant has not been ended.')
         if self._start is None:
-            raise ValueError('Timer has not been started.')
+            raise ValueError('Instant has not been started.')
 
         return self._end - self._start
 

@@ -133,7 +133,8 @@ class Utility(Cog):
             Return code: {return_code} {"(" + return_code_map.get(return_code, 'Unknown') + ")" if return_code != 0 else ''}
             ```
             """
-                ), SAFE_SEND
+                ),
+                SAFE_SEND,
             )
 
 

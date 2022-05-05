@@ -12,7 +12,7 @@ __all__ = ('BaseView', 'ConfirmView')
 
 
 class BaseView(discord.ui.View):
-    def __init__(self, user_id: int, timeout: int = 180) -> None:
+    def __init__(self, user_id: int, timeout: int | None = 180) -> None:
         super().__init__(timeout=timeout)
 
         self.user_id = user_id
