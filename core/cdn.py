@@ -1,4 +1,4 @@
-#! This CDN client is by jay3332
+#! This CDN client is created by jay3332
 
 from __future__ import annotations
 
