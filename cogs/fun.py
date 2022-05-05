@@ -6,6 +6,7 @@ from io import BytesIO
 from akinator.async_aki import Akinator
 from akinator import CantGoBackAnyFurther
 import discord
+from discord import app_commands
 
 from core import Cog
 from core.command import command, hybrid_group
@@ -337,7 +338,8 @@ class Fun(Cog):
 
         return embed
 
-    @hybrid_group(aliases=['r'])
+    @hybrid_group(aliases=['r'], fallback='show')
+    @app_commands.describe(url='The url of the reddit post.')
     async def reddit(self, ctx: BoboContext, url: str | None = None) -> OutputType:
         """
         Shows a reddit post.
@@ -359,13 +361,6 @@ class Fun(Cog):
                 return 'Invalid Reddit URL or Reddit is down'
 
             return self.process_reddit_post(ctx, await resp.json())
-
-    @reddit.command()
-    async def show(self, ctx: BoboContext, url: str) -> None:
-        """
-        Shows a reddit post.
-        """
-        await self.reddit(ctx, url)
 
     @reddit.command(name='random', aliases=['r'])
     async def reddit_random(self, ctx: BoboContext, subreddit: str) -> OutputType:

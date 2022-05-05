@@ -111,7 +111,7 @@ class VideoPrompt(BaseView):
 class Videos(Cog):
     @command()
     async def yt(self, ctx: BoboContext, *, url: str) -> str | discord.File:
-        await ctx.trigger_typing()
+        await ctx.typing()
 
         try:
             metadata = await YoutubeDownloader.metadata(url)

@@ -88,7 +88,8 @@ class Tag(Cog):
     async def cog_load(self):
         self.ctx_tag_manager = ContextBasedTagManager(self.bot.db)
 
-    @hybrid_group()
+    @hybrid_group(fallback='show')
+    @app_commands.describe(name='The name of the tag.')
     async def tag(self, ctx: BoboContext, *, name: str) -> str:
         """Shows the content of a tag."""
         content = await self.ctx_tag_manager.get_tag_content(name)
@@ -96,12 +97,6 @@ class Tag(Cog):
             return 'Tag not found.'
 
         return escape_mentions(content)
-
-    @tag.command()
-    @app_commands.describe(name='The name of the tag.')
-    async def show(self, ctx: BoboContext, name: str) -> None:
-        """Shows the content of a tag."""
-        await self.tag(ctx, name=name)
 
     @tag.command(aliases=['create'])
     @app_commands.describe(
@@ -117,24 +112,6 @@ class Tag(Cog):
 
         return 'Tag created.'
 
-    # @slash_group.command()
-    # @app_commands.describe(
-    #     name='The name of the tag.', content='The content of the tag.'
-    # )
-    # async def create(self, interaction: Interaction, name: str, content: str) -> None:
-    #     """Creates a new tag."""
-    #     if len(name) > 200:
-    #         await interaction.response.send_message('Tag name is too long.')
-
-    #         return
-
-    #     if not await self.slash_tag_manager.new_tag(interaction, name, content):
-    #         await interaction.response.send_message('Tag already exists.')
-
-    #         return
-
-    #     await interaction.response.send_message('Tag created.')
-
     @tag.command(aliases=['delete'])
     @app_commands.describe(name='The name of the tag.')
     async def remove(self, ctx: BoboContext, name: str) -> None:
@@ -147,21 +124,6 @@ class Tag(Cog):
             return
 
         await ctx.send('Tag deleted.')
-
-    # @slash_group.command(name='remove')
-    # @app_commands.describe(name='The name of the tag.')
-    # async def slash_remove(self, interaction: Interaction, name: str) -> None:
-    #     """
-    #     Deletes a tag.
-    #     """
-    #     if not await self.slash_tag_manager.remove_tag(interaction, name):
-    #         await interaction.response.send_message(
-    #             'Tag not found, are you sure you owns it?'
-    #         )
-
-    #         return
-
-    #     await interaction.response.send_message('Tag deleted.')
 
     @tag.command()
     @app_commands.describe(
@@ -176,26 +138,7 @@ class Tag(Cog):
 
         return 'Tag edited.'
 
-    # @slash_group.command(name='edit')
-    # @app_commands.describe(
-    #     name='The name of the tag.', content='The content of the tag.'
-    # )
-    # async def slash_edit(
-    #     self, interaction: Interaction, name: str, content: str
-    # ) -> None:
-    #     """
-    #     Edits a tag.
-    #     """
-    #     if not await self.slash_tag_manager.edit_tag(interaction, name, content):
-    #         await interaction.response.send_message(
-    #             'Tag not found, are you sure you owns it?'
-    #         )
-
-    #         return
-
-    #     await interaction.response.send_message('Tag edited.')
-
-    @show.autocomplete('name')
+    @tag.autocomplete('name')
     @remove.autocomplete('name')
     @edit.autocomplete('name')
     async def show_autocomplete(
