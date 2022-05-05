@@ -24,12 +24,11 @@ class Listeners(Cog):
         if not self._events_to_send:
             return
         
-        async with self._events_lock:
-            async with self.bot.redis.pipeline() as pipe:
-                for event in self._events_to_send:
-                    pipe.hincrby('events', event, 1)
-                
-                await pipe.execute()
+        async with (self._events_lock, self.bot.redis.pipeline() as pipe):
+            for event in self._events_to_send:
+                pipe.hincrby('events', event, 1)
+
+            await pipe.execute()
             
             self._events_to_send.clear()
 
