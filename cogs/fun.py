@@ -340,13 +340,10 @@ class Fun(Cog):
 
     @hybrid_group(aliases=['r'], fallback='show')
     @app_commands.describe(url='The url of the reddit post.')
-    async def reddit(self, ctx: BoboContext, url: str | None = None) -> OutputType:
+    async def reddit(self, ctx: BoboContext, url: str) -> OutputType:
         """
         Shows a reddit post.
         """
-        if not url:
-            return await ctx.send_help(ctx.command)
-
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
         
