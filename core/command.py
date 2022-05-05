@@ -3,18 +3,19 @@ from __future__ import annotations
 import functools
 import inspect
 
-from typing import TYPE_CHECKING, Awaitable
+from typing import TYPE_CHECKING, Awaitable, Coroutine
 
 import discord
 from discord import Member, PartialMessageable
 from discord.ext import commands
+from discord.ext.commands import HybridCommand
 
 from core.constants import REPLY, CAN_DELETE, SAFE_SEND
 
 if TYPE_CHECKING:
     from typing import Any, AsyncGenerator, Callable, TypeVar, ParamSpec
 
-    from discord.ext.commands import Command, HybridCommand
+    from discord.ext.commands import Command
 
     from core.context import BoboContext
     from core.types import OutputType
@@ -124,7 +125,7 @@ async def _command_callback(
 
 def command_callback(
     func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]
-) -> Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, Any]]:
+) -> Callable[..., Coroutine[Any, Any, None]]:
     @functools.wraps(func)
     async def wrapper(self: Cog, ctx: BoboContext, *args: Any, **kwargs: Any) -> None:
         await _command_callback(ctx, func(self, ctx, *args, **kwargs))
@@ -143,7 +144,7 @@ def command(
     def wrapper(
         func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
     ) -> Command:
-        return command(command_callback(func))  # type: ignore
+        return command(command_callback(func))
 
     return wrapper
 
@@ -154,12 +155,10 @@ def hybrid_command(
     [Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]],
     HybridCommand,
 ]:
-    hybrid_command = commands.hybrid_command(**attrs)
-
     def wrapper(
         func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
     ) -> HybridCommand:
-        return hybrid_command(command_callback(func))  # type: ignore
+        return HybridCommand(command_callback(func), **attrs)
 
     return wrapper
 
@@ -232,11 +231,9 @@ def hybrid_group(
     if 'invoke_without_command' not in attrs:
         attrs['invoke_without_command'] = True
 
-    group = commands.group(cls=HybridGroup, **attrs)
-
     def wrapper(
         func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
     ) -> HybridGroup:
-        return group(command_callback(func))  # type: ignore
+        return HybridGroup(command_callback(func), **attrs)
 
     return wrapper
