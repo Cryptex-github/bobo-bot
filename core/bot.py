@@ -68,16 +68,10 @@ class BoboBot(commands.Bot):
     
     @staticmethod
     def _get_prefix(bot: BoboBot, message: Message) -> str:
-        if not bot.user:
+        if not bot.user or bot.user.id == BETA_ID:
             return 'bobo '
 
-        if bot.user.id == BETA_ID:
-            return 'bobo '
-
-        if bot.user.id == PROD_ID:
-            return 'bobob '
-
-        return 'bobo '
+        return 'bobob '
 
     async def self_test(self) -> SelfTestResult:
         with Instant() as postgres_instant:

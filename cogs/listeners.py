@@ -46,7 +46,10 @@ class Listeners(Cog):
                 )  # Well if someone were to edit their message 100 times then uhh idk.
             except (discord.Forbidden, discord.NotFound):
                 for m in messages:
-                    await self.bot.http.delete_message(payload.channel_id, m)
+                    try:
+                        await self.bot.http.delete_message(payload.channel_id, m)
+                    except (discord.Forbidden, discord.NotFound):
+                        pass
 
             await self.bot.delete_message_manager.delete_messages(payload.message_id)
 
@@ -60,13 +63,19 @@ class Listeners(Cog):
                     await self.bot.http.delete_messages(payload.channel_id, messages)
                 except (discord.Forbidden, discord.NotFound):
                     for m in messages:
-                        await self.bot.http.delete_message(payload.channel_id, m)
+                        try:
+                            await self.bot.http.delete_message(payload.channel_id, m)
+                        except (discord.Forbidden, discord.NotFound):
+                            pass
 
                 await self.bot.delete_message_manager.delete_messages(message)
 
     @Cog.listener()
     async def on_message_edit(self, old: discord.Message, new: discord.Message) -> None:
         if old.embeds or new.embeds:
+            return
+        
+        if old.content == new.content:
             return
 
         await self.bot.process_commands(new)
