@@ -147,6 +147,15 @@ def command(
 
     return wrapper
 
+@discord.utils.copy_doc(commands.hybrid_command)
+def hybrid_command(**attrs) -> Any:
+    hybrid_command = commands.hybrid_command(**attrs)
+
+    def wrapper(func):
+        return hybrid_command(command_callback(func)) # type: ignore
+    
+    return wrapper
+
 
 @discord.utils.copy_doc(commands.hybrid_command)
 def hybrid_command(
@@ -238,6 +247,18 @@ def hybrid_group(
     def wrapper(
         func: Callable[..., Awaitable[OutputType] | AsyncGenerator[OutputType, None]]
     ) -> HybridGroup:
+        return group(command_callback(func))  # type: ignore
+
+    return wrapper
+
+
+def hybrid_group(**attrs) -> Any:
+    if 'invoke_without_command' not in attrs:
+        attrs['invoke_without_command'] = True
+
+    group = commands.group(cls=HybridGroup, **attrs)
+
+    def wrapper(func):
         return group(command_callback(func))  # type: ignore
 
     return wrapper
