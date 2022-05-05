@@ -347,6 +347,9 @@ class Fun(Cog):
 
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
+        
+        if '?' in url:
+            url = url.split('?')[0]
 
         if '?' in url:
             url = url.split('?')[0]
@@ -356,6 +359,13 @@ class Fun(Cog):
                 return 'Invalid Reddit URL or Reddit is down'
 
             return self.process_reddit_post(ctx, await resp.json())
+    
+    @reddit.command()
+    async def show(self, ctx: BoboContext, url: str) -> None:
+        """
+        Shows a reddit post.
+        """
+        await self.reddit(ctx, url)
 
     @reddit.command()
     async def show(self, ctx: BoboContext, url: str) -> None:
