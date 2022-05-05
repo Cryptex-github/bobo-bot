@@ -9,12 +9,12 @@ from quart import Quart, request
 from quart_cors import cors
 
 from config import client_secret
-from .bot import BoboBot
+from core.bot import BoboBot
+from core.types import Json
 
 
 if TYPE_CHECKING:
     METHODS: TypeAlias = Literal['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
-    JSON: TypeAlias = dict[str, str | int]
 
     class _Quart(Quart):        
         bot: BoboBot
@@ -28,7 +28,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
-async def discord_request(method: METHODS, route: str, data: JSON) -> JSON | tuple[JSON, int]:
+async def discord_request(method: METHODS, route: str, data: Json) -> Json | tuple[Json, int]:
     try:
         token = request.args['Access-Token']
     except KeyError:
@@ -82,7 +82,7 @@ async def stats():
     }
 
 @app.post('/exchange-code')
-async def exchange_code() -> JSON | tuple[JSON, int]:
+async def exchange_code() -> Json | tuple[Json, int]:
     try:
         code = request.args['code']
     except KeyError:
@@ -106,7 +106,7 @@ async def exchange_code() -> JSON | tuple[JSON, int]:
         return await resp.json()
 
 @app.get('/commands')
-async def commands() -> JSON | tuple[JSON, int]:
+async def commands() -> Json | tuple[Json, int]:
     bot = cast(BoboBot, app.bot)
     json = []
 
@@ -131,4 +131,4 @@ async def commands() -> JSON | tuple[JSON, int]:
     cogs = [cog.qualified_name for cog in bot.cogs.values() if not getattr(cog, 'ignore', False)]
     del cogs[cogs.index('Jishaku')]
 
-    return {'commands': json, 'categories': cogs}
+    return {'commands': json, 'categories': cogs} # type: ignore

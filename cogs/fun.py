@@ -359,13 +359,6 @@ class Fun(Cog):
                 return 'Invalid Reddit URL or Reddit is down'
 
             return self.process_reddit_post(ctx, await resp.json())
-    
-    @reddit.command()
-    async def show(self, ctx: BoboContext, url: str) -> None:
-        """
-        Shows a reddit post.
-        """
-        await self.reddit(ctx, url)
 
     @reddit.command()
     async def show(self, ctx: BoboContext, url: str) -> None:

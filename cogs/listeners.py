@@ -18,7 +18,7 @@ class Listeners(Cog):
             await self.bot.redis.set('events_start_time', datetime.now().timestamp())
 
     @loop(seconds=1)
-    async def send_events(self):
+    async def send_events(self) -> None:
         await self.bot.wait_until_ready()
 
         if not self._events_to_send:
@@ -29,8 +29,8 @@ class Listeners(Cog):
                 pipe.hincrby('events', event, 1)
 
             await pipe.execute()
-            
-            self._events_to_send.clear()
+
+            self._events_to_send = []
 
     @Cog.listener()
     async def on_raw_message_delete(

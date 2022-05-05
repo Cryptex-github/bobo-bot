@@ -20,7 +20,7 @@ from requests_html import AsyncHTMLSession
 from core.cache_manager import DeleteMessageManager
 from core.utils import Instant
 from core.cdn import CDNClient
-from core.constants import BETA_ID, PROD_ID
+from core.constants import BETA_ID
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
@@ -104,21 +104,36 @@ class BoboBot(commands.Bot):
 
         return obj
 
-    def initialize_libaries(self) -> None:
+    async def initialize(self) -> None:
+        from core.web import app
+
+        self.session = aiohttp.ClientSession(connector=self.connector)
+        self.ready_once = False
         self.context = BoboContext
         self.mystbin = mystbin.Client(session=self.session)
         self.html_session = AsyncHTMLSession()
         self.cdn = CDNClient(self)
-
-    async def initialize_constants(self) -> None:
-        self.session = aiohttp.ClientSession(connector=self.connector)
 
         self.redis = aioredis.from_url(
             'unix:///var/run/redis/redis-server.sock', decode_responses=True
         )
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
-        self.ready_once = False
+
+        self.db = await asyncpg.create_pool(
+            host=DbConnectionDetails.host,
+            user=DbConnectionDetails.user,
+            password=DbConnectionDetails.password,
+            database=DbConnectionDetails.database,
+        )
+
+        await self.redis.ping()
+        await self.load_all_extensions()
+
+        self.web = app
+        app.bot = self
+
+        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082, use_reloader=False))
 
     def get_cooldown(self, message: Message) -> commands.Cooldown | None:
         if message.author.id == 590323594744168494:
@@ -169,25 +184,7 @@ class BoboBot(commands.Bot):
         await asyncio.gather(*chunk_tasks)
 
     async def setup_hook(self) -> None:
-        from core.web import app
-
-        await self.initialize_constants()
-        self.initialize_libaries()
-
-        self.db = await asyncpg.create_pool(
-            host=DbConnectionDetails.host,
-            user=DbConnectionDetails.user,
-            password=DbConnectionDetails.password,
-            database=DbConnectionDetails.database,
-        )
-
-        await self.load_all_extensions()
-
-        self.web = app
-
-        app.bot = self
-
-        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082, use_reloader=False))
+        await self.initialize()
 
     async def load_all_extensions(self) -> None:
         for file in os.listdir('./cogs'):
