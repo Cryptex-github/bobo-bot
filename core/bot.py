@@ -119,7 +119,6 @@ class BoboBot(commands.Bot):
         )
         self.delete_message_manager = DeleteMessageManager(self.redis)
 
-
         self.db = await asyncpg.create_pool(
             host=DbConnectionDetails.host,
             user=DbConnectionDetails.user,
