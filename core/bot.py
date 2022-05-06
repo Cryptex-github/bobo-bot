@@ -97,7 +97,7 @@ class BoboBot(commands.Bot):
         get = getattr(self, f'get_{object_}')
         fetch = getattr(self, f'fetch_{object_}')
 
-        obj = await get(id_)
+        obj = get(id_)
 
         if not obj:
             obj = await fetch(id_)
