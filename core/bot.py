@@ -97,7 +97,7 @@ class BoboBot(commands.Bot):
         get = getattr(self, f'get_{object_}')
         fetch = getattr(self, f'fetch_{object_}')
 
-        obj = await get(id_)
+        obj = get(id_)
 
         if not obj:
             obj = await fetch(id_)
@@ -118,7 +118,6 @@ class BoboBot(commands.Bot):
             'unix:///var/run/redis/redis-server.sock', decode_responses=True
         )
         self.delete_message_manager = DeleteMessageManager(self.redis)
-
 
         self.db = await asyncpg.create_pool(
             host=DbConnectionDetails.host,
