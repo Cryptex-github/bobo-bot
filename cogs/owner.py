@@ -16,7 +16,7 @@ from jishaku.codeblocks import codeblock_converter
 from jishaku.exception_handling import ReactionProcedureTimer
 from tabulate import tabulate
 
-from core import BoboContext, Cog, Regexs, Instant, command, unique_list
+from core import BoboContext, Cog, Regexes, Instant, command, unique_list
 from core.constants import CAN_DELETE, SAFE_SEND
 from core.types import OutputType
 
@@ -36,7 +36,7 @@ class Owner(Cog):
         stdout, stderr = stdout.decode(), stderr.decode()
         res = f'```\n{stdout}\n\n{stderr}```'
 
-        files_to_reload = unique_list(Regexs.FILES_TO_RELOAD_REGEX.findall(res))
+        files_to_reload = unique_list(Regexes.FILES_TO_RELOAD_REGEX.findall(res))
 
         for file_to_reload in files_to_reload:
             mod = file_to_reload.replace('/', '.').replace('.py', '')
