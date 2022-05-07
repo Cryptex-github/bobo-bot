@@ -346,7 +346,7 @@ class Fun(Cog):
         """
         if not url.startswith('https://www.reddit.com'):
             return 'Invalid Reddit URL'
-        
+
         if '?' in url:
             url = url.split('?')[0]
 

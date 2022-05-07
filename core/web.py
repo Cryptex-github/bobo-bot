@@ -14,11 +14,13 @@ from core.types import Json
 
 
 if TYPE_CHECKING:
-    METHODS: TypeAlias = Literal['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
+    METHODS: TypeAlias = Literal[
+        'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'
+    ]
 
-    class _Quart(Quart):        
+    class _Quart(Quart):
         bot: BoboBot
-    
+
     Quart = _Quart
 
 
@@ -28,26 +30,31 @@ app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
-async def discord_request(method: METHODS, route: str, data: Json) -> Json | tuple[Json, int]:
+
+async def discord_request(
+    method: METHODS, route: str, data: Json
+) -> Json | tuple[Json, int]:
     try:
         token = request.args['Access-Token']
     except KeyError:
         return {'error': 'Missing Access-Token header'}, 401
-    
+
     route = Route.BASE + route
     headers = {'Authorization': 'Bearer ' + token}
 
-    async with app.bot.session.request(method, route, headers=headers, json=data) as resp:
+    async with app.bot.session.request(
+        method, route, headers=headers, json=data
+    ) as resp:
         if not resp.ok:
-            return {
-                'error': f'{resp.status}: {await resp.text()}'
-            }, 400
-        
+            return {'error': f'{resp.status}: {await resp.text()}'}, 400
+
         return await resp.json()
+
 
 @app.get('/')
 async def index():
     return {'message': 'Hello World!'}
+
 
 @app.get('/stats')
 async def stats():
@@ -81,29 +88,31 @@ async def stats():
         'Average Events per minute': f'{events // time_difference}',
     }
 
+
 @app.post('/exchange-code')
 async def exchange_code() -> Json | tuple[Json, int]:
     try:
         code = request.args['code']
     except KeyError:
         return {'error': 'No code provided'}, 400
-    
+
     data = {
         'client_id': app.bot.user.id,
         'client_secret': client_secret,
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': 'https://bobobot.cf'
+        'redirect_uri': 'https://bobobot.cf',
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    async with app.bot.session.post(Route.BASE + '/oauth2/token', data=data, headers=headers) as resp:
+    async with app.bot.session.post(
+        Route.BASE + '/oauth2/token', data=data, headers=headers
+    ) as resp:
         if not resp.ok:
-            return {
-                'error': f'{resp.status}: {await resp.text()}'
-            }, 400
-        
+            return {'error': f'{resp.status}: {await resp.text()}'}, 400
+
         return await resp.json()
+
 
 @app.get('/commands')
 async def commands() -> Json | tuple[Json, int]:
@@ -117,18 +126,24 @@ async def commands() -> Json | tuple[Json, int]:
             if cooldown := getattr(bucket, '_cooldown'):
                 cooldown_fmted = f'{cooldown.rate} time(s) per {cooldown.per} second(s)'
 
-        json.append({
-            'name': command.qualified_name,
-            'args': command.signature,
-            'category': command.cog_name,
-            'description': (
-                command.description or command.short_doc or 'No Help Provided'
-            ),
-            'aliases': command.aliases,
-            'cooldown': cooldown_fmted
-        })
+        json.append(
+            {
+                'name': command.qualified_name,
+                'args': command.signature,
+                'category': command.cog_name,
+                'description': (
+                    command.description or command.short_doc or 'No Help Provided'
+                ),
+                'aliases': command.aliases,
+                'cooldown': cooldown_fmted,
+            }
+        )
 
-    cogs = [cog.qualified_name for cog in bot.cogs.values() if not getattr(cog, 'ignore', False)]
+    cogs = [
+        cog.qualified_name
+        for cog in bot.cogs.values()
+        if not getattr(cog, 'ignore', False)
+    ]
     del cogs[cogs.index('Jishaku')]
 
-    return {'commands': json, 'categories': cogs} # type: ignore
+    return {'commands': json, 'categories': cogs}  # type: ignore

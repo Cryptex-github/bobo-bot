@@ -65,7 +65,7 @@ class BoboBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions.none(),
             strip_after_prefix=True,
         )
-    
+
     @staticmethod
     def _get_prefix(bot: BoboBot, message: Message) -> str:
         if not bot.user or bot.user.id == BETA_ID:
@@ -132,7 +132,9 @@ class BoboBot(commands.Bot):
         self.web = app
         app.bot = self
 
-        self.web_task = self.loop.create_task(app.run_task(host='0.0.0.0', port=8082, use_reloader=False))
+        self.web_task = self.loop.create_task(
+            app.run_task(host='0.0.0.0', port=8082, use_reloader=False)
+        )
 
     def get_cooldown(self, message: Message) -> commands.Cooldown | None:
         if message.author.id == 590323594744168494:
@@ -233,7 +235,7 @@ class BoboBot(commands.Bot):
             mode = sys.argv[1]
         except IndexError:
             mode = 'dev'
-        
+
         if mode == 'dev':
             super().run(token=token)
         else:

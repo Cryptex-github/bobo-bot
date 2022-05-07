@@ -10,6 +10,7 @@ from core.context import BoboContext
 
 class Listeners(Cog):
     ignore = True
+
     async def cog_load(self):
         self._events_lock = asyncio.Lock()
         self._events_to_send = []
@@ -23,7 +24,7 @@ class Listeners(Cog):
 
         if not self._events_to_send:
             return
-        
+
         async with (self._events_lock, self.bot.redis.pipeline() as pipe):
             for event in self._events_to_send:
                 pipe.hincrby('events', event, 1)
@@ -73,7 +74,7 @@ class Listeners(Cog):
     async def on_message_edit(self, old: discord.Message, new: discord.Message) -> None:
         if old.embeds or new.embeds:
             return
-        
+
         if old.content == new.content:
             return
 

@@ -3,9 +3,24 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeAlias, Type, cast, Callable, TypeVar
 
 import magmatic
-from magmatic import Source, Playlist, Track as _Track, Player as _Player, Node as _Node, Queue as _Queue, LoopType
+from magmatic import (
+    Source,
+    Playlist,
+    Track as _Track,
+    Player as _Player,
+    Node as _Node,
+    Queue as _Queue,
+    LoopType,
+)
 
-from discord import VoiceChannel, StageChannel, Member, Embed, ButtonStyle, PartialMessageable
+from discord import (
+    VoiceChannel,
+    StageChannel,
+    Member,
+    Embed,
+    ButtonStyle,
+    PartialMessageable,
+)
 from discord.ext.commands import CheckFailure, check
 from discord.ui import button, Modal, TextInput, Select
 from discord.utils import MISSING, utcnow
@@ -40,6 +55,7 @@ class MetaData:
 
 Track: TypeAlias = _Track[MetaData]
 
+
 class Queue(_Queue[MetaData]):
     ...
 
@@ -60,7 +76,7 @@ class LoopTypeSelect(Select):
         self.add_option(label='None', value='None')
         self.add_option(label='Track', value='Track', emoji='🔂')
         self.add_option(label='Queue', value='Queue', emoji='🔁')
-    
+
     async def callback(self, interaction: Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
 
@@ -69,14 +85,16 @@ class LoopTypeSelect(Select):
 
 
 class MusicController(BaseView):
-    def __init__(self, player: Player, user_id: int, timeout: int | None = None) -> None:
+    def __init__(
+        self, player: Player, user_id: int, timeout: int | None = None
+    ) -> None:
         super().__init__(user_id, timeout)
 
         self.player = player
-    
+
     def make_embed(self) -> Embed:
         embed = self.player.ctx.embed()
-        
+
         guild = self.player.bot.get_guild(self.player.guild_id)
         channel = self.player.channel
 
@@ -87,11 +105,11 @@ class MusicController(BaseView):
         embed.add_field(name='Volume', value=str(self.player.volume) + '%')
         embed.add_field(name='Loop Type', value=self.player.queue.loop_type.name)
         embed.add_field(name='Is paused', value=str(self.player.is_paused()))
-        
+
         embed.timestamp = utcnow()
 
         return embed
-    
+
     @button(label='Volume', emoji='🔊', style=ButtonStyle.primary)
     async def set_volume(self, interaction: Interaction, button: Button) -> None:
         modal = SetVolumeModal()
@@ -100,14 +118,14 @@ class MusicController(BaseView):
         await modal.wait()
 
         try:
-            volume = int(modal.volume.value) # type: ignore
+            volume = int(modal.volume.value)  # type: ignore
         except ValueError:
             return
 
         await self.player.set_volume(volume)
 
         await interaction.edit_original_message(embed=self.make_embed())
-    
+
     @button(label='Loop Type', emoji='🔁', style=ButtonStyle.primary)
     async def set_loop_type(self, interaction: Interaction, button: Button) -> None:
         view = BaseView(interaction.user.id)
@@ -119,30 +137,30 @@ class MusicController(BaseView):
         await view.wait()
 
         selected = select.values[0]
-        
+
         if selected == 'None':
             loop_type = LoopType.none
         elif selected == 'Track':
             loop_type = LoopType.track
         else:
             loop_type = LoopType.queue
-        
+
         self.player.queue.loop_type = loop_type
 
         await interaction.edit_original_message(embed=self.make_embed(), view=self)
-    
+
     @button(label='Toggle Pause', emoji='⏸', style=ButtonStyle.primary)
     async def toggle_pause(self, interaction: Interaction, button: Button) -> None:
         await self.player.toggle_pause()
 
         await interaction.response.edit_message(embed=self.make_embed())
-    
+
     @button(label='Skip', emoji='⏭', style=ButtonStyle.primary)
     async def skip(self, interaction: Interaction, button: Button) -> None:
         await self.player.stop()
 
         await interaction.response.edit_message(embed=self.make_embed())
-    
+
     @button(label='Leave', emoji='⏹', style=ButtonStyle.danger)
     async def leave(self, interaction: Interaction, button: Button) -> None:
         await self.player.disconnect()
@@ -154,7 +172,9 @@ class MusicController(BaseView):
 
 
 class MusicControllerInvoke(BaseView):
-    def __init__(self, player: Player, user_id: int, timeout: int | None = None) -> None:
+    def __init__(
+        self, player: Player, user_id: int, timeout: int | None = None
+    ) -> None:
         super().__init__(user_id, timeout)
 
         self.player = player
@@ -163,7 +183,9 @@ class MusicControllerInvoke(BaseView):
     async def invoke(self, interaction: Interaction, button: Button) -> None:
         controller = MusicController(self.player, interaction.user.id)
 
-        await interaction.response.send_message(view=controller, embed=controller.make_embed(), ephemeral=True)
+        await interaction.response.send_message(
+            view=controller, embed=controller.make_embed(), ephemeral=True
+        )
 
 
 class Player(_Player['BoboBot']):
@@ -186,17 +208,17 @@ class Player(_Player['BoboBot']):
         self.dj: int | None = None
         self.dj_mention: str | None = None
         self.queue = Queue()
-    
+
     def is_dj(self, ctx: BoboContext) -> bool:
         assert isinstance(ctx.author, Member)
 
         if ctx.author.id == self.dj:
             return True
-        
+
         if not isinstance(ctx.channel, PartialMessageable):
             if ctx.channel.permissions_for(ctx.author).manage_guild:
                 return True
-        
+
         raise CheckFailure('Only the DJ can do this.')
 
     async def do_next(self) -> None:
@@ -249,9 +271,7 @@ class Player(_Player['BoboBot']):
         )
 
         embed.add_field(name='Author', value=track.author)
-        embed.add_field(
-            name='Requested By', value=track.metadata.requestor.mention
-        )
+        embed.add_field(name='Requested By', value=track.metadata.requestor.mention)
         embed.add_field(name='Volume', value=f'{self.volume}%')
 
         if self.dj_mention:
@@ -266,21 +286,25 @@ class Player(_Player['BoboBot']):
         if track := self.queue.current:
             if message := self._prev_message:
                 await message.delete()
-            
+
             view = MusicControllerInvoke(self, self.dj or self.ctx.author.id)
 
-            self._prev_message = await self.ctx.send(embed=self._make_embed(track), view=view)
+            self._prev_message = await self.ctx.send(
+                embed=self._make_embed(track), view=view
+            )
+
 
 def is_dj() -> Callable[[T], T]:
     async def _is_dj(ctx: BoboContext) -> bool:
         player = cast(Player, ctx.voice_client)
-        
+
         if not player:
             return False
-        
+
         return player.is_dj(ctx)
-    
+
     return check(_is_dj)
+
 
 class Node(_Node['BoboBot']):
     def get_player(
@@ -290,9 +314,7 @@ class Node(_Node['BoboBot']):
         cls: Type[Player] = Player,
         fail_if_not_exists: bool = False,
     ) -> Player:
-        return super().get_player(
-            guild, cls=cls, fail_if_not_exists=fail_if_not_exists
-        )
+        return super().get_player(guild, cls=cls, fail_if_not_exists=fail_if_not_exists)
 
 
 class Music(Cog):
@@ -447,7 +469,7 @@ class Music(Cog):
         if not player.dj:
             player.dj = ctx.author.id
             player.dj_mention = ctx.author.mention
-        
+
         if not player.is_dj(ctx):
             return 'Only DJ can use this command.'
 

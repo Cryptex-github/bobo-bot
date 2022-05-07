@@ -10,7 +10,9 @@ from core.constants import Constant
 __all__ = ('OutputType', 'PossibleRTFMSources')
 
 
-JsonValue: TypeAlias = str | int | float | bool | list['JsonValue'] | dict[str, 'JsonValue'] | None
+JsonValue: TypeAlias = (
+    str | int | float | bool | list['JsonValue'] | dict[str, 'JsonValue'] | None
+)
 Json: TypeAlias = dict[str, JsonValue] | list[JsonValue]
 
 OutputType: TypeAlias = (

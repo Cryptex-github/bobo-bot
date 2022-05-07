@@ -148,6 +148,7 @@ def command(
 
     return wrapper
 
+
 @discord.utils.copy_doc(commands.hybrid_command)
 def hybrid_command(
     **attrs,

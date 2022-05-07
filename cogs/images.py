@@ -18,7 +18,7 @@ from discord.ext.commands import (
     ColorConverter as _ColorConverter,
     BadColorArgument,
     BadArgument,
-    param
+    param,
 )
 from PIL import Image, ImageColor
 
@@ -54,7 +54,7 @@ class ColorConverter(Converter[tuple[int, int, int]]):
                     return red, green, blue
                 except ValueError:
                     pass
-            
+
             try:
                 color = name_to_rgb(argument)
             except ValueError:
@@ -146,7 +146,7 @@ class ImageResolver:
             async with self.ctx.bot.session.get(content) as resp:
                 if not resp.ok:
                     return None
-                
+
                 if url := Regexes.TENOR_MEDIA_REGEX.search(await resp.text()):
                     return url.group(0)
 
@@ -295,7 +295,9 @@ class Images(Cog):
         return f'({round(h)}, {round(s)}%, {round(lightness)}%)'
 
     @staticmethod
-    def _rgb_to_cmyk(r: int, g: int, b: int) -> tuple[int | float, int | float, int | float, int | float]:
+    def _rgb_to_cmyk(
+        r: int, g: int, b: int
+    ) -> tuple[int | float, int | float, int | float, int | float]:
         if (r, g, b) == (0, 0, 0):
             return 0, 0, 0, CMYK_SCALE
 
@@ -310,20 +312,35 @@ class Images(Cog):
         y = (y - min_cmy) / (1 - min_cmy)
         k = min_cmy
 
-        return tuple((round(i) for i in (c * CMYK_SCALE, m * CMYK_SCALE, y * CMYK_SCALE, k * CMYK_SCALE)))
+        return tuple(
+            (
+                round(i)
+                for i in (
+                    c * CMYK_SCALE,
+                    m * CMYK_SCALE,
+                    y * CMYK_SCALE,
+                    k * CMYK_SCALE,
+                )
+            )
+        )
 
     @command()
-    async def color(self, ctx: BoboContext, *, color: tuple[int, int, int] = param(converter=ColorConverter)) -> tuple[Embed, File]:
+    async def color(
+        self,
+        ctx: BoboContext,
+        *,
+        color: tuple[int, int, int] = param(converter=ColorConverter),
+    ) -> tuple[Embed, File]:
         try:
             name = rgb_to_name(color)
         except ValueError:
             name = None
-        
+
         embed = ctx.embed(color=Color.from_rgb(*color))
 
         if name:
             embed.title = name
-        
+
         embed.add_field(name='RGB', value=str(color))
         embed.add_field(name='CMYK', value=str(self._rgb_to_cmyk(*color)))
 

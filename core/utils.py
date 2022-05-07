@@ -59,7 +59,7 @@ class Instant:
 
     def start(self) -> None:
         self._start = time.perf_counter()
-    
+
     @classmethod
     def now(cls) -> Self:
         instant = cls()
@@ -69,7 +69,7 @@ class Instant:
 
     def stop(self) -> None:
         self._end = time.perf_counter()
-    
+
     @property
     def elapsed(self) -> Duration:
         return Duration.from_secs(self.time)

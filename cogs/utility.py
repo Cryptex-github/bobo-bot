@@ -126,14 +126,12 @@ class Utility(Cog):
             return_code = json['returncode']
 
             return (
-                dedent(
-                    f"""
-            ```{language}
-            {json['stdout']}
-            Return code: {return_code} {"(" + return_code_map.get(return_code, 'Unknown') + ")" if return_code != 0 else ''}
-            ```
-            """
-                ),
+                f"""
+```{language}
+{json['stdout']}
+Return code: {return_code} {"(" + return_code_map.get(return_code, 'Unknown') + ")" if return_code != 0 else ''}
+```
+""",
                 SAFE_SEND,
             )
 

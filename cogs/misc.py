@@ -81,7 +81,6 @@ class Misc(Cog):
             )
 
         return embed
-        
 
     @command()
     async def speedtest(self, ctx: BoboContext) -> Embed | str:

@@ -178,9 +178,13 @@ class RTFM(Cog):
         Search discordpy master branch documentation.
         """
         await self.sphinx_rtfm(ctx, 'discordpy_master', query)
-    
-    async def parse_rust_doc(self, url: str, *, query: str, crate: str | None = None) -> list[tuple[str, str]] | None:
-        resp = await self.bot.html_session.get(f'{url}/{crate if crate else "std"}/?search={query}')
+
+    async def parse_rust_doc(
+        self, url: str, *, query: str, crate: str | None = None
+    ) -> list[tuple[str, str]] | None:
+        resp = await self.bot.html_session.get(
+            f'{url}/{crate if crate else "std"}/?search={query}'
+        )
         await resp.html.arender()
 
         try:
@@ -198,17 +202,15 @@ class RTFM(Cog):
 
             key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
 
-            results[key] = url + element.attrs[
-                'href'
-            ].replace('..', '')
+            results[key] = url + element.attrs['href'].replace('..', '')
 
         if crate:
             await self.cache.add('crates', f'{crate}:{query}', results)
         else:
             await self.cache.add('rust', query, results)
-        
+
         return list(results.items())
-    
+
     async def parse_rust_struct(self, url: str) -> RustDocParsedResult:
         resp = await self.bot.html_session.get(url)
         await resp.html.arender()
@@ -245,9 +247,7 @@ class RTFM(Cog):
         if not res:
             return 'No results found for your query.'
 
-        pages = ViewMenuPages(
-            source=RTFMMenuSource(res, 'Rust Standard Library')
-        )
+        pages = ViewMenuPages(source=RTFMMenuSource(res, 'Rust Standard Library'))
 
         await pages.start(ctx)
 
@@ -265,7 +265,7 @@ class RTFM(Cog):
                     return 'Crate not found.'
 
             return crate_url
-        
+
         query = quote(query.lower())
 
         if cached := await self.cache.get('crates', f'{crate}:{query}'):
@@ -274,7 +274,7 @@ class RTFM(Cog):
             await pages.start(ctx)
 
             return
-        
+
         res = await self.parse_rust_doc(base_url, query=query, crate=crate)
 
         if not res:

@@ -18,17 +18,22 @@ class Regexes:
         r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     )
     TENOR_REGEX: RePattern = re.compile(r'http[s]?://(www\.)?tenor\.com/view/\S+')
-    TENOR_MEDIA_REGEX: RePattern = re.compile(r'http[s]?:\/\/c.tenor.com/\w+\/[a-zA-z-]+\.gif')
-    GIPHY_REGEX: RePattern = re.compile(r'http[s]?://(www\.)?giphy\.com/gifs/[A-Za-z0-9]+')
+    TENOR_MEDIA_REGEX: RePattern = re.compile(
+        r'http[s]?:\/\/c.tenor.com/\w+\/[a-zA-z-]+\.gif'
+    )
+    GIPHY_REGEX: RePattern = re.compile(
+        r'http[s]?://(www\.)?giphy\.com/gifs/[A-Za-z0-9]+'
+    )
 
 
-INVITE_LINK: Final[str] = (
-    r'https://discord.com/api/oauth2/authorize?client_id=808485782067216434&permissions=448827607232&scope=bot%20applications.commands'
-)
+INVITE_LINK: Final[
+    str
+] = r'https://discord.com/api/oauth2/authorize?client_id=808485782067216434&permissions=448827607232&scope=bot%20applications.commands'
 SUPPORT_SERVER: Final[str] = 'https://discord.gg/AHYTRPr8hZ'
 BOT_COLOR: Final[int] = 0xFF4500
 BETA_ID: Final[int] = 808485782067216434
 PROD_ID: Final[int] = 787927476177076234
+
 
 class Constant(ABC):
     __slots__ = ()
