@@ -142,6 +142,17 @@ class ImageResolver:
 
         content = content.strip('<>')
 
+        if Regexes.TENOR_REGEX.match(content):
+            async with self.ctx.bot.session.get(content) as resp:
+                if not resp.ok:
+                    return None
+                
+                if url := Regexes.TENOR_MEDIA_REGEX.search(await resp.text()):
+                    return url.group(0)
+
+        if Regexes.GIPHY_REGEX.match(content):
+            return 'https://i.giphy.com/' + content.split('/')[-1] + '.gif'
+
         if Regexes.URL_REGEX.match(content):
             return content
 
@@ -326,7 +337,6 @@ class Images(Cog):
         embed.set_thumbnail(url=f'attachment://color_{hex_}.png')
 
         return embed, File(await self._create_color_image(color), f'color_{hex_}.png')
-
 
 
 setup = Images.setup

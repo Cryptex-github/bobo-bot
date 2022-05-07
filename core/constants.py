@@ -17,6 +17,9 @@ class Regexes:
     URL_REGEX: RePattern = re.compile(
         r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     )
+    TENOR_REGEX: RePattern = re.compile(r'http[s]?://(www\.)?tenor\.com/view/\S+/')
+    TENOR_MEDIA_REGEX: RePattern = re.compile(r'http[s]?:\/\/c.tenor.com/\w+\/[a-zA-z-]+\.gif')
+    GIPHY_REGEX: RePattern = re.compile(r'http[?://(www\.)?giphy\.com/gifs/[A-Za-z0-9]+/?')
 
 
 INVITE_LINK: Final[str] = (
