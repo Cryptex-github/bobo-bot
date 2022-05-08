@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal, TypeAlias, cast
 
 from datetime import datetime
 
-from quart import Quart, request, g
+from quart import Quart, request
 from quart_cors import cors
 
 from config import client_secret
@@ -41,19 +41,13 @@ async def discord_request(
     route = Route.BASE + route
     headers = {'Authorization': 'Bearer ' + token}
 
-    async with g.bot.session.request(
+    async with app.bot.session.request(
         method, route, headers=headers, json=data
     ) as resp:
         if not resp.ok:
             return {'error': f'{resp.status}: {await resp.text()}'}, 400
 
         return await resp.json()
-
-def set_bot(bot: BoboBot) -> None:
-    g.bot = bot
-
-def get_bot() -> BoboBot:
-    return g.bot
 
 @app.get('/')
 async def index():
@@ -62,26 +56,26 @@ async def index():
 
 @app.get('/stats')
 async def stats():
-    async with g.bot.db.acquire() as conn:
+    async with app.bot.db.acquire() as conn:
         total_command_uses = await conn.fetchval('SELECT SUM(uses) FROM commands_usage')
         most_used_command = await conn.fetchval(
             'SELECT command FROM commands_usage ORDER BY uses DESC LIMIT 1'
         )
 
-    latency = await g.bot.self_test()
+    latency = await app.bot.self_test()
 
-    events = await g.bot.get_cog('Misc').get_event_counts()
+    events = await app.bot.get_cog('Misc').get_event_counts()
 
     time_difference = (
         float(datetime.now().timestamp())
-        - float(await g.bot.redis.get('events_start_time'))
+        - float(await app.bot.redis.get('events_start_time'))
     ) / 60
 
     return {
-        'Servers': len(g.bot.guilds),
-        'Users': len(g.bot.users),
-        'Channels': len(list(g.bot.get_all_channels())),
-        'Commands': len(list(g.bot.walk_commands())),
+        'Servers': len(app.bot.guilds),
+        'Users': len(app.bot.users),
+        'Channels': len(list(app.bot.get_all_channels())),
+        'Commands': len(list(app.bot.walk_commands())),
         'Total Command Uses': int(total_command_uses),
         'Most Used Command': most_used_command,
         'Postgres Latency': f'{latency.postgres} ms',
@@ -101,7 +95,7 @@ async def exchange_code() -> Json | tuple[Json, int]:
         return {'error': 'No code provided'}, 400
 
     data = {
-        'client_id': g.bot.user.id,
+        'client_id': app.bot.user.id,
         'client_secret': client_secret,
         'grant_type': 'authorization_code',
         'code': code,
@@ -109,7 +103,7 @@ async def exchange_code() -> Json | tuple[Json, int]:
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    async with g.bot.session.post(
+    async with app.bot.session.post(
         Route.BASE + '/oauth2/token', data=data, headers=headers
     ) as resp:
         if not resp.ok:
@@ -120,7 +114,7 @@ async def exchange_code() -> Json | tuple[Json, int]:
 
 @app.get('/commands')
 async def commands() -> Json | tuple[Json, int]:
-    bot = cast(BoboBot, g.bot)
+    bot = cast(BoboBot, app.bot)
     json = []
 
     for command in bot.walk_commands():
