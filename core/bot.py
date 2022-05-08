@@ -15,6 +15,7 @@ import mystbin
 from discord.utils import MISSING
 from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
+from quart import g
 from requests_html import AsyncHTMLSession
 
 from core.cache_manager import DeleteMessageManager
@@ -130,7 +131,7 @@ class BoboBot(commands.Bot):
         await self.load_all_extensions()
 
         self.web = app
-        app.bot = self
+        g.bot = self
 
         self.web_task = self.loop.create_task(
             app.run_task(host='0.0.0.0', port=8082, use_reloader=False)
