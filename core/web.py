@@ -30,6 +30,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 app = cors(app)
 
+
 async def discord_request(
     method: METHODS, route: str, data: Json
 ) -> Json | tuple[Json, int]:
@@ -48,6 +49,7 @@ async def discord_request(
             return {'error': f'{resp.status}: {await resp.text()}'}, 400
 
         return await resp.json()
+
 
 @app.get('/')
 async def index():

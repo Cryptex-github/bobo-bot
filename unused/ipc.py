@@ -17,10 +17,10 @@ class IPC(Cog, RedisIPC):
         super().__init__(bot)
 
         RedisIPC.__init__(self, bot.redis, channel='ipc:bobobot')
-    
+
     async def cog_load(self) -> None:
         self._task = self.bot.loop.create_task(self.start())
-    
+
     async def cog_unload(self) -> None:
         await self.close()
 
@@ -29,7 +29,9 @@ class IPC(Cog, RedisIPC):
 
     async def handle_stats(self) -> Json:
         async with self.bot.db.acquire() as conn:
-            total_command_uses = await conn.fetchval('SELECT SUM(uses) FROM commands_usage')
+            total_command_uses = await conn.fetchval(
+                'SELECT SUM(uses) FROM commands_usage'
+            )
             most_used_command = await conn.fetchval(
                 'SELECT command FROM commands_usage ORDER BY uses DESC LIMIT 1'
             )
@@ -71,7 +73,9 @@ class IPC(Cog, RedisIPC):
 
             if bucket := getattr(command, '_buckets'):
                 if cooldown := getattr(bucket, '_cooldown'):
-                    cooldown_fmted = f'{cooldown.rate} time(s) per {cooldown.per} second(s)'
+                    cooldown_fmted = (
+                        f'{cooldown.rate} time(s) per {cooldown.per} second(s)'
+                    )
 
             json.append(
                 {
@@ -93,6 +97,7 @@ class IPC(Cog, RedisIPC):
         ]
         del cogs[cogs.index('Jishaku')]
 
-        return {'commands': json, 'categories': cogs} # type: ignore
+        return {'commands': json, 'categories': cogs}  # type: ignore
+
 
 setup = IPC.setup
