@@ -94,3 +94,5 @@ class IPC(Cog, RedisIPC):
         del cogs[cogs.index('Jishaku')]
 
         return {'commands': json, 'categories': cogs} # type: ignore
+
+setup = IPC.setup
