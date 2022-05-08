@@ -5,7 +5,7 @@ from datetime import datetime
 
 from core.cog import Cog
 from cogs.misc import Misc
-from redis_ipc import IPC as RedisIPC
+from redisipc import IPC as RedisIPC
 
 if TYPE_CHECKING:
     from core.bot import BoboBot
