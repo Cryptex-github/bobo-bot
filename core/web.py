@@ -49,6 +49,12 @@ async def discord_request(
 
         return await resp.json()
 
+def set_bot(bot: BoboBot) -> None:
+    g.bot = bot
+
+def get_bot() -> BoboBot:
+    return g.bot
+
 @app.get('/')
 async def index():
     return {'message': 'Hello World!'}
