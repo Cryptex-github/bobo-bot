@@ -36,8 +36,17 @@ if TYPE_CHECKING:
 
     from magmatic import Node
 
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.INFO)
+
 __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
+
+logging_handler = logging.StreamHandler()
+logging_handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+
+discord_logger.addHandler(logging_handler)
+__log__.addHandler(logging_handler)
 
 
 class SelfTestResult(NamedTuple):
