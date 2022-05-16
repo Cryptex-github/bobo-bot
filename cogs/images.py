@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from asyncio import TimeoutError
 from typing import TYPE_CHECKING, Final
 from io import BytesIO
 
@@ -200,29 +201,33 @@ class Images(Cog):
 
                     url = await resolver.get_image(target)
 
-                    async with self.bot.session.post(
-                        f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}',
-                        json={'url': url},
-                        timeout=ClientTimeout(total=600),
-                    ) as resp:
-                        if resp.status == 200:
-                            if resp.headers['Content-Type'] == 'image/gif':
-                                fmt = 'gif'
-                            else:
-                                fmt = 'png'
+                    try:
+                        async with self.bot.session.post(
+                            f'http://127.0.0.1:8085/images/{ctx.command.qualified_name}',
+                            json={'url': url},
+                            timeout=ClientTimeout(total=600),
+                        ) as resp:
+                            if resp.status == 200:
+                                if resp.headers['Content-Type'] == 'image/gif':
+                                    fmt = 'gif'
+                                else:
+                                    fmt = 'png'
 
-                            return (
-                                f'Process Time: {round(float(resp.headers["Process-Time"]) * 1000, 3)}ms',
-                                File(
-                                    BytesIO(await resp.read()),
-                                    f'bobo_bot_{ctx.command.qualified_name}.{fmt}',
-                                ),
-                            )
+                                return (
+                                    f'Process Time: {round(float(resp.headers["Process-Time"]) * 1000, 3)}ms',
+                                    File(
+                                        BytesIO(await resp.read()),
+                                        f'bobo_bot_{ctx.command.qualified_name}.{fmt}',
+                                    ),
+                                )
 
-                        if resp.status == 400:
-                            return (await resp.json())['message']
+                            if resp.status == 400:
+                                return (await resp.json())['message']
 
-                        return await resp.text()
+                            return await resp.text()
+                    except TimeoutError:
+                        return "Aborted due to image manipulation taking too long."
+                        
 
             self.__cog_commands__ += (image_endpoint_command,)
 
