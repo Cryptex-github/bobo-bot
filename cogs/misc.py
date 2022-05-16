@@ -33,6 +33,9 @@ class Misc(Cog):
             Redis latency: {res.redis}ms
             Discord REST latency: {res.discord_rest}ms
             Discord WS latency: {res.discord_ws}ms
+            Bobo API latency: {res.bobo_api}ms
+            Bobo CDN latency: {res.bobo_cdn}ms
+            Bobo eval API latency: {res.bobo_eval_api}ms
         """
         )
 
