@@ -45,6 +45,9 @@ class SelfTestResult(NamedTuple):
     redis: float
     discord_rest: float
     discord_ws: float
+    bobo_api: float
+    bobo_cdn: float
+    bobo_eval_api: float
 
 
 class BoboBot(commands.Bot):
@@ -81,8 +84,21 @@ class BoboBot(commands.Bot):
             await self.redis.ping()
 
         with Instant() as discord_rest_instant:
-            async with self.session.get('https://discord.com/api/v10') as resp:
+            async with self.session.get('https://discord.com/api/v10') as _:
                 ...
+
+        with Instant() as bobo_api_instant:
+            async with self.session.get('https://api.bobobot.cf') as _:
+                ...
+
+        with Instant() as bobo_cdn_instant:
+            async with self.session.get('https://cdn.bobobot.cf') as _:
+                ...
+
+        with Instant() as bobo_eval_api_instant:
+            async with self.session.get('https://eval.bobobot.cf') as _:
+                ...
+
 
         r = lambda x: round(x, 3)
 
@@ -90,6 +106,9 @@ class BoboBot(commands.Bot):
             r(postgres_instant.elapsed.as_millis()),
             r(redis_instant.elapsed.as_millis()),
             r(discord_rest_instant.elapsed.as_millis()),
+            r(bobo_api_instant.elapsed.as_millis()),
+            r(bobo_cdn_instant.elapsed.as_millis()),
+            r(bobo_eval_api_instant.elapsed.as_millis()),
             r(float(self.latency) * 1000),
         )
 
