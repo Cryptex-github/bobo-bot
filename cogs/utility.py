@@ -19,11 +19,12 @@ class Utility(Cog):
     @command(aliases=['ui'])
     async def userinfo(
         self, ctx: BoboContext, user: discord.Member | discord.User = Author
-    ) -> discord.Embed:
+    ) -> tuple[discord.Embed, discord.File]:
         """
         Get information about a user.
         """
-        user_avatar = user.display_avatar.with_static_format('png').url
+        user_avatar = f'attachment://{user.id}.png'
+        avatar = discord.File(await user.display_avatar.with_static_format('png').read(), f'{user.id}.png')
 
         embed = ctx.embed()
         embed.set_author(name=user.display_name, icon_url=user_avatar)
@@ -51,7 +52,7 @@ class Utility(Cog):
         embed.add_field(name='General Informations', value=general_field)
 
         if not isinstance(user, discord.Member):
-            return embed
+            return embed, avatar
 
         joined_at = 'N/A'
 
@@ -94,7 +95,7 @@ class Utility(Cog):
 
         embed.add_field(name='Guild Informations', value=guild_field)
 
-        return embed
+        return embed, avatar
 
     @command(aliases=['eval', 'run'])
     async def evaluate(
