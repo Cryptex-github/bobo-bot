@@ -145,7 +145,6 @@ class Misc(Cog):
         return dedent(f"""
             Total WS Events: {events_count}
             Average WS Events per minute: {events_count // time_difference}
-            Alvin S' Will: {ctx}
         """)
 
 
