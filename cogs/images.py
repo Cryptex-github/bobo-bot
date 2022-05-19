@@ -184,7 +184,7 @@ class ImageResolver:
 
 class Images(Cog):
     async def cog_load(self) -> None:
-        endpoint_list = ['invert', 'flip', 'mirror', 'floor', 'roo', 'reverse']
+        endpoint_list = ['invert', 'flip', 'mirror', 'floor', 'roo', 'reverse', 'rotate']
 
         for endpoint in endpoint_list:
             async with self.bot.session.get(
