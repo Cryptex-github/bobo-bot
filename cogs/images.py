@@ -184,7 +184,15 @@ class ImageResolver:
 
 class Images(Cog):
     async def cog_load(self) -> None:
-        endpoint_list = ['invert', 'flip', 'mirror', 'floor', 'roo', 'reverse', 'rotate']
+        endpoint_list = [
+            'invert',
+            'flip',
+            'mirror',
+            'floor',
+            'roo',
+            'reverse',
+            'rotate',
+        ]
 
         for endpoint in endpoint_list:
             async with self.bot.session.get(
@@ -227,7 +235,6 @@ class Images(Cog):
                             return await resp.text()
                     except TimeoutError:
                         return "Aborted due to image manipulation taking too long."
-                        
 
             self.__cog_commands__ += (image_endpoint_command,)
 

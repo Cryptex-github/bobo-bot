@@ -25,7 +25,10 @@ class Utility(Cog):
         Get information about a user.
         """
         user_avatar = f'attachment://{user.id}.png'
-        avatar = discord.File(BytesIO(await user.display_avatar.with_static_format('png').read()), f'{user.id}.png')
+        avatar = discord.File(
+            BytesIO(await user.display_avatar.with_static_format('png').read()),
+            f'{user.id}.png',
+        )
 
         embed = ctx.embed()
         embed.set_author(name=user.display_name, icon_url=user_avatar)

@@ -27,7 +27,8 @@ class Misc(Cog):
         """Pong!"""
         res = await self.bot.self_test()
 
-        return dedent(f"""
+        return dedent(
+            f"""
             PostgreSQL latency: {res.postgres}ms
             Redis latency: {res.redis}ms
             Discord REST latency: {res.discord_rest}ms
@@ -35,7 +36,8 @@ class Misc(Cog):
             Bobo API latency: {res.bobo_api}ms
             Bobo CDN latency: {res.bobo_cdn}ms
             Bobo eval API latency: {res.bobo_eval_api}ms
-        """)
+        """
+        )
 
     @command()
     async def sys(self, ctx: BoboContext) -> Embed:
@@ -48,7 +50,8 @@ class Misc(Cog):
 
             embed = ctx.embed(title='System Info')
 
-            embed.description = dedent(f"""
+            embed.description = dedent(
+                f"""
                 ```prolog
                 Node: {node()}
 
@@ -77,7 +80,8 @@ class Misc(Cog):
                 System:
                     Boot Time: {datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}
                 ```
-            """)
+            """
+            )
 
         return embed
 
@@ -142,10 +146,12 @@ class Misc(Cog):
             - float(await self.bot.redis.get('events_start_time'))
         ) / 60
 
-        return dedent(f"""
+        return dedent(
+            f"""
             Total WS Events: {events_count}
             Average WS Events per minute: {events_count // time_difference}
-        """)
+        """
+        )
 
 
 setup = Misc.setup

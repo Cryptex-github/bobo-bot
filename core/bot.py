@@ -43,7 +43,9 @@ __log__ = logging.getLogger('BoboBot')
 __all__ = ('BoboBot',)
 
 logging_handler = logging.StreamHandler()
-logging_handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logging_handler.setFormatter(
+    logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+)
 
 discord_logger.addHandler(logging_handler)
 __log__.addHandler(logging_handler)
@@ -84,7 +86,7 @@ class BoboBot(commands.Bot):
             return 'bobo '
 
         return 'bobob '
-    
+
     async def _test_latency(self, url: str) -> Instant:
         with Instant() as instant:
             async with self.session.get(url) as _:
@@ -98,8 +100,13 @@ class BoboBot(commands.Bot):
 
         with Instant() as redis_instant:
             await self.redis.ping()
-        
-        discord_rest_instant, bobo_api_instant, bobo_cdn_instant, bobo_eval_api_instant = await asyncio.gather(
+
+        (
+            discord_rest_instant,
+            bobo_api_instant,
+            bobo_cdn_instant,
+            bobo_eval_api_instant,
+        ) = await asyncio.gather(
             self._test_latency('https://discord.com/api/v10'),
             self._test_latency('https://api.bobobot.cf'),
             self._test_latency('https://cdn.bobobot.cf'),
