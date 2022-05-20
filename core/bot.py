@@ -84,6 +84,13 @@ class BoboBot(commands.Bot):
             return 'bobo '
 
         return 'bobob '
+    
+    async def _test_latency(self, url: str) -> Instant:
+        with Instant() as instant:
+            async with self.session.get(url) as _:
+                ...
+
+        return instant
 
     async def self_test(self) -> SelfTestResult:
         with Instant() as postgres_instant:
@@ -91,23 +98,13 @@ class BoboBot(commands.Bot):
 
         with Instant() as redis_instant:
             await self.redis.ping()
-
-        with Instant() as discord_rest_instant:
-            async with self.session.get('https://discord.com/api/v10') as _:
-                ...
-
-        with Instant() as bobo_api_instant:
-            async with self.session.get('https://api.bobobot.cf') as _:
-                ...
-
-        with Instant() as bobo_cdn_instant:
-            async with self.session.get('https://cdn.bobobot.cf') as _:
-                ...
-
-        with Instant() as bobo_eval_api_instant:
-            async with self.session.get('https://eval.bobobot.cf') as _:
-                ...
-
+        
+        discord_rest_instant, bobo_api_instant, bobo_cdn_instant, bobo_eval_api_instant = await asyncio.gather(
+            self._test_latency('https://discord.com/api/v10'),
+            self._test_latency('https://api.bobobot.cf'),
+            self._test_latency('https://cdn.bobobot.cf'),
+            self._test_latency('https://eval.bobobot.cf'),
+        )
 
         r = lambda x: round(x, 3)
 
