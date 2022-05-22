@@ -4,6 +4,7 @@ from textwrap import indent
 from traceback import TracebackException
 from typing import TYPE_CHECKING
 
+from discord.errors import HTTPException
 from discord.utils import escape_mentions
 from discord.ext import commands
 from discord.ext.commands.view import StringView
@@ -63,6 +64,12 @@ class ErrorHandler(Cog):
             )
 
             return
+        
+        if isinstance(error, HTTPException):
+            if '413' in error.text:
+                await send('The attachment is too large to be sent in this channel.')
+
+                return
 
         exc = TracebackException.from_exception(error)
         await send(''.join(exc.format()))

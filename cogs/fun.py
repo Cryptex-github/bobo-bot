@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final, Any
-from io import BytesIO
 
 from akinator.async_aki import Akinator
 from akinator import CantGoBackAnyFurther
@@ -282,11 +281,6 @@ class Fun(Cog):
         await m.edit(embed=embed, view=akinator_view)
 
         await akinator_view.wait()
-
-    @command()
-    async def http(self, ctx: BoboContext, code: int) -> discord.File:
-        async with self.bot.session.get(f'https://http.cat/{code}') as resp:
-            return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
 
     @staticmethod
     def process_reddit_post(ctx: BoboContext, _js: Any) -> OutputType:

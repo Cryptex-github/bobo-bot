@@ -44,9 +44,8 @@ class Utility(Cog):
 
         general_field = dedent(
             f"""
-        **Name:** {user.name}
+        **Name:** {user.name}#{user.discriminator}
         **Display Name:** {user.display_name}
-        **Discriminator:** {user.discriminator}
         **ID:** {user.id}
         **Created At:** {user.created_at.strftime('%Y-%m-%d %H:%M:%S')} ({discord.utils.format_dt(user.created_at, style='R')})
         **Bot Status:** {bot_status}
@@ -100,6 +99,14 @@ class Utility(Cog):
         embed.add_field(name='Guild Informations', value=guild_field)
 
         return embed, avatar
+
+    @command()
+    async def http(self, ctx: BoboContext, code: int) -> discord.File:
+        """
+        Return the description of a HTTP status code.
+        """
+        async with self.bot.session.get(f'https://http.cat/{code}') as resp:
+            return discord.File(BytesIO(await resp.read()), filename=f'{code}.png')
 
     @command(aliases=['eval', 'run'])
     async def evaluate(

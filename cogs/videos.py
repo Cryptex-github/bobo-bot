@@ -117,6 +117,8 @@ class Videos(Cog):
             metadata = await YoutubeDownloader.metadata(url)
         except ValueError:
             return 'Video not available for download.'
+        except IndexError:
+            return 'Invalid URL'
 
         prompt = VideoPrompt(user_id=ctx.author.id)
 
