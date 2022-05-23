@@ -184,7 +184,7 @@ class BoboBot(commands.Bot):
         async with self.redis.pipeline() as pipe:
             for guild in await self.db.fetch('SELECT * FROM prefix'):
                 pipe.delete(f'prefix:{guild["guild_id"]}')
-                pipe.lpush(f'prefix:{guild["guild_id"]}', guild['prefix'])
+                pipe.lpush(f'prefix:{guild["guild_id"]}', *guild['prefix'])
 
             await pipe.execute()
 
