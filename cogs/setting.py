@@ -51,3 +51,5 @@ class Settings(Cog):
         await self.bot.prefix_manager.reset_prefix(ctx.guild.id)
 
         return 'Reset prefixes, the only prefix is now the default prefix.'
+
+setup = Settings.setup
