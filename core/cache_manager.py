@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
     from .types import PossibleRTFMSources
 
-__all__ = ('DeleteMessageManager', 'RTFMCacheManager', 'ReactionRoleManager')
+__all__ = ('DeleteMessageManager', 'RTFMCacheManager', 'ReactionRoleManager', 'PrefixManager')
 
 
 class CacheManager(ABC):
@@ -82,3 +82,26 @@ class ReactionRoleManager(RedisCacheManager):
 
     async def delete(self, message_id: int) -> None:
         await self.redis.delete(f'reaction_roles:{message_id}')
+
+
+class PrefixManager(RedisCacheManager):
+    __slots__ = ()
+
+    async def get_prefix(self, guild_id: int) -> list[str]:
+        return await self.redis.lrange(f'prefix:{guild_id}', 0, -1)
+
+    async def add_prefix(self, guild_id: int, *prefix: str) -> None:
+        await self.redis.lpush(f'prefix:{guild_id}', *prefix)
+
+    async def reset_prefix(self, guild_id: int) -> None:
+        await self.redis.delete(f'prefix:{guild_id}')
+    
+    async def remove_prefix(self, guild_id: int, prefix: str) -> None:
+        await self.redis.lrem(f'prefix:{guild_id}', 0, prefix)
+    
+    async def remove_prefixes(self, guild_id: int, *prefixes: str) -> None:
+        async with self.redis.pipeline() as pipe:
+            for prefix in prefixes:
+                pipe.lrem(f'prefix:{guild_id}', 0, prefix)
+            
+            await pipe.execute()

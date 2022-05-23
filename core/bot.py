@@ -17,10 +17,10 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import MaxConcurrency
 from requests_html import AsyncHTMLSession
 
-from core.cache_manager import DeleteMessageManager
+from core.cache_manager import DeleteMessageManager, PrefixManager
 from core.utils import Instant
 from core.cdn import CDNClient
-from core.constants import BETA_ID
+from core.constants import PROD_ID
 
 jishaku.Flags.NO_UNDERSCORE = True
 jishaku.Flags.NO_DM_TRACEBACK = True
@@ -81,11 +81,23 @@ class BoboBot(commands.Bot):
         )
 
     @staticmethod
-    def _get_prefix(bot: BoboBot, message: Message) -> str:
-        if not bot.user or bot.user.id == BETA_ID:
-            return 'bobo '
+    async def _get_prefix(bot: BoboBot, message: Message) -> str | list[str]:
+        default_prefix = 'bobo '
 
-        return 'bobob '
+        if bot.user and bot.user.id == PROD_ID:
+            default_prefix = 'bobob '
+
+        if not hasattr(bot, 'redis') or not message.guild:
+            return default_prefix
+
+        prefix = await bot.prefix_manager.get_prefix(message.guild.id)
+
+        if not prefix:
+            return default_prefix
+
+        prefix.append(default_prefix)
+
+        return default_prefix
 
     async def _test_latency(self, url: str) -> Instant:
         with Instant() as instant:
@@ -150,6 +162,7 @@ class BoboBot(commands.Bot):
             'unix:///var/run/redis/redis-server.sock', decode_responses=True
         )
         self.delete_message_manager = DeleteMessageManager(self.redis)
+        self.prefix_manager = PrefixManager(self.redis)
 
         self.db = await asyncpg.create_pool(
             host=DbConnectionDetails.host,
@@ -167,6 +180,12 @@ class BoboBot(commands.Bot):
         self.web_task = self.loop.create_task(
             app.run_task(host='0.0.0.0', port=8082, use_reloader=False)
         )
+
+        async with self.redis.pipeline() as pipe:
+            for guild in await self.db.fetch('SELECT * FROM prefix'):
+                pipe.set(f'prefix:{guild["guild_id"]}', guild['prefix'])
+            
+            await pipe.execute()
 
     def get_cooldown(self, message: Message) -> commands.Cooldown | None:
         if message.author.id == 590323594744168494:
