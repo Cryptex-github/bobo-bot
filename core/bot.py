@@ -183,8 +183,9 @@ class BoboBot(commands.Bot):
 
         async with self.redis.pipeline() as pipe:
             for guild in await self.db.fetch('SELECT * FROM prefix'):
-                pipe.set(f'prefix:{guild["guild_id"]}', guild['prefix'])
-            
+                pipe.delete(f'prefix:{guild["guild_id"]}')
+                pipe.lpush(f'prefix:{guild["guild_id"]}', guild['prefix'])
+
             await pipe.execute()
 
     def get_cooldown(self, message: Message) -> commands.Cooldown | None:
