@@ -197,7 +197,7 @@ class RTFM(Cog):
         extra = ''
 
         if crate:
-            extra = f'{crate}/latest'
+            extra = f'/{crate}/latest'
 
         for element in a:
             try:
