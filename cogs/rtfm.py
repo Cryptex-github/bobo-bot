@@ -194,6 +194,11 @@ class RTFM(Cog):
 
         results = {}
 
+        extra = ''
+
+        if crate:
+            extra = f'{crate}/latest'
+
         for element in a:
             try:
                 div = element.find('.result-name')[0]
@@ -202,7 +207,7 @@ class RTFM(Cog):
 
             key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
 
-            results[key] = url + element.attrs['href'].replace('..', '')
+            results[key] = url + extra + element.attrs['href'].replace('..', '')
 
         if crate:
             await self.cache.add('crates', f'{crate}:{query}', results)
