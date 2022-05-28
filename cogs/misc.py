@@ -4,11 +4,12 @@ import json
 from asyncio import to_thread
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from datetime import datetime
+from platform import node
 from textwrap import dedent
 from typing import TYPE_CHECKING
-from platform import node
-import psutil
+
 import humanize
+import psutil
 
 from core import Cog, command
 
@@ -112,14 +113,17 @@ class Misc(Cog):
                 inline=False,
             )
 
+            download_bytes = json_['download']['bytes']
+            upload_bytes = json_['upload']['bytes']
+
             embed.add_field(
                 name='Download',
-                value=f'{round((((json_["download"]["bytes"] / json_["download"]["elapsed"])) * 8.0) / 1000, 2)}Mbps',
+                value=f'{round((((download_bytes / json_["download"]["elapsed"])) * 8.0) / 1000, 2)}Mbps (Data used: {humanize.naturalsize(download_bytes)})',
                 inline=False,
             )
             embed.add_field(
                 name='Upload',
-                value=f'{round((((json_["upload"]["bytes"] / json_["upload"]["elapsed"])) * 8.0) / 1000, 2)}Mbps',
+                value=f'{round((((upload_bytes / json_["upload"]["elapsed"])) * 8.0) / 1000, 2)}Mbps (Data used: {humanize.naturalsize(upload_bytes)})',
                 inline=False,
             )
 

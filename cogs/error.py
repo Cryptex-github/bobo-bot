@@ -64,7 +64,7 @@ class ErrorHandler(Cog):
             )
 
             return
-        
+
         if isinstance(error, HTTPException):
             if '413' in error.text:
                 await send('The attachment is too large to be sent in this channel.')
