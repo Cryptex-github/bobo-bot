@@ -226,7 +226,7 @@ class RTFM(Cog):
 
         return RustDocParsedResult(title, signature, description)
 
-    @rtfm.command()
+    @rtfm.command(aliases=['rs'])
     async def rust(self, ctx, *, query: str | None = None) -> str | None:
         """
         Search Rust standard library documentation.
@@ -256,7 +256,7 @@ class RTFM(Cog):
 
         await pages.start(ctx)
 
-    @rtfm.command(aliases=['crate'])
+    @rtfm.command(aliases=['crate', 'crt'])
     async def crates(self, ctx, crate: str, *, query: str | None = None) -> str | None:
         """
         Search a crate's documentation.
