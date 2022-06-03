@@ -205,7 +205,7 @@ class RTFM(Cog):
             except IndexError:
                 div = element
 
-            key = ''.join(e.text for e in div.find('span')).replace(':', r'\:')
+            key = ''.join(e.text for e in div.find('span')).replace(':', '\u200b:')
 
             results[key] = url + extra + element.attrs['href'].replace('..', '')
 
