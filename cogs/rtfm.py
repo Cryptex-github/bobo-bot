@@ -144,7 +144,7 @@ class RTFM(Cog):
 
         await pages.start(ctx)
 
-    @group()
+    @group(aliases=['rtfd'])
     async def rtfm(self, ctx) -> None:
         """
         Query documentations.
