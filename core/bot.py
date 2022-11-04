@@ -59,7 +59,7 @@ class BoboBot(commands.Bot):
         super().__init__(
             command_prefix=self._get_prefix,
             intents=intents,
-            description='Bobo Bot, The Anime Bot but better.',
+            description='Bobo Bot, The Anime Bot but better. My name is ALVIN',
             chunk_guilds_at_startup=False,
             case_insensitive=True,
             allowed_mentions=discord.AllowedMentions.none(),
